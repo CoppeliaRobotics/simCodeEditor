@@ -6,7 +6,7 @@
 
 #define VRGB(r,g,b) ((quint32)((quint8)(r)|((quint8)(g) << 8)|((quint8)(b) << 16)))
 
-const int fontSize=8;
+const int fontSize=14;
 const char* theFont("Courier");
 
 const unsigned int colBlack=VRGB(0,0,0);
