@@ -37,6 +37,8 @@ configure_file(${CMAKE_SOURCE_DIR}/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 set(SOURCES
     scintillaDlg.cpp
     plugin.cpp
+    UI.cpp
+    SIM.cpp
     debug.cpp
     tinyxml2/tinyxml2.cpp
     ${CMAKE_SOURCE_DIR}/external/v_repPlusPlus/Plugin.cpp

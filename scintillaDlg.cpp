@@ -1,4 +1,5 @@
 #include "scintillaDlg.h"
+#include "UI.h"
 #include <algorithm> 
 #include <QCloseEvent>
 #include <QVBoxLayout>
@@ -51,9 +52,10 @@ const SScintillaColors syntaxColors[]=
     {-1,0}
 };
 
-CScintillaDlg::CScintillaDlg(QWidget* pParent) : QDialog(pParent)
+CScintillaDlg::CScintillaDlg(UI *ui, QWidget* pParent)
+    : QDialog(pParent),
+      ui(ui)
 {
-    closeRequest=false;
     setAttribute(Qt::WA_DeleteOnClose);
     _scintillaObject=new QsciScintilla;
 
@@ -88,8 +90,7 @@ CScintillaDlg::CScintillaDlg(QWidget* pParent) : QDialog(pParent)
     connect(_scintillaObject,SIGNAL(SCN_CHARADDED(int)),this,SLOT(charAdded(int)));
     connect(_scintillaObject,SIGNAL(SCN_MODIFIED(int,int,const char*,int,int,int,int,int,int,int)),this,SLOT(modified(int,int,const char*,int,int,int,int,int,int,int)));
 
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETTEXT,(unsigned long)0,"Hello world!\nsim.getObjectHandle(...)\nsim.getObjectName(..)\nsim.handle_all\nsim.handle_parent");
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_EMPTYUNDOBUFFER); // Make sure the undo buffer is empty (otherwise the first undo will remove the whole script --> a bit confusing)
+    setText("Hello world!\nsim.getObjectHandle(...)\nsim.getObjectName(..)\nsim.handle_all\nsim.handle_parent");
     setWindowTitle("Test window");
     show();
     raise();
@@ -100,6 +101,30 @@ CScintillaDlg::~CScintillaDlg()
 {
     // _scintillaObject is normally automatically destroyed!
 }
+
+void CScintillaDlg::setHandle(int handle)
+{
+    this->handle = handle;
+}
+
+void CScintillaDlg::setModal(QSemaphore *sem, QString *text, int *positionAndSize)
+{
+    isModal = true;
+    modalData.sem = sem;
+    modalData.text = text;
+    modalData.positionAndSize = positionAndSize;
+}
+
+void CScintillaDlg::setText(const QString &text)
+{
+    _scintillaObject->setText(text);
+}
+
+QString CScintillaDlg::text() const
+{
+    return _scintillaObject->text();
+}
+
 void CScintillaDlg::setAStyle(int style,unsigned int fore,unsigned int back,int size,const char *face)
 {
     _scintillaObject->SendScintilla(QsciScintillaBase::SCI_STYLESETFORE,(unsigned long)style,(long)fore);
@@ -112,8 +137,21 @@ void CScintillaDlg::setAStyle(int style,unsigned int fore,unsigned int back,int 
 
 void CScintillaDlg::closeEvent(QCloseEvent *event)
 {
-    event->ignore();
-    closeRequest=true;
+    if(isModal)
+    {
+        *modalData.text = text();
+        modalData.positionAndSize[0] = x();
+        modalData.positionAndSize[1] = y();
+        modalData.positionAndSize[2] = width();
+        modalData.positionAndSize[3] = height();
+        modalData.sem->release();
+        QDialog::closeEvent(event);
+    }
+    else
+    {
+        event->ignore();
+        ui->notifyEvent("close", handle);
+    }
 }
 
 std::string CScintillaDlg::getCallTip(const char* txt)
