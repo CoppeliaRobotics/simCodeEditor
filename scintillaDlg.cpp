@@ -1,5 +1,6 @@
 #include "scintillaDlg.h"
 #include <algorithm> 
+#include <QCloseEvent>
 #include <QVBoxLayout>
 #include <SciLexer.h>
 

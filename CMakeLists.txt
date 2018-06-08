@@ -36,9 +36,9 @@ endif()
 
 set(SOURCES
     scintillaDlg.cpp
-    v_repExtCodeEditor.cpp
+    plugin.cpp
     tinyxml2/tinyxml2.cpp
-    #${CMAKE_SOURCE_DIR}/external/v_repPlusPlus/Plugin.cpp
+    ${CMAKE_SOURCE_DIR}/external/v_repPlusPlus/Plugin.cpp
     #${CMAKE_BINARY_DIR}/generated/stubs.cpp
     ${VREP_EXPORTED_SOURCES}
 )

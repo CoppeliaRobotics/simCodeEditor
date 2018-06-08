@@ -51,13 +51,13 @@ unix:!macx {
 
 SOURCES += \
     tinyxml2/tinyxml2.cpp \
-    v_repExtCodeEditor.cpp \
+    plugin.cpp \
     scintillaDlg.cpp \
     ../common/v_repLib.cpp \
 
 HEADERS +=\
     tinyxml2/tinyxml2.h \
-    v_repExtCodeEditor.h \
+    plugin.h \
     scintillaDlg.h \
     ../include/v_repLib.h \
 

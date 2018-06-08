@@ -1,0 +1,4 @@
+[submodule "external/v_repPlusPlus"]
+	path = external/v_repPlusPlus
+	url = https://github.com/CoppeliaRobotics/v_repPlusPlus
+	branch = master
