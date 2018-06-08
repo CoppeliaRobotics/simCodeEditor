@@ -25,6 +25,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 if(QSCINTILLA_DIR)
     include_directories(${QSCINTILLA_DIR}/Qt4Qt5)
     include_directories(${QSCINTILLA_DIR}/include)
+    set(QSCINTILLA_LIB ${QSCINTILLA_DIR}/Qt4Qt5/${CMAKE_SHARED_LIBRARY_PREFIX}qscintilla2_qt5${CMAKE_SHARED_LIBRARY_SUFFIX})
 else()
     message(FATAL_ERROR "Please provide path to QScintilla via -DQSCINTILLA_DIR=...")
 endif()
@@ -49,6 +50,7 @@ set(LIBRARIES
     Qt5::Gui
     Qt5::Widgets
     Qt5::PrintSupport
+    ${QSCINTILLA_LIB}
 )
 
 add_library(v_repExtCodeEditor SHARED ${SOURCES})
