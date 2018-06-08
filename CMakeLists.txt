@@ -32,11 +32,12 @@ endif()
 
 #vrep_generate_stubs(${CMAKE_BINARY_DIR}/generated XML_FILE ${CMAKE_SOURCE_DIR}/callbacks.xml LUA_FILE ${CMAKE_SOURCE_DIR}/simExtCustomUI.lua)
 
-#configure_file(${CMAKE_SOURCE_DIR}/config.h.in ${CMAKE_BINARY_DIR}/config.h)
+configure_file(${CMAKE_SOURCE_DIR}/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 
 set(SOURCES
     scintillaDlg.cpp
     plugin.cpp
+    debug.cpp
     tinyxml2/tinyxml2.cpp
     ${CMAKE_SOURCE_DIR}/external/v_repPlusPlus/Plugin.cpp
     #${CMAKE_BINARY_DIR}/generated/stubs.cpp

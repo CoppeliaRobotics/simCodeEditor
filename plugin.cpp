@@ -1,7 +1,7 @@
 #include "plugin.h"
 #include "v_repPlusPlus/Plugin.h"
 #include "scintillaDlg.h"
-#include <iostream>
+#include "debug.h"
 
 CScintillaDlg *editor = nullptr;
 bool closeIt = false;
@@ -11,6 +11,8 @@ class Plugin : public vrep::Plugin
 public:
     void onStart()
     {
+        uiThread();
+
         if(simGetBooleanParameter(sim_boolparam_headless) > 0)
             throw std::runtime_error("cannot load in headless mode");
 
@@ -27,8 +29,15 @@ public:
 
     void onInstancePass(const vrep::InstancePassFlags &flags, bool first)
     {
+        if(first)
+        {
+            simThread();
+        }
+
         if(editor && editor->closeRequest)
+        {
             simEventNotification("<event origin=\"codeEditor\" msg=\"close\" handle=\"0\"></event>");
+        }
     }
 
     void onGuiPass()
@@ -45,7 +54,7 @@ VREP_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
 
 VREP_DLLEXPORT char * codeEditor_openModal(const char *initText, const char *properties, int *positionAndSize)
 {
-    std::cout << "codeEditor_openModal: initText=" << initText << ", properties=" << properties << std::endl;
+    DBG << "codeEditor_openModal: initText=" << initText << ", properties=" << properties << std::endl;
 
     if(positionAndSize)
     {
@@ -62,21 +71,21 @@ VREP_DLLEXPORT char * codeEditor_openModal(const char *initText, const char *pro
 
 VREP_DLLEXPORT int codeEditor_open(const char *initText, const char *properties)
 {
-    std::cout << "codeEditor_open: initText=" << initText << ", properties=" << properties << std::endl;
+    DBG << "codeEditor_open: initText=" << initText << ", properties=" << properties << std::endl;
 
     return -1;
 }
 
 VREP_DLLEXPORT int codeEditor_setText(int handle, const char *text, int insertMode)
 {
-    std::cout << "codeEditor_setText: handle=" << handle << ", text=" << text << ", insertMode=" << insertMode << std::endl;
+    DBG << "codeEditor_setText: handle=" << handle << ", text=" << text << ", insertMode=" << insertMode << std::endl;
 
     return -1;
 }
 
 VREP_DLLEXPORT char * codeEditor_getText(int handle)
 {
-    std::cout << "codeEditor_getText: handle=" << handle << std::endl;
+    DBG << "codeEditor_getText: handle=" << handle << std::endl;
 
     const char *txt = "Hello from code editor";
     char *buff = simCreateBuffer(strlen(txt) + 1);
@@ -86,14 +95,14 @@ VREP_DLLEXPORT char * codeEditor_getText(int handle)
 
 VREP_DLLEXPORT int codeEditor_show(int handle, int showState)
 {
-    std::cout << "codeEditor_show: handle=" << handle << ", showState=" << showState << std::endl;
+    DBG << "codeEditor_show: handle=" << handle << ", showState=" << showState << std::endl;
 
     return -1;
 }
 
 VREP_DLLEXPORT int codeEditor_close(int handle, int *positionAndSize)
 {
-    std::cout << "codeEditor_close: handle=" << handle << std::endl;
+    DBG << "codeEditor_close: handle=" << handle << std::endl;
 
     closeIt = true;
 
