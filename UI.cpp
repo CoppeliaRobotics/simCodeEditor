@@ -2,26 +2,14 @@
 #include "debug.h"
 #include "v_repLib.h"
 #include "scintillaDlg.h"
+#include "QtUtils.h"
 #include <QDomDocument>
 #include <QDomElement>
 
-inline QColor parseColor(const QString &colorStr)
-{
-    QColor ret;
-    QStringList colorStrLst = colorStr.split(" ");
-    ret.setRed(colorStrLst[0].toInt());
-    ret.setGreen(colorStrLst[1].toInt());
-    ret.setBlue(colorStrLst[2].toInt());
-    return ret;
-}
-
-inline bool parseBool(const QString &boolStr)
-{
-    return boolStr != "false";
-}
-
 CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QString &properties)
 {
+    ASSERT_THREAD(UI);
+
     QDomDocument doc;
     doc.setContent(properties.isEmpty() ? "<editor/>" : properties);
     QDomElement e = doc.documentElement();
@@ -171,12 +159,16 @@ CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QStr
 
 void UI::openModal(const QString &initText, const QString &properties, QSemaphore *sem, QString *text, int *positionAndSize)
 {
+    ASSERT_THREAD(UI);
+
     CScintillaDlg *editor = createWindow(true, initText, properties);
     editor->setModal(sem, text, positionAndSize);
 }
 
 void UI::open(const QString &initText, const QString &properties, int *handle)
 {
+    ASSERT_THREAD(UI);
+
     CScintillaDlg *editor = createWindow(false, initText, properties);
     *handle = nextEditorHandle++;
     editor->setHandle(*handle);
@@ -185,7 +177,9 @@ void UI::open(const QString &initText, const QString &properties, int *handle)
 
 void UI::setText(int handle, const QString &text, int insertMode)
 {
-    CScintillaDlg *editor = editorByHandle(handle);
+    ASSERT_THREAD(UI);
+
+    CScintillaDlg *editor = editors.value(handle);
     if(editor)
     {
         editor->scintilla()->setText(text);
@@ -194,7 +188,9 @@ void UI::setText(int handle, const QString &text, int insertMode)
 
 void UI::getText(int handle, QString *text)
 {
-    CScintillaDlg *editor = editorByHandle(handle);
+    ASSERT_THREAD(UI);
+
+    CScintillaDlg *editor = editors.value(handle);
     if(editor)
     {
         *text = editor->scintilla()->text();
@@ -203,7 +199,9 @@ void UI::getText(int handle, QString *text)
 
 void UI::show(int handle, int showState)
 {
-    CScintillaDlg *editor = editorByHandle(handle);
+    ASSERT_THREAD(UI);
+
+    CScintillaDlg *editor = editors.value(handle);
     if(editor)
     {
     }
@@ -211,7 +209,9 @@ void UI::show(int handle, int showState)
 
 void UI::close(int handle, int *positionAndSize)
 {
-    CScintillaDlg *editor = editorByHandle(handle);
+    ASSERT_THREAD(UI);
+
+    CScintillaDlg *editor = editors.value(handle);
     if(editor)
     {
         if(positionAndSize)
@@ -224,12 +224,5 @@ void UI::close(int handle, int *positionAndSize)
         delete editor;
         editors.remove(handle);
     }
-}
-
-CScintillaDlg * UI::editorByHandle(int handle)
-{
-    if(editors.contains(handle))
-        return editors[handle];
-    return nullptr;
 }
 

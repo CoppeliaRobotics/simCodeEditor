@@ -18,6 +18,8 @@ SIM::SIM(UI *ui)
 
 void SIM::notifyEvent(const QString &msg, int handle)
 {
+    ASSERT_THREAD(!UI);
+
     QString xml = "<event origin='codeEditor' msg='%1' handle='%2'/>";
     simEventNotification(xml.arg(msg).arg(handle).toUtf8().data());
 }

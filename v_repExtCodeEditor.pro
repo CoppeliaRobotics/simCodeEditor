@@ -52,13 +52,22 @@ unix:!macx {
 SOURCES += \
     tinyxml2/tinyxml2.cpp \
     plugin.cpp \
+    debug.cpp \
     scintillaDlg.cpp \
+    UI.cpp \
+    SIM.cpp \
+    QtUtils.cpp \
     ../common/v_repLib.cpp \
 
 HEADERS +=\
     tinyxml2/tinyxml2.h \
     plugin.h \
+    codeEditor.h \
+    debug.h \
     scintillaDlg.h \
+    UI.h \
+    SIM.h \
+    QtUtils.h \
     ../include/v_repLib.h \
 
 unix:!symbian {

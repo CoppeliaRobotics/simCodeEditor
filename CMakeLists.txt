@@ -40,6 +40,7 @@ set(SOURCES
     plugin.cpp
     UI.cpp
     SIM.cpp
+    QtUtils.cpp
     debug.cpp
     tinyxml2/tinyxml2.cpp
     ${CMAKE_SOURCE_DIR}/external/v_repPlusPlus/Plugin.cpp

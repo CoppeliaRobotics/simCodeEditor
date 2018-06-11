@@ -27,7 +27,6 @@ signals:
 private:
     int nextEditorHandle = 103800;
     QMap<int, CScintillaDlg*> editors;
-    CScintillaDlg * editorByHandle(int handle);
 };
 
 #endif // UI_H__INCLUDED
