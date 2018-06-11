@@ -5,52 +5,8 @@
 #include <QVBoxLayout>
 #include <SciLexer.h>
 
-#define VRGB(r,g,b) ((quint32)((quint8)(r)|((quint8)(g) << 8)|((quint8)(b) << 16)))
-
 const int fontSize=14;
 const char* theFont("Courier");
-
-const unsigned int colBlack=VRGB(0,0,0);
-const unsigned int colDarkGrey=VRGB(64,64,64);
-const unsigned int colWhite=VRGB(255,255,255);
-const unsigned int colBackground=VRGB(190,175,175);
-const unsigned int colSelection=VRGB(128,128,255);
-const unsigned int colComment=VRGB(0,140,0);
-const unsigned int colNumber=VRGB(220,0,220);
-const unsigned int colString=VRGB(255,255,0);
-const unsigned int colCharacter=VRGB(255,255,0);
-const unsigned int colOperator=VRGB(0,0,0);
-const unsigned int colPreprocessor=VRGB(0,128,128);
-const unsigned int colIdentifier=VRGB(64,64,64);
-const unsigned int colWord=VRGB(0,0,255);
-const unsigned int colWord2=VRGB(152,0,0);
-const unsigned int colWord3=VRGB(220,80,20);
-const unsigned int colWord4=VRGB(152,64,0);
-
-struct SScintillaColors
-{
-    int iItem;
-    unsigned int rgb;
-};
-
-const SScintillaColors syntaxColors[]=
-{
-    {SCE_LUA_COMMENT,colComment},
-    {SCE_LUA_COMMENTLINE,colComment},
-    {SCE_LUA_COMMENTDOC,colComment},
-    {SCE_LUA_NUMBER,colNumber},
-    {SCE_LUA_STRING,colString},
-    {SCE_LUA_LITERALSTRING,colString},
-    {SCE_LUA_CHARACTER,colCharacter},
-    {SCE_LUA_OPERATOR,colOperator},
-    {SCE_LUA_PREPROCESSOR,colPreprocessor},
-    {SCE_LUA_WORD,colWord},
-    {SCE_LUA_WORD2,colWord2},
-    {SCE_LUA_WORD3,colWord3},
-    {SCE_LUA_WORD4,colWord4},
-    {SCE_LUA_IDENTIFIER,colIdentifier},
-    {-1,0}
-};
 
 CScintillaDlg::CScintillaDlg(UI *ui, QWidget* pParent)
     : QDialog(pParent),
@@ -69,32 +25,12 @@ CScintillaDlg::CScintillaDlg(UI *ui, QWidget* pParent)
     _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETSTYLEBITS,(int)5);
     _scintillaObject->setTabWidth(4);
     _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETUSETABS,(int)0);
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETMARGINWIDTHN,(unsigned long)0,(long)48); // Line numbers
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETMARGINWIDTHN,(unsigned long)1,(long)0); // Symbols
-    // Keywords:
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS,(unsigned long)1,"sim.getObjectHandle sim.getObjectName");
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS,(unsigned long)2,"sim.handle_all sim.handle_parent");
-    // Colors and main styles:
-    setAStyle(QsciScintillaBase::STYLE_DEFAULT,colBlack,colBackground,fontSize,theFont); // set global default style
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETCARETFORE,(unsigned long)colBlack);
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_STYLECLEARALL); // set all styles
-    setAStyle(QsciScintillaBase::STYLE_LINENUMBER,(unsigned long)colWhite,(long)colDarkGrey);
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETSELBACK,(unsigned long)1,(long)colSelection); // selection color
-    for (int i=0;syntaxColors[i].iItem!=-1;i++)
-        setAStyle(syntaxColors[i].iItem,syntaxColors[i].rgb,colBackground);
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_INDICSETSTYLE,(unsigned long)20,(long)QsciScintillaBase::INDIC_STRAIGHTBOX);
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_INDICSETALPHA,(unsigned long)20,(long)160);
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_INDICSETFORE,(unsigned long)20,(long)colSelection);
+    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETMARGINWIDTHN,(unsigned long)0,(long)48);
+    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETMARGINWIDTHN,(unsigned long)1,(long)0);
     _scintillaObject->setFolding(QsciScintilla::BoxedTreeFoldStyle);
 
     connect(_scintillaObject,SIGNAL(SCN_CHARADDED(int)),this,SLOT(charAdded(int)));
     connect(_scintillaObject,SIGNAL(SCN_MODIFIED(int,int,const char*,int,int,int,int,int,int,int)),this,SLOT(modified(int,int,const char*,int,int,int,int,int,int,int)));
-
-    setText("Hello world!\nsim.getObjectHandle(...)\nsim.getObjectName(..)\nsim.handle_all\nsim.handle_parent");
-    setWindowTitle("Test window");
-    show();
-    raise();
-    activateWindow();
 }
 
 CScintillaDlg::~CScintillaDlg() 
@@ -115,31 +51,49 @@ void CScintillaDlg::setModal(QSemaphore *sem, QString *text, int *positionAndSiz
     modalData.positionAndSize = positionAndSize;
 }
 
-void CScintillaDlg::setText(const QString &text)
+void CScintillaDlg::setAStyle(int style,QColor fore,QColor back,int size,const char *face)
 {
-    _scintillaObject->setText(text);
-}
-
-QString CScintillaDlg::text() const
-{
-    return _scintillaObject->text();
-}
-
-void CScintillaDlg::setAStyle(int style,unsigned int fore,unsigned int back,int size,const char *face)
-{
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_STYLESETFORE,(unsigned long)style,(long)fore);
-    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_STYLESETBACK,(unsigned long)style,(long)back);
+    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_STYLESETFORE,(unsigned long)style,(long)fore.rgb());
+    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_STYLESETBACK,(unsigned long)style,(long)back.rgb());
     if (size>=1)
         _scintillaObject->SendScintilla(QsciScintillaBase::SCI_STYLESETSIZE,(unsigned long)style,(long)size);
     if (face)
         _scintillaObject->SendScintilla(QsciScintillaBase::SCI_STYLESETFONT,(unsigned long)style,face);
 }
 
+void CScintillaDlg::setColorTheme(QColor text_col, QColor background_col, QColor selection_col, QColor comment_col, QColor number_col, QColor string_col, QColor character_col, QColor operator_col, QColor identifier_col, QColor preprocessor_col, QColor keyword1_col, QColor keyword2_col, QColor keyword3_col, QColor keyword4_col)
+{
+    setAStyle(QsciScintillaBase::STYLE_DEFAULT, text_col, background_col, fontSize, theFont); // set global default style
+    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETCARETFORE,(unsigned long)QColor(Qt::black).rgb());
+    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_STYLECLEARALL); // set all styles
+    setAStyle(QsciScintillaBase::STYLE_LINENUMBER,(unsigned long)QColor(Qt::white).rgb(),(long)QColor(Qt::darkGray).rgb());
+    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETSELBACK,(unsigned long)1,(long)selection_col.rgb()); // selection color
+
+    setAStyle(SCE_LUA_COMMENT, comment_col, background_col);
+    setAStyle(SCE_LUA_COMMENTLINE, comment_col, background_col);
+    setAStyle(SCE_LUA_COMMENTDOC, comment_col, background_col);
+    setAStyle(SCE_LUA_NUMBER, number_col, background_col);
+    setAStyle(SCE_LUA_STRING, string_col, background_col);
+    setAStyle(SCE_LUA_LITERALSTRING, string_col, background_col);
+    setAStyle(SCE_LUA_CHARACTER, character_col, background_col);
+    setAStyle(SCE_LUA_OPERATOR, operator_col, background_col);
+    setAStyle(SCE_LUA_PREPROCESSOR, preprocessor_col, background_col);
+    setAStyle(SCE_LUA_WORD, keyword1_col, background_col);
+    setAStyle(SCE_LUA_WORD2, keyword2_col, background_col);
+    setAStyle(SCE_LUA_WORD3, keyword3_col, background_col);
+    setAStyle(SCE_LUA_WORD4, keyword4_col, background_col);
+    setAStyle(SCE_LUA_IDENTIFIER, identifier_col, background_col);
+
+    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_INDICSETSTYLE,(unsigned long)20,(long)QsciScintillaBase::INDIC_STRAIGHTBOX);
+    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_INDICSETALPHA,(unsigned long)20,(long)160);
+    _scintillaObject->SendScintilla(QsciScintillaBase::SCI_INDICSETFORE,(unsigned long)20,(long)selection_col.rgb());
+}
+
 void CScintillaDlg::closeEvent(QCloseEvent *event)
 {
     if(isModal)
     {
-        *modalData.text = text();
+        *modalData.text = _scintillaObject->text();
         modalData.positionAndSize[0] = x();
         modalData.positionAndSize[1] = y();
         modalData.positionAndSize[2] = width();
@@ -228,7 +182,7 @@ void CScintillaDlg::charAdded(int charAdded)
                     if (s!="")
                     {
                         // tabs and window scroll are problematic : pos-=line.size()+startword;
-                        setAStyle(QsciScintillaBase::STYLE_CALLTIP,VRGB(0,0,0),VRGB(255,255,255),fontSize,theFont);
+                        setAStyle(QsciScintillaBase::STYLE_CALLTIP,Qt::black,Qt::white,fontSize,theFont);
                         _scintillaObject->SendScintilla(QsciScintillaBase::SCI_CALLTIPUSESTYLE,(int)0);
 
                         int cursorPosInPixelsFromLeftWindowBorder=_scintillaObject->SendScintilla(QsciScintillaBase::SCI_POINTXFROMPOSITION,(int)0,(unsigned long)pos);

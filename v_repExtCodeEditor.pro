@@ -5,7 +5,7 @@ TEMPLATE = lib
 
 DEFINES -= UNICODE
 CONFIG += shared
-QT += widgets
+QT += widgets xml
 
 *-msvc* {
     QMAKE_CXXFLAGS += -O2

@@ -13,6 +13,9 @@ class UI : public QObject
     Q_OBJECT
 public:
 public slots:
+private:
+    CScintillaDlg * createWindow(bool modal, const QString &initText, const QString &properties);
+public:
     void openModal(const QString &initText, const QString &properties, QSemaphore *sem, QString *text, int *positionAndSize);
     void open(const QString &initText, const QString &properties, int *handle);
     void setText(int handle, const QString &text, int insertMode);

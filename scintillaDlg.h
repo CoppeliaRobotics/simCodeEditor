@@ -16,13 +16,13 @@ public:
     CScintillaDlg(UI *ui, QWidget* pParent = NULL);
     virtual ~CScintillaDlg();
 
+    inline QsciScintilla * scintilla() {return _scintillaObject;}
     void setHandle(int handle);
     void setModal(QSemaphore *sem, QString *text, int *positionAndSize);
-    void setText(const QString &text);
-    QString text() const;
+    void setAStyle(int style,QColor fore,QColor back,int size=-1,const char *face=0);
+    void setColorTheme(QColor text_col, QColor background_col, QColor selection_col, QColor comment_col, QColor number_col, QColor string_col, QColor character_col, QColor operator_col, QColor identifier_col, QColor preprocessor_col, QColor keyword1_col, QColor keyword2_col, QColor keyword3_col, QColor keyword4_col);
 
 private:
-    void setAStyle(int style,unsigned int fore,unsigned int back=0,int size=-1,const char *face=0);
     void closeEvent(QCloseEvent *event);
     std::string getCallTip(const char* txt);
 
