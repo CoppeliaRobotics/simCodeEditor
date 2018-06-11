@@ -22,6 +22,7 @@ CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QStr
     window->setWindowTitle(e.attribute("title", "Editor"));
 
     bool resizable = parseBool(e.attribute("resizable", "false"));
+    window->statusbar()->setSizeGripEnabled(resizable);
     bool closeable = parseBool(e.attribute("closeable", "false"));
     Qt::WindowFlags flags = Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowStaysOnTopHint;
 #ifdef MAC_VREP
@@ -68,7 +69,7 @@ CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QStr
     window->scintilla()->setReadOnly(!editable);
 
     bool searchable = parseBool(e.attribute("searchable", "true"));
-    // TODO: implement search functionality
+    window->toolbar()->actShowSearchPanel->setEnabled(searchable);
 
     int tab_width = e.attribute("tab-width", "4").toInt();
     window->scintilla()->setTabWidth(tab_width);

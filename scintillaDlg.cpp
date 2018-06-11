@@ -1,9 +1,12 @@
 #include "scintillaDlg.h"
 #include "UI.h"
+#include "debug.h"
 #include <algorithm> 
 #include <QCloseEvent>
 #include <QVBoxLayout>
+#include <QStyle>
 #include <SciLexer.h>
+#include <QGuiApplication>
 
 const int fontSize=14;
 const char* theFont("Courier");
@@ -13,12 +16,20 @@ CScintillaDlg::CScintillaDlg(UI *ui, QWidget* pParent)
       ui(ui)
 {
     setAttribute(Qt::WA_DeleteOnClose);
+
     _scintillaObject=new QsciScintilla;
+    searchAndReplacePanel=new SearchAndReplacePanel(this);
+    toolBar = new ToolBar(this);
+    statusBar = new StatusBar(this);
 
     QVBoxLayout *bl=new QVBoxLayout(this);
     bl->setContentsMargins(0,0,0,0);
+    bl->setSpacing(0);
     setLayout(bl);
+    bl->addWidget(toolBar);
     bl->addWidget(_scintillaObject);
+    bl->addWidget(searchAndReplacePanel);
+    bl->addWidget(statusBar);
 
     QsciLexerLua* lexer=new QsciLexerLua;
     _scintillaObject->setLexer(lexer);
@@ -238,5 +249,149 @@ void CScintillaDlg::charAdded(int charAdded)
 
 void CScintillaDlg::modified(int,int,const char*,int,int,int,int,int,int,int)
 {
-
 }
+
+void CScintillaDlg::reloadScript()
+{
+    DBG << "reload script not implemented" << std::endl;
+}
+
+void CScintillaDlg::indent()
+{
+    int lineFrom, indexFrom, lineTo, indexTo;
+    _scintillaObject->getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
+    if(indexTo == 0) lineTo--;
+    _scintillaObject->beginUndoAction();
+    for(int line = lineFrom; line <= lineTo && line != -1; line++)
+        _scintillaObject->indent(line);
+    _scintillaObject->endUndoAction();
+}
+
+void CScintillaDlg::unindent()
+{
+    int lineFrom, indexFrom, lineTo, indexTo;
+    _scintillaObject->getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
+    if(indexTo == 0) lineTo--;
+    _scintillaObject->beginUndoAction();
+    for(int line = lineFrom; line <= lineTo && line != -1; line++)
+        _scintillaObject->unindent(line);
+    _scintillaObject->endUndoAction();
+}
+
+#include "icons/icons.cpp"
+#define ICON(x) QPixmap x; x.loadFromData(x ## _png, x ## _png_len)
+
+ToolBar::ToolBar(CScintillaDlg *parent)
+    : QToolBar(parent),
+      parent(parent)
+{
+    setIconSize(QSize(16, 16));
+
+    ICON(upload);
+    addAction(actReload = new QAction(QIcon(upload), "Reload script"));
+    actReload->setEnabled(false);
+    connect(actReload, &QAction::triggered, parent, &CScintillaDlg::reloadScript);
+
+    ICON(search);
+    addAction(actShowSearchPanel = new QAction(QIcon(search), "Find and replace"));
+    connect(actShowSearchPanel, &QAction::triggered, parent->searchAndReplacePanel, &SearchAndReplacePanel::show);
+
+    ICON(undo);
+    addAction(actUndo = new QAction(QIcon(undo), "Undo"));
+    connect(actUndo, &QAction::triggered, parent->scintilla(), &QsciScintilla::undo);
+
+    ICON(redo);
+    addAction(actRedo = new QAction(QIcon(redo), "Redo"));
+    connect(actRedo, &QAction::triggered, parent->scintilla(), &QsciScintilla::redo);
+
+    ICON(unindent);
+    addAction(actUnindent = new QAction(QIcon(unindent), "Unindent"));
+    connect(actUnindent, &QAction::triggered, parent, &CScintillaDlg::unindent);
+
+    ICON(indent);
+    addAction(actIndent = new QAction(QIcon(indent), "Indent"));
+    connect(actIndent, &QAction::triggered, parent, &CScintillaDlg::indent);
+}
+
+ToolBar::~ToolBar()
+{
+}
+
+SearchAndReplacePanel::SearchAndReplacePanel(CScintillaDlg *parent)
+    : QWidget(parent),
+      parent(parent)
+{
+    QGridLayout *layout = new QGridLayout;
+    layout->setContentsMargins(11, 0, 0, 0);
+    layout->setColumnStretch(1, 10);
+    layout->addWidget(chkRegExp = new QCheckBox("Regular expression"), 1, 4);
+    layout->addWidget(chkCaseSens = new QCheckBox("Case sensitive"), 2, 4);
+    layout->addWidget(lblFind = new QLabel("Find:"), 1, 0);
+    lblFind->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    layout->addWidget(editFind = new QLineEdit, 1, 1, 1, 2);
+    layout->addWidget(btnFind = new QPushButton("Find"), 1, 3);
+    layout->addWidget(btnClose = new QPushButton, 1, 5);
+    layout->addWidget(lblReplace = new QLabel("Replace with:"), 2, 0);
+    lblReplace->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    layout->addWidget(editReplace = new QLineEdit, 2, 1, 1, 2);
+    layout->addWidget(btnReplace = new QPushButton("Replace"), 2, 3);
+    setLayout(layout);
+    btnClose->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton));
+    btnClose->setFlat(true);
+    btnClose->setStyleSheet("margin-left: 5px; margin-right: 5px; font-size: 14pt;");
+    connect(btnClose, &QPushButton::clicked, this, &QWidget::hide);
+    connect(btnFind, &QPushButton::clicked, this, &SearchAndReplacePanel::find);
+    connect(btnReplace, &QPushButton::clicked, this, &SearchAndReplacePanel::replace);
+    hide();
+}
+
+SearchAndReplacePanel::~SearchAndReplacePanel()
+{
+}
+
+void SearchAndReplacePanel::show()
+{
+    QWidget::show();
+    int line, index;
+    parent->scintilla()->getCursorPosition(&line, &index);
+    parent->scintilla()->ensureLineVisible(line);
+}
+
+void SearchAndReplacePanel::find()
+{
+    QsciScintilla *sci = parent->scintilla();
+    bool shift = QGuiApplication::keyboardModifiers() & Qt::ShiftModifier;
+    // FIXME: reverse search does not work. bug in QScintilla?
+    if(!sci->findFirst(editFind->text(), chkRegExp->isChecked(), chkCaseSens->isChecked(), false, false, !shift))
+    {
+        if(sci->findFirst(editFind->text(), chkRegExp->isChecked(), chkCaseSens->isChecked(), false, true, !shift))
+            parent->statusbar()->showMessage("Search reahced end. Continuing from top.", 4000);
+        else
+            parent->statusbar()->showMessage("No occurrences found.", 4000);
+    }
+}
+
+void SearchAndReplacePanel::replace()
+{
+    parent->scintilla()->replace(editReplace->text());
+}
+
+StatusBar::StatusBar(CScintillaDlg *parent)
+    : QStatusBar(parent),
+      parent(parent)
+{
+    addPermanentWidget(lblCursorPos = new QLabel("1:1"));
+    lblCursorPos->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    lblCursorPos->setFixedWidth(120);
+    connect(parent->scintilla(), &QsciScintilla::cursorPositionChanged, this, &StatusBar::onCursorPositionChanged);
+}
+
+StatusBar::~StatusBar()
+{
+}
+
+void StatusBar::onCursorPositionChanged(int line, int index)
+{
+    lblCursorPos->setText(QString("%1:%2").arg(line + 1).arg(index + 1));
+}
+
