@@ -4,6 +4,9 @@
 #include <Qsci/qscilexerlua.h>
 #include <Qsci/qscistyle.h>
 #include <QDialog>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QGridLayout>
 #include <QPushButton>
 #include <QCheckBox>
 #include <QLineEdit>
@@ -13,6 +16,7 @@
 #include <QSemaphore>
 #include <QStatusBar>
 #include <QComboBox>
+#include <QStyle>
 
 class UI;
 class ToolBar;
@@ -29,6 +33,7 @@ public:
 
     inline QsciScintilla * scintilla() {return _scintillaObject;}
     inline ToolBar * toolbar() {return toolBar;}
+    inline SearchAndReplacePanel * searchPanel() {return searchAndReplacePanel;}
     inline StatusBar * statusbar() {return statusBar;}
     void setHandle(int handle);
     void setModal(QSemaphore *sem, QString *text, int *positionAndSize);
@@ -42,11 +47,16 @@ private:
 private slots:
     void charAdded(int charAdded);
     void modified(int, int, const char *, int, int, int, int, int, int, int);
+    void textChanged();
+    void cursorPosChanged(int line, int index);
+    void selectionChanged();
     void reloadScript();
     void indent();
     void unindent();
 
 private:
+    void updateCursorSelectionDisplay();
+
     UI *ui;
     ToolBar *toolBar;
     QsciScintilla* _scintillaObject;
@@ -74,15 +84,26 @@ public:
     ToolBar(CScintillaDlg *parent = nullptr);
     virtual ~ToolBar();
 
+    void connectAll();
+
+public slots:
+    void updateButtons();
+
+public:
     QAction *actReload;
     QAction *actShowSearchPanel;
     QAction *actUndo;
     QAction *actRedo;
     QAction *actUnindent;
     QAction *actIndent;
+    QAction *actFuncNav;
 private:
     CScintillaDlg *parent;
-    QComboBox *funcNavCombo;
+    struct {
+        QWidget *widget;
+        QLabel *label;
+        QComboBox *combo;
+    } funcNav;
 };
 
 class SearchAndReplacePanel : public QWidget
@@ -93,8 +114,11 @@ public:
     SearchAndReplacePanel(CScintillaDlg *parent = nullptr);
     virtual ~SearchAndReplacePanel();
 
+    void connectAll();
+
 public slots:
     void show();
+    void hide();
 
 private slots:
     void find();
@@ -116,8 +140,8 @@ public:
     StatusBar(CScintillaDlg *parent = nullptr);
     virtual ~StatusBar();
 
-private slots:
-    void onCursorPositionChanged(int line, int index);
+    void setCursorInfo(int line, int index);
+    void setSelectionInfo(int fromLine, int fromIndex, int toLine, int toIndex);
 
 private:
     CScintillaDlg *parent;

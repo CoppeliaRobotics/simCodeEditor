@@ -3,8 +3,6 @@
 #include "debug.h"
 #include <algorithm> 
 #include <QCloseEvent>
-#include <QVBoxLayout>
-#include <QStyle>
 #include <SciLexer.h>
 #include <QGuiApplication>
 
@@ -18,8 +16,8 @@ CScintillaDlg::CScintillaDlg(UI *ui, QWidget* pParent)
     setAttribute(Qt::WA_DeleteOnClose);
 
     _scintillaObject=new QsciScintilla;
-    searchAndReplacePanel=new SearchAndReplacePanel(this);
     toolBar = new ToolBar(this);
+    searchAndReplacePanel=new SearchAndReplacePanel(this);
     statusBar = new StatusBar(this);
 
     QVBoxLayout *bl=new QVBoxLayout(this);
@@ -40,8 +38,14 @@ CScintillaDlg::CScintillaDlg(UI *ui, QWidget* pParent)
     _scintillaObject->SendScintilla(QsciScintillaBase::SCI_SETMARGINWIDTHN,(unsigned long)1,(long)0);
     _scintillaObject->setFolding(QsciScintilla::BoxedTreeFoldStyle);
 
+    toolBar->connectAll();
+    searchAndReplacePanel->connectAll();
+
     connect(_scintillaObject,SIGNAL(SCN_CHARADDED(int)),this,SLOT(charAdded(int)));
     connect(_scintillaObject,SIGNAL(SCN_MODIFIED(int,int,const char*,int,int,int,int,int,int,int)),this,SLOT(modified(int,int,const char*,int,int,int,int,int,int,int)));
+    connect(_scintillaObject,&QsciScintilla::textChanged,this,&CScintillaDlg::textChanged);
+    connect(_scintillaObject,&QsciScintilla::selectionChanged,this,&CScintillaDlg::selectionChanged);
+    connect(_scintillaObject,&QsciScintilla::cursorPositionChanged,this, &CScintillaDlg::cursorPosChanged);
 }
 
 CScintillaDlg::~CScintillaDlg() 
@@ -251,6 +255,23 @@ void CScintillaDlg::modified(int,int,const char*,int,int,int,int,int,int,int)
 {
 }
 
+void CScintillaDlg::textChanged()
+{
+    toolBar->updateButtons();
+}
+
+void CScintillaDlg::cursorPosChanged(int line, int index)
+{
+    toolBar->updateButtons();
+    updateCursorSelectionDisplay();
+}
+
+void CScintillaDlg::selectionChanged()
+{
+    toolBar->updateButtons();
+    updateCursorSelectionDisplay();
+}
+
 void CScintillaDlg::reloadScript()
 {
     DBG << "reload script not implemented" << std::endl;
@@ -278,6 +299,19 @@ void CScintillaDlg::unindent()
     _scintillaObject->endUndoAction();
 }
 
+void CScintillaDlg::updateCursorSelectionDisplay()
+{
+    int fromLine, fromIndex, toLine, toIndex;
+    _scintillaObject->getSelection(&fromLine, &fromIndex, &toLine, &toIndex);
+    if(fromLine != -1)
+    {
+        statusBar->setSelectionInfo(fromLine, fromIndex, toLine, toIndex);
+        return;
+    }
+    _scintillaObject->getCursorPosition(&fromLine, &fromIndex);
+    statusBar->setCursorInfo(fromLine, fromIndex);
+}
+
 #include "icons/icons.cpp"
 #define ICON(x) QPixmap x; x.loadFromData(x ## _png, x ## _png_len)
 
@@ -290,44 +324,67 @@ ToolBar::ToolBar(CScintillaDlg *parent)
     ICON(upload);
     addAction(actReload = new QAction(QIcon(upload), "Reload script"));
     actReload->setEnabled(false);
-    connect(actReload, &QAction::triggered, parent, &CScintillaDlg::reloadScript);
 
     ICON(search);
     addAction(actShowSearchPanel = new QAction(QIcon(search), "Find and replace"));
-    connect(actShowSearchPanel, &QAction::triggered, parent->searchAndReplacePanel, &SearchAndReplacePanel::show);
 
     ICON(undo);
     addAction(actUndo = new QAction(QIcon(undo), "Undo"));
-    connect(actUndo, &QAction::triggered, parent->scintilla(), &QsciScintilla::undo);
 
     ICON(redo);
     addAction(actRedo = new QAction(QIcon(redo), "Redo"));
-    connect(actRedo, &QAction::triggered, parent->scintilla(), &QsciScintilla::redo);
 
     ICON(unindent);
     addAction(actUnindent = new QAction(QIcon(unindent), "Unindent"));
-    connect(actUnindent, &QAction::triggered, parent, &CScintillaDlg::unindent);
 
     ICON(indent);
     addAction(actIndent = new QAction(QIcon(indent), "Indent"));
-    connect(actIndent, &QAction::triggered, parent, &CScintillaDlg::indent);
 
     QWidget *spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     addWidget(spacer);
 
-    QLabel *funcNavLabel = new QLabel("Go to function: ");
-    funcNavCombo = new QComboBox;
-    funcNavCombo->addItem("functionNavigatorPlaceholder(...)");
-    if(false)
-    {
-        addWidget(funcNavLabel);
-        addWidget(funcNavCombo);
-    }
+    funcNav.label = new QLabel("Go to function: ");
+    funcNav.combo = new QComboBox;
+    funcNav.combo->addItem("functionNavigatorPlaceholder(...)");
+    funcNav.widget = new QWidget;
+    QHBoxLayout *l = new QHBoxLayout;
+    l->setSpacing(0);
+    l->setContentsMargins(0,0,0,0);
+    funcNav.widget->setLayout(l);
+    l->addWidget(funcNav.label);
+    l->addWidget(funcNav.combo);
+    actFuncNav = addWidget(funcNav.widget);
+    actFuncNav->setVisible(false);
 }
 
 ToolBar::~ToolBar()
 {
+}
+
+void ToolBar::connectAll()
+{
+    connect(actReload, &QAction::triggered, parent, &CScintillaDlg::reloadScript);
+    connect(actShowSearchPanel, &QAction::triggered, parent->searchAndReplacePanel, &SearchAndReplacePanel::show);
+    connect(actUndo, &QAction::triggered, parent->scintilla(), &QsciScintilla::undo);
+    connect(actRedo, &QAction::triggered, parent->scintilla(), &QsciScintilla::redo);
+    connect(actUnindent, &QAction::triggered, parent, &CScintillaDlg::unindent);
+    connect(actIndent, &QAction::triggered, parent, &CScintillaDlg::indent);
+    connect(actShowSearchPanel, &QAction::triggered, this, &ToolBar::updateButtons);
+}
+
+void ToolBar::updateButtons()
+{
+    actUndo->setEnabled(parent->scintilla()->isUndoAvailable());
+    actRedo->setEnabled(parent->scintilla()->isRedoAvailable());
+
+    int fromLine, fromIndex, toLine, toIndex;
+    parent->scintilla()->getSelection(&fromLine, &fromIndex, &toLine, &toIndex);
+    bool hasSel = fromLine != -1;
+    actIndent->setEnabled(hasSel);
+    actUnindent->setEnabled(hasSel);
+
+    actShowSearchPanel->setEnabled(!parent->searchPanel()->isVisible());
 }
 
 SearchAndReplacePanel::SearchAndReplacePanel(CScintillaDlg *parent)
@@ -352,14 +409,19 @@ SearchAndReplacePanel::SearchAndReplacePanel(CScintillaDlg *parent)
     btnClose->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton));
     btnClose->setFlat(true);
     btnClose->setStyleSheet("margin-left: 5px; margin-right: 5px; font-size: 14pt;");
-    connect(btnClose, &QPushButton::clicked, this, &QWidget::hide);
-    connect(btnFind, &QPushButton::clicked, this, &SearchAndReplacePanel::find);
-    connect(btnReplace, &QPushButton::clicked, this, &SearchAndReplacePanel::replace);
     hide();
 }
 
 SearchAndReplacePanel::~SearchAndReplacePanel()
 {
+}
+
+void SearchAndReplacePanel::connectAll()
+{
+    connect(btnClose, &QPushButton::clicked, this, &QWidget::hide);
+    connect(btnFind, &QPushButton::clicked, this, &SearchAndReplacePanel::find);
+    connect(btnReplace, &QPushButton::clicked, this, &SearchAndReplacePanel::replace);
+    connect(btnClose, &QPushButton::clicked, parent->toolbar(), &ToolBar::updateButtons);
 }
 
 void SearchAndReplacePanel::show()
@@ -368,6 +430,11 @@ void SearchAndReplacePanel::show()
     int line, index;
     parent->scintilla()->getCursorPosition(&line, &index);
     parent->scintilla()->ensureLineVisible(line);
+}
+
+void SearchAndReplacePanel::hide()
+{
+    QWidget::hide();
 }
 
 void SearchAndReplacePanel::find()
@@ -396,15 +463,19 @@ StatusBar::StatusBar(CScintillaDlg *parent)
     addPermanentWidget(lblCursorPos = new QLabel("1:1"));
     lblCursorPos->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     lblCursorPos->setFixedWidth(120);
-    connect(parent->scintilla(), &QsciScintilla::cursorPositionChanged, this, &StatusBar::onCursorPositionChanged);
 }
 
 StatusBar::~StatusBar()
 {
 }
 
-void StatusBar::onCursorPositionChanged(int line, int index)
+void StatusBar::setCursorInfo(int line, int index)
 {
     lblCursorPos->setText(QString("%1:%2").arg(line + 1).arg(index + 1));
+}
+
+void StatusBar::setSelectionInfo(int fromLine, int fromIndex, int toLine, int toIndex)
+{
+    lblCursorPos->setText(QString("%1:%2-%3:%4 S").arg(fromLine + 1).arg(fromIndex + 1).arg(toLine + 1).arg(toIndex + 1));
 }
 
