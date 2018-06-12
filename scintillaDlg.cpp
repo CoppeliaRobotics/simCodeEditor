@@ -311,6 +311,19 @@ ToolBar::ToolBar(CScintillaDlg *parent)
     ICON(indent);
     addAction(actIndent = new QAction(QIcon(indent), "Indent"));
     connect(actIndent, &QAction::triggered, parent, &CScintillaDlg::indent);
+
+    QWidget *spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    addWidget(spacer);
+
+    QLabel *funcNavLabel = new QLabel("Go to function: ");
+    funcNavCombo = new QComboBox;
+    funcNavCombo->addItem("functionNavigatorPlaceholder(...)");
+    if(false)
+    {
+        addWidget(funcNavLabel);
+        addWidget(funcNavCombo);
+    }
 }
 
 ToolBar::~ToolBar()

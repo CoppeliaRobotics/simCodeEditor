@@ -12,6 +12,7 @@
 #include <QAction>
 #include <QSemaphore>
 #include <QStatusBar>
+#include <QComboBox>
 
 class UI;
 class ToolBar;
@@ -81,6 +82,7 @@ public:
     QAction *actIndent;
 private:
     CScintillaDlg *parent;
+    QComboBox *funcNavCombo;
 };
 
 class SearchAndReplacePanel : public QWidget
