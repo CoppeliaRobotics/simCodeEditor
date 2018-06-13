@@ -31,10 +31,10 @@ public:
     CScintillaDlg(UI *ui, QWidget* pParent = nullptr);
     virtual ~CScintillaDlg();
 
-    inline QsciScintilla * scintilla() {return _scintillaObject;}
-    inline ToolBar * toolbar() {return toolBar;}
-    inline SearchAndReplacePanel * searchPanel() {return searchAndReplacePanel;}
-    inline StatusBar * statusbar() {return statusBar;}
+    inline QsciScintilla * scintilla() {return scintilla_;}
+    inline ToolBar * toolBar() {return toolBar_;}
+    inline SearchAndReplacePanel * searchPanel() {return searchPanel_;}
+    inline StatusBar * statusBar() {return statusBar_;}
     void setHandle(int handle);
     void setModal(QSemaphore *sem, QString *text, int *positionAndSize);
     void setAStyle(int style,QColor fore,QColor back,int size=-1,const char *face=0);
@@ -58,10 +58,10 @@ private:
     void updateCursorSelectionDisplay();
 
     UI *ui;
-    ToolBar *toolBar;
-    QsciScintilla* _scintillaObject;
-    SearchAndReplacePanel *searchAndReplacePanel;
-    StatusBar *statusBar;
+    ToolBar *toolBar_;
+    QsciScintilla *scintilla_;
+    SearchAndReplacePanel *searchPanel_;
+    StatusBar *statusBar_;
     int handle;
     struct
     {
@@ -71,9 +71,6 @@ private:
     }
     modalData;
     bool isModal = false;
-    friend class ToolBar;
-    friend class SearchAndReplacePanel;
-    friend class StatusBar;
 };
 
 class ToolBar : public QToolBar
@@ -83,8 +80,6 @@ class ToolBar : public QToolBar
 public:
     ToolBar(CScintillaDlg *parent = nullptr);
     virtual ~ToolBar();
-
-    void connectAll();
 
 public slots:
     void updateButtons();
@@ -114,8 +109,6 @@ public:
     SearchAndReplacePanel(CScintillaDlg *parent = nullptr);
     virtual ~SearchAndReplacePanel();
 
-    void connectAll();
-
 public slots:
     void show();
     void hide();
@@ -123,6 +116,10 @@ public slots:
 private slots:
     void find();
     void replace();
+
+signals:
+    void shown();
+    void hidden();
 
 private:
     CScintillaDlg *parent;
