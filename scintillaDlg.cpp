@@ -39,7 +39,7 @@ CScintillaDlg::CScintillaDlg(UI *ui, QWidget* pParent)
     scintilla_->setFolding(QsciScintilla::BoxedTreeFoldStyle);
 
     connect(toolBar_->actReload, &QAction::triggered, this, &CScintillaDlg::reloadScript);
-    connect(toolBar_->actShowSearchPanel, &QAction::triggered, searchPanel_, &SearchAndReplacePanel::show);
+    connect(toolBar_->actShowSearchPanel, &QAction::toggled, searchPanel_, &SearchAndReplacePanel::setVisible);
     connect(toolBar_->actUndo, &QAction::triggered, scintilla_, &QsciScintilla::undo);
     connect(toolBar_->actRedo, &QAction::triggered, scintilla_, &QsciScintilla::redo);
     connect(toolBar_->actUnindent, &QAction::triggered, this, &CScintillaDlg::unindent);
@@ -334,6 +334,7 @@ ToolBar::ToolBar(CScintillaDlg *parent)
 
     ICON(search);
     addAction(actShowSearchPanel = new QAction(QIcon(search), "Find and replace"));
+    actShowSearchPanel->setCheckable(true);
 
     ICON(undo);
     addAction(actUndo = new QAction(QIcon(undo), "Undo"));
@@ -380,7 +381,7 @@ void ToolBar::updateButtons()
     actIndent->setEnabled(hasSel);
     actUnindent->setEnabled(hasSel);
 
-    actShowSearchPanel->setEnabled(!parent->searchPanel()->isVisible());
+    actShowSearchPanel->setChecked(parent->searchPanel()->isVisible());
 }
 
 SearchAndReplacePanel::SearchAndReplacePanel(CScintillaDlg *parent)
