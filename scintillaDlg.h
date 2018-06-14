@@ -9,7 +9,6 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <QCheckBox>
-#include <QLineEdit>
 #include <QLabel>
 #include <QToolBar>
 #include <QAction>
@@ -124,7 +123,7 @@ signals:
 private:
     CScintillaDlg *parent;
     QLabel *lblFind, *lblReplace;
-    QLineEdit *editFind, *editReplace;
+    QComboBox *editFind, *editReplace;
     QPushButton *btnFind, *btnReplace, *btnClose;
     QCheckBox *chkRegExp, *chkCaseSens;
 };

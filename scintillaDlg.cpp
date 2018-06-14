@@ -394,12 +394,16 @@ SearchAndReplacePanel::SearchAndReplacePanel(CScintillaDlg *parent)
     layout->addWidget(chkCaseSens = new QCheckBox("Case sensitive"), 2, 4);
     layout->addWidget(lblFind = new QLabel("Find:"), 1, 0);
     lblFind->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    layout->addWidget(editFind = new QLineEdit, 1, 1, 1, 2);
+    layout->addWidget(editFind = new QComboBox, 1, 1, 1, 2);
+    editFind->setEditable(true);
+    editFind->setInsertPolicy(QComboBox::InsertAtTop);
     layout->addWidget(btnFind = new QPushButton("Find"), 1, 3);
     layout->addWidget(btnClose = new QPushButton, 1, 5);
     layout->addWidget(lblReplace = new QLabel("Replace with:"), 2, 0);
     lblReplace->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    layout->addWidget(editReplace = new QLineEdit, 2, 1, 1, 2);
+    layout->addWidget(editReplace = new QComboBox, 2, 1, 1, 2);
+    editReplace->setEditable(true);
+    editReplace->setInsertPolicy(QComboBox::InsertAtTop);
     layout->addWidget(btnReplace = new QPushButton("Replace"), 2, 3);
     setLayout(layout);
     btnClose->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton));
@@ -435,9 +439,11 @@ void SearchAndReplacePanel::find()
     QsciScintilla *sci = parent->scintilla();
     bool shift = QGuiApplication::keyboardModifiers() & Qt::ShiftModifier;
     // FIXME: reverse search does not work. bug in QScintilla?
-    if(!sci->findFirst(editFind->text(), chkRegExp->isChecked(), chkCaseSens->isChecked(), false, false, !shift))
+    QString what = editFind->currentText();
+    if(editFind->findText(what) == -1) editFind->addItem(what);
+    if(!sci->findFirst(what, chkRegExp->isChecked(), chkCaseSens->isChecked(), false, false, !shift))
     {
-        if(sci->findFirst(editFind->text(), chkRegExp->isChecked(), chkCaseSens->isChecked(), false, true, !shift))
+        if(sci->findFirst(what, chkRegExp->isChecked(), chkCaseSens->isChecked(), false, true, !shift))
             parent->statusBar()->showMessage("Search reahced end. Continuing from top.", 4000);
         else
             parent->statusBar()->showMessage("No occurrences found.", 4000);
@@ -446,7 +452,9 @@ void SearchAndReplacePanel::find()
 
 void SearchAndReplacePanel::replace()
 {
-    parent->scintilla()->replace(editReplace->text());
+    QString what = editReplace->currentText();
+    if(editReplace->findText(what) == -1) editReplace->addItem(what);
+    parent->scintilla()->replace(what);
 }
 
 StatusBar::StatusBar(CScintillaDlg *parent)
