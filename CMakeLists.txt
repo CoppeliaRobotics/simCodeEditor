@@ -17,7 +17,11 @@ find_package(Qt5Xml REQUIRED)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 find_package(VREP REQUIRED)
 
-set(QSCINTILLA_DIR NOTFOUND CACHE STRING "Path to the QScintilla directory")
+set(QSCINTILLA_DIR_DEFAULT NOTFOUND)
+if(NOT "$ENV{QSCINTILLA_DIR}" STREQUAL "")
+    set(QSCINTILLA_DIR_DEFAULT "$ENV{QSCINTILLA_DIR}")
+endif()
+set(QSCINTILLA_DIR ${QSCINTILLA_DIR_DEFAULT} CACHE STRING "Path to the QScintilla directory")
 
 include_directories(${VREP_INCLUDE})
 include_directories(${CMAKE_BINARY_DIR}/generated)
