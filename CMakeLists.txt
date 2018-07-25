@@ -15,7 +15,7 @@ find_package(Qt5PrintSupport REQUIRED)
 find_package(Qt5Xml REQUIRED)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
-find_package(VREP REQUIRED)
+find_package(VREP 3.5.0 REQUIRED)
 
 set(QSCINTILLA_DIR_DEFAULT NOTFOUND)
 if(NOT "$ENV{QSCINTILLA_DIR}" STREQUAL "")
