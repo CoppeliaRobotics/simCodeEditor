@@ -18,7 +18,7 @@ public:
             throw std::runtime_error("cannot load in headless mode");
 
         simSetModuleInfo(PLUGIN_NAME, 0, "Code Editor Plugin", 0);
-        simSetModuleInfo(PLUGIN_NAME, 1, __DATE__, 0);
+        simSetModuleInfo(PLUGIN_NAME, 1, BUILD_DATE, 0);
 
         ui = new UI;
 
