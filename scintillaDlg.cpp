@@ -281,7 +281,7 @@ void CScintillaDlg::selectionChanged()
 
 void CScintillaDlg::reloadScript()
 {
-    DBG << "reload script not implemented" << std::endl;
+    DEBUG_OUT << "reload script not implemented" << std::endl;
 }
 
 void CScintillaDlg::indent()
