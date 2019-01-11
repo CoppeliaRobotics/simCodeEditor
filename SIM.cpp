@@ -2,9 +2,11 @@
 #include "UI.h"
 #include "v_repLib.h"
 #include "debug.h"
+#include "scintillaDlg.h"
 
-SIM::SIM(UI *ui)
+SIM::SIM(UI *theUi)
 {
+    ui = theUi;
     Qt::ConnectionType sim2ui = Qt::BlockingQueuedConnection;
     QObject::connect(this, &SIM::openModal, ui, &UI::openModal, sim2ui);
     QObject::connect(this, &SIM::open, ui, &UI::open, sim2ui);
@@ -16,11 +18,11 @@ SIM::SIM(UI *ui)
     QObject::connect(ui, &UI::notifyEvent, this, &SIM::notifyEvent, ui2sim);
 }
 
-void SIM::notifyEvent(const QString &msg, int handle)
+void SIM::notifyEvent(int handle, const QString &eventType, const QString &data)
 {
     ASSERT_THREAD(!UI);
 
-    QString xml = "<event origin='codeEditor' msg='%1' handle='%2'/>";
-    simEventNotification(xml.arg(msg).arg(handle).toUtf8().data());
+    QString xml = "<event origin='codeEditor' msg='%1' handle='%2' data='%3'/>";
+    simEventNotification(xml.arg(eventType).arg(handle).arg(data).toStdString().c_str());
 }
 

@@ -5,20 +5,28 @@
 #include <QCloseEvent>
 #include <SciLexer.h>
 #include <QGuiApplication>
+#include <qshortcut.h>
 
-const int fontSize=14;
-const char* theFont("Courier");
-
-CScintillaDlg::CScintillaDlg(UI *ui, QWidget* pParent)
+CScintillaDlg::CScintillaDlg(bool toolbar, bool statusbar,bool canRestart,bool searchable, UI *ui, QWidget* pParent)
     : QDialog(pParent),
       ui(ui)
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
     scintilla_ = new QsciScintilla;
-    toolBar_ = new ToolBar(this);
+    toolBar_ = new ToolBar(canRestart,this);
+    if (!toolbar)
+        toolBar_->setVisible(false);
     searchPanel_ = new SearchAndReplacePanel(this);
     statusBar_ = new StatusBar(this);
+    if (!statusbar)
+        statusBar_->setVisible(false);
+
+    if (searchable)
+    {
+        QShortcut* shortcut = new QShortcut(QKeySequence(tr("Ctrl+f", "Find")), this);
+        connect(shortcut, &QShortcut::activated, searchPanel_, &SearchAndReplacePanel::show);
+    }
 
     QVBoxLayout *bl=new QVBoxLayout(this);
     bl->setContentsMargins(0,0,0,0);
@@ -34,9 +42,6 @@ CScintillaDlg::CScintillaDlg(UI *ui, QWidget* pParent)
     scintilla_->SendScintilla(QsciScintillaBase::SCI_SETSTYLEBITS,(int)5);
     scintilla_->setTabWidth(4);
     scintilla_->SendScintilla(QsciScintillaBase::SCI_SETUSETABS,(int)0);
-    scintilla_->SendScintilla(QsciScintillaBase::SCI_SETMARGINWIDTHN,(unsigned long)0,(long)48);
-    scintilla_->SendScintilla(QsciScintillaBase::SCI_SETMARGINWIDTHN,(unsigned long)1,(long)0);
-    scintilla_->setFolding(QsciScintilla::BoxedTreeFoldStyle);
 
     connect(toolBar_->actReload, &QAction::triggered, this, &CScintillaDlg::reloadScript);
     connect(toolBar_->actShowSearchPanel, &QAction::toggled, searchPanel_, &SearchAndReplacePanel::setVisible);
@@ -60,17 +65,45 @@ CScintillaDlg::~CScintillaDlg()
     // scintilla_ is normally automatically destroyed!
 }
 
+void CScintillaDlg::setText(const char* txt, int insertMode)
+{
+    if (insertMode == 0)
+        scintilla_->setText(txt);
+    else
+        scintilla_->append(txt);
+
+    bool ro = scintilla_->isReadOnly();
+    scintilla_->SendScintilla(QsciScintillaBase::SCI_SETREADONLY, (int)0);
+
+    int lines = scintilla_->SendScintilla(QsciScintillaBase::SCI_GETLINECOUNT);
+    if ( (lines > maxLines)&&(maxLines!=0) )
+    { // we have to remove lines-_maxLines lines!
+        scintilla_->SendScintilla(QsciScintillaBase::SCI_SETSELECTIONSTART, (int)0);
+        scintilla_->SendScintilla(QsciScintillaBase::SCI_SETSELECTIONEND, (int)scintilla_->SendScintilla(QsciScintillaBase::SCI_POSITIONFROMLINE, (int)lines - maxLines));
+        scintilla_->SendScintilla(QsciScintillaBase::SCI_CLEAR);
+    }
+    if (insertMode != 0)
+        scintilla_->SendScintilla(QsciScintillaBase::SCI_GOTOPOS, (int)scintilla_->SendScintilla(QsciScintillaBase::SCI_POSITIONFROMLINE, (int)scintilla_->SendScintilla(QsciScintillaBase::SCI_GETLINECOUNT) - 1)); // set the cursor and move the view into position
+    if (ro)
+        scintilla_->SendScintilla(QsciScintillaBase::SCI_SETREADONLY, (int)1);
+}
+
 void CScintillaDlg::setHandle(int handle)
 {
     this->handle = handle;
 }
 
-void CScintillaDlg::setModal(QSemaphore *sem, QString *text, int *positionAndSize)
+std::string CScintillaDlg::makeModal(int *positionAndSize)
 {
-    isModal = true;
-    modalData.sem = sem;
-    modalData.text = text;
-    modalData.positionAndSize = positionAndSize;
+    isModalSpecial = true;
+    setModal(true);
+    exec();
+    if (positionAndSize != nullptr)
+    {
+        for (size_t i = 0; i < 4; i++)
+            positionAndSize[i] = modalPosAndSize[i];
+    }
+    return(modalText.toStdString());
 }
 
 void CScintillaDlg::setAStyle(int style,QColor fore,QColor back,int size,const char *face)
@@ -83,28 +116,50 @@ void CScintillaDlg::setAStyle(int style,QColor fore,QColor back,int size,const c
         scintilla_->SendScintilla(QsciScintillaBase::SCI_STYLESETFONT,(unsigned long)style,face);
 }
 
-void CScintillaDlg::setColorTheme(QColor text_col, QColor background_col, QColor selection_col, QColor comment_col, QColor number_col, QColor string_col, QColor character_col, QColor operator_col, QColor identifier_col, QColor preprocessor_col, QColor keyword1_col, QColor keyword2_col, QColor keyword3_col, QColor keyword4_col)
+void CScintillaDlg::setTheme(bool modalSpecial,bool lineNumbers, int maxLines,bool isLua, const std::string& onClose,bool wrapWord,const std::string& theFont, int theFontSize, const std::vector<SScintillaUserKeyword>& theUserKeywords,QColor text_col, QColor background_col, QColor selection_col, QColor comment_col, QColor number_col, QColor string_col, QColor character_col, QColor operator_col, QColor identifier_col, QColor preprocessor_col, QColor keyword1_col, QColor keyword2_col, QColor keyword3_col, QColor keyword4_col)
 {
-    setAStyle(QsciScintillaBase::STYLE_DEFAULT, text_col, background_col, fontSize, theFont); // set global default style
+    isModalSpecial = modalSpecial;
+    font = theFont;
+    fontSize = theFontSize;
+    this->onClose = onClose.c_str();
+    this->maxLines = maxLines;
+    userKeywords.assign(theUserKeywords.begin(), theUserKeywords.end());
+    setAStyle(QsciScintillaBase::STYLE_DEFAULT, text_col, background_col, fontSize, font.c_str()); // set global default style
     scintilla_->SendScintilla(QsciScintillaBase::SCI_SETCARETFORE,(unsigned long)QColor(Qt::black).rgb());
     scintilla_->SendScintilla(QsciScintillaBase::SCI_STYLECLEARALL); // set all styles
-    setAStyle(QsciScintillaBase::STYLE_LINENUMBER,(unsigned long)QColor(Qt::white).rgb(),(long)QColor(Qt::darkGray).rgb());
+
+    if (wrapWord)
+        scintilla_->SendScintilla(QsciScintillaBase::SCI_SETWRAPMODE, QsciScintillaBase::SC_WRAP_WORD);
+    else
+        scintilla_->SendScintilla(QsciScintillaBase::SCI_SETWRAPMODE, QsciScintillaBase::SC_WRAP_NONE);
+
+    if (lineNumbers)
+    {
+        scintilla_->SendScintilla(QsciScintillaBase::SCI_SETMARGINWIDTHN, (unsigned long)0, (long)48);
+        setAStyle(QsciScintillaBase::STYLE_LINENUMBER, (unsigned long)QColor(Qt::white).rgb(), (long)QColor(Qt::darkGray).rgb());
+    }
+    scintilla_->SendScintilla(QsciScintillaBase::SCI_SETMARGINWIDTHN, (unsigned long)1, (long)0);
     scintilla_->SendScintilla(QsciScintillaBase::SCI_SETSELBACK,(unsigned long)1,(long)selection_col.rgb()); // selection color
 
-    setAStyle(SCE_LUA_COMMENT, comment_col, background_col);
-    setAStyle(SCE_LUA_COMMENTLINE, comment_col, background_col);
-    setAStyle(SCE_LUA_COMMENTDOC, comment_col, background_col);
-    setAStyle(SCE_LUA_NUMBER, number_col, background_col);
-    setAStyle(SCE_LUA_STRING, string_col, background_col);
-    setAStyle(SCE_LUA_LITERALSTRING, string_col, background_col);
-    setAStyle(SCE_LUA_CHARACTER, character_col, background_col);
-    setAStyle(SCE_LUA_OPERATOR, operator_col, background_col);
-    setAStyle(SCE_LUA_PREPROCESSOR, preprocessor_col, background_col);
-    setAStyle(SCE_LUA_WORD, keyword1_col, background_col);
-    setAStyle(SCE_LUA_WORD2, keyword2_col, background_col);
-    setAStyle(SCE_LUA_WORD3, keyword3_col, background_col);
-    setAStyle(SCE_LUA_WORD4, keyword4_col, background_col);
-    setAStyle(SCE_LUA_IDENTIFIER, identifier_col, background_col);
+    setAStyle(SCE_LUA_WORD2, keyword1_col, background_col);
+    setAStyle(SCE_LUA_WORD3, keyword2_col, background_col);
+
+    if (isLua)
+    {
+        scintilla_->setFolding(QsciScintilla::BoxedTreeFoldStyle);
+        setAStyle(SCE_LUA_COMMENT, comment_col, background_col);
+        setAStyle(SCE_LUA_COMMENTLINE, comment_col, background_col);
+        setAStyle(SCE_LUA_COMMENTDOC, comment_col, background_col);
+        setAStyle(SCE_LUA_NUMBER, number_col, background_col);
+        setAStyle(SCE_LUA_STRING, string_col, background_col);
+        setAStyle(SCE_LUA_LITERALSTRING, string_col, background_col);
+        setAStyle(SCE_LUA_CHARACTER, character_col, background_col);
+        setAStyle(SCE_LUA_OPERATOR, operator_col, background_col);
+        setAStyle(SCE_LUA_PREPROCESSOR, preprocessor_col, background_col);
+        setAStyle(SCE_LUA_WORD, keyword3_col, background_col);
+        setAStyle(SCE_LUA_WORD4, keyword4_col, background_col);
+        setAStyle(SCE_LUA_IDENTIFIER, identifier_col, background_col);
+    }
 
     scintilla_->SendScintilla(QsciScintillaBase::SCI_INDICSETSTYLE,(unsigned long)20,(long)QsciScintillaBase::INDIC_STRAIGHTBOX);
     scintilla_->SendScintilla(QsciScintillaBase::SCI_INDICSETALPHA,(unsigned long)20,(long)160);
@@ -113,28 +168,29 @@ void CScintillaDlg::setColorTheme(QColor text_col, QColor background_col, QColor
 
 void CScintillaDlg::closeEvent(QCloseEvent *event)
 {
-    if(isModal)
+    if(isModalSpecial)
     {
-        *modalData.text = scintilla_->text();
-        modalData.positionAndSize[0] = x();
-        modalData.positionAndSize[1] = y();
-        modalData.positionAndSize[2] = width();
-        modalData.positionAndSize[3] = height();
-        modalData.sem->release();
+        modalText = scintilla_->text();
+        modalPosAndSize[0] = x();
+        modalPosAndSize[1] = y();
+        modalPosAndSize[2] = width();
+        modalPosAndSize[3] = height();
         QDialog::closeEvent(event);
     }
     else
     {
         event->ignore();
-        ui->notifyEvent("close", handle);
+        ui->notifyEvent(handle,"closeEditor", onClose);
     }
 }
 
 std::string CScintillaDlg::getCallTip(const char* txt)
 {
-    // e.g.
-    if (strcmp(txt,"sim.getObjectHandle")==0)
-        return("number handle=sim.getObjectHandle(string objectName)");
+    for (size_t i = 0; i < userKeywords.size(); i++)
+    {
+        if ((strcmp(txt, userKeywords[i].keyword.c_str()) == 0) && (userKeywords[i].callTip.size() > 0))
+            return(userKeywords[i].callTip);
+    }
     return("");
 }
 
@@ -204,7 +260,7 @@ void CScintillaDlg::charAdded(int charAdded)
                     if (s!="")
                     {
                         // tabs and window scroll are problematic : pos-=line.size()+startword;
-                        setAStyle(QsciScintillaBase::STYLE_CALLTIP,Qt::black,Qt::white,fontSize,theFont);
+                        setAStyle(QsciScintillaBase::STYLE_CALLTIP,Qt::black,Qt::white,fontSize,font.c_str());
                         scintilla_->SendScintilla(QsciScintillaBase::SCI_CALLTIPUSESTYLE,(int)0);
 
                         int cursorPosInPixelsFromLeftWindowBorder=scintilla_->SendScintilla(QsciScintillaBase::SCI_POINTXFROMPOSITION,(int)0,(unsigned long)pos);
@@ -241,15 +297,48 @@ void CScintillaDlg::charAdded(int charAdded)
                     }
                     if (theWord.size()>=3)
                     {
-                        // Here we need to create a list with all keywords that match "theWord". e.g.
-                        std::string autoCompList="sim.getObjectHandle sim.getObjectName";
-                        if (autoCompList.size()!=0)
+                        std::string autoCompletionList;
+                        std::vector<std::string> t;
+                        std::map<std::string, bool> map;
+
+                        bool hasDot = (theWord.find('.') != std::string::npos);
+
+                        for (size_t i = 0; i < userKeywords.size(); i++)
+                        {
+                            if ((userKeywords[i].autocomplete) && (userKeywords[i].keyword.size() >= theWord.size()) && (userKeywords[i].keyword.compare(0, theWord.size(), theWord) == 0))
+                            {
+                                std::string n(userKeywords[i].keyword);
+                                if (!hasDot)
+                                {
+                                    size_t dp = n.find('.');
+                                    if (dp != std::string::npos)
+                                        n.erase(n.begin() + dp, n.end()); // we only push the text up to the dot
+                                }
+                                std::map<std::string, bool>::iterator it = map.find(n);
+                                if (it == map.end())
+                                {
+                                    map[n] = true;
+                                    t.push_back(n);
+                                }
+                            }
+                        }
+
+                        std::sort(t.begin(), t.end());
+
+                        for (size_t i = 0; i < t.size(); i++)
+                        {
+                            autoCompletionList += t[i];
+                            if (i != t.size() - 1)
+                                autoCompletionList += ' ';
+                        }
+
+                        if (autoCompletionList.size()!=0)
                         { // We need to activate autocomplete!
                             scintilla_->SendScintilla(QsciScintillaBase::SCI_AUTOCSETAUTOHIDE,(int)0);
                             scintilla_->SendScintilla(QsciScintillaBase::SCI_AUTOCSTOPS,(unsigned long)0," ()[]{}:;~`',=*-+/?!@#$%^&|\\<>\"");
 //                            scintilla_->SendScintilla(QsciScintillaBase::SCI_AUTOCSETMAXHEIGHT,(int)100); // it seems that SCI_AUTOCSETMAXHEIGHT and SCI_AUTOCSETMAXWIDTH are not implemented yet!
 //                            scintilla_->SendScintilla(QsciScintillaBase::SCI_AUTOCSETMAXWIDTH,(int)500); // it seems that SCI_AUTOCSETMAXHEIGHT and SCI_AUTOCSETMAXWIDTH are not implemented yet!
-                            scintilla_->SendScintilla(QsciScintillaBase::SCI_AUTOCSHOW,(unsigned long)cnt,&(autoCompList[0]));
+                            scintilla_->SendScintilla(QsciScintillaBase::SCI_AUTOCSHOW,(unsigned long)cnt,&(autoCompletionList[0]));
                         }
                     }
                 }
@@ -281,7 +370,7 @@ void CScintillaDlg::selectionChanged()
 
 void CScintillaDlg::reloadScript()
 {
-    DEBUG_OUT << "reload script not implemented" << std::endl;
+    ui->notifyEvent(handle, "restartScript", onClose);
 }
 
 void CScintillaDlg::indent()
@@ -322,15 +411,15 @@ void CScintillaDlg::updateCursorSelectionDisplay()
 #include "icons/icons.cpp"
 #define ICON(x) QPixmap x; x.loadFromData(x ## _png, x ## _png_len)
 
-ToolBar::ToolBar(CScintillaDlg *parent)
+ToolBar::ToolBar(bool canRestart,CScintillaDlg *parent)
     : QToolBar(parent),
       parent(parent)
 {
     setIconSize(QSize(16, 16));
 
     ICON(upload);
-    addAction(actReload = new QAction(QIcon(upload), "Reload script"));
-    actReload->setEnabled(false);
+    addAction(actReload = new QAction(QIcon(upload), "Restart script"));
+    actReload->setEnabled(canRestart);
 
     ICON(search);
     addAction(actShowSearchPanel = new QAction(QIcon(search), "Find and replace"));
@@ -445,7 +534,7 @@ void SearchAndReplacePanel::find()
     if(!sci->findFirst(what, chkRegExp->isChecked(), chkCaseSens->isChecked(), false, false, !shift))
     {
         if(sci->findFirst(what, chkRegExp->isChecked(), chkCaseSens->isChecked(), false, true, !shift))
-            parent->statusBar()->showMessage("Search reahced end. Continuing from top.", 4000);
+            parent->statusBar()->showMessage("Search reached end. Continuing from top.", 4000);
         else
             parent->statusBar()->showMessage("No occurrences found.", 4000);
     }

@@ -16,9 +16,9 @@ VREP_DLLEXPORT int codeEditor_setText(int handle, const char *text, int insertMo
     return vrepPlugin.codeEditor_setText(handle, text, insertMode);
 }
 
-VREP_DLLEXPORT char * codeEditor_getText(int handle)
+VREP_DLLEXPORT char * codeEditor_getText(int handle, int *positionAndSize)
 {
-    return vrepPlugin.codeEditor_getText(handle);
+    return vrepPlugin.codeEditor_getText(handle,positionAndSize);
 }
 
 VREP_DLLEXPORT int codeEditor_show(int handle, int showState)

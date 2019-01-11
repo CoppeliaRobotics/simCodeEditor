@@ -14,16 +14,19 @@ class UI : public QObject
 public:
 public slots:
 private:
-    CScintillaDlg * createWindow(bool modal, const QString &initText, const QString &properties);
+    CScintillaDlg * createWindow(bool modalSpecial, const QString &initText, const QString &properties);
 public:
-    void openModal(const QString &initText, const QString &properties, QSemaphore *sem, QString *text, int *positionAndSize);
+    void openModal(const QString &initText, const QString &properties, QString& text, int *positionAndSize);
     void open(const QString &initText, const QString &properties, int *handle);
     void setText(int handle, const QString &text, int insertMode);
-    void getText(int handle, QString *text);
+    void getText(int handle, QString *text, int* posAndSize);
     void show(int handle, int showState);
     void close(int handle, int *positionAndSize);
+    CScintillaDlg* getEditor(int handle);
+
 signals:
-    void notifyEvent(const QString &msg, int handle);
+    void notifyEvent(int handle, const QString &eventType, const QString &data);
+
 private:
     int nextEditorHandle = 103800;
     QMap<int, CScintillaDlg*> editors;

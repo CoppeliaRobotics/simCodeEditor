@@ -22,12 +22,18 @@ class ToolBar;
 class SearchAndReplacePanel;
 class StatusBar;
 
+struct SScintillaUserKeyword {
+    std::string keyword;
+    std::string callTip;
+    bool autocomplete;
+};
+
 class CScintillaDlg : public QDialog
 {
     Q_OBJECT
 
 public:
-    CScintillaDlg(UI *ui, QWidget* pParent = nullptr);
+    CScintillaDlg(bool toolbar,bool statusbar,bool canRestart,bool searchable,UI *ui, QWidget* pParent = nullptr);
     virtual ~CScintillaDlg();
 
     inline QsciScintilla * scintilla() {return scintilla_;}
@@ -35,9 +41,10 @@ public:
     inline SearchAndReplacePanel * searchPanel() {return searchPanel_;}
     inline StatusBar * statusBar() {return statusBar_;}
     void setHandle(int handle);
-    void setModal(QSemaphore *sem, QString *text, int *positionAndSize);
+    void setText(const char* txt, int insertMode);
+    std::string makeModal(int *positionAndSize);
     void setAStyle(int style,QColor fore,QColor back,int size=-1,const char *face=0);
-    void setColorTheme(QColor text_col, QColor background_col, QColor selection_col, QColor comment_col, QColor number_col, QColor string_col, QColor character_col, QColor operator_col, QColor identifier_col, QColor preprocessor_col, QColor keyword1_col, QColor keyword2_col, QColor keyword3_col, QColor keyword4_col);
+    void setTheme(bool modalSpecial,bool lineNumbers, int maxLines, bool isLua,const std::string& onClose,bool wrapWord,const std::string& theFont,int theFontSize, const std::vector<SScintillaUserKeyword>& theUserKeywords,QColor text_col, QColor background_col, QColor selection_col, QColor comment_col, QColor number_col, QColor string_col, QColor character_col, QColor operator_col, QColor identifier_col, QColor preprocessor_col, QColor keyword1_col, QColor keyword2_col, QColor keyword3_col, QColor keyword4_col);
 
 private:
     void closeEvent(QCloseEvent *event);
@@ -62,14 +69,15 @@ private:
     SearchAndReplacePanel *searchPanel_;
     StatusBar *statusBar_;
     int handle;
-    struct
-    {
-        QSemaphore *sem;
-        QString *text;
-        int *positionAndSize;
-    }
-    modalData;
-    bool isModal = false;
+    int scriptTypeOrHandle;
+    int fontSize;
+    int maxLines;
+    QString onClose;
+    std::string font;
+    std::vector<SScintillaUserKeyword> userKeywords;
+    QString modalText;
+    int modalPosAndSize[4];
+    bool isModalSpecial = false;
 };
 
 class ToolBar : public QToolBar
@@ -77,7 +85,7 @@ class ToolBar : public QToolBar
     Q_OBJECT
 
 public:
-    ToolBar(CScintillaDlg *parent = nullptr);
+    ToolBar(bool canRestart,CScintillaDlg *parent = nullptr);
     virtual ~ToolBar();
 
 public slots:

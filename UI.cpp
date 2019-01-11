@@ -6,7 +6,7 @@
 #include <QDomDocument>
 #include <QDomElement>
 
-CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QString &properties)
+CScintillaDlg * UI::createWindow(bool modalSpecial, const QString &initText, const QString &properties)
 {
     ASSERT_THREAD(UI);
 
@@ -17,14 +17,20 @@ CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QStr
 
     QWidget *parent = (QWidget*)simGetMainWindow(1);
 
-    CScintillaDlg *window = new CScintillaDlg(this, parent);
+    bool toolBar = parseBool(e.attribute("toolbar", "false"));
+    bool statusBar = parseBool(e.attribute("statusbar", "false"));
+    bool canRestart = parseBool(e.attribute("can-restart", "false"));
+    bool searchable = parseBool(e.attribute("searchable", "true"));
+    CScintillaDlg *window = new CScintillaDlg(toolBar,statusBar, canRestart, searchable,this, parent);
 
     window->setWindowTitle(e.attribute("title", "Editor"));
 
-    bool resizable = parseBool(e.attribute("resizable", "false"));
+    bool resizable = parseBool(e.attribute("resizable", "true"));
     window->statusBar()->setSizeGripEnabled(resizable);
-    bool closeable = parseBool(e.attribute("closeable", "false"));
-    Qt::WindowFlags flags = Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowStaysOnTopHint;
+    bool modal = parseBool(e.attribute("modal", "false"));
+    window->setModal(modal);
+    bool closeable = parseBool(e.attribute("closeable", "true"));
+    Qt::WindowFlags flags = Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowSystemMenuHint; // | Qt::WindowStaysOnTopHint;
 #ifdef MAC_VREP
     flags |= Qt::Tool;
 #else
@@ -32,7 +38,7 @@ CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QStr
 #endif
     if(resizable) flags |= Qt::WindowMaximizeButtonHint;
     else flags |= Qt::MSWindowsFixedSizeDialogHint;
-    if(modal || closeable) flags |= Qt::WindowCloseButtonHint;
+    if(modalSpecial || closeable) flags |= Qt::WindowCloseButtonHint;
     window->setWindowFlags(flags);
 
     QStringList sizeStrLst = e.attribute("size", "800 600").split(" ");
@@ -61,6 +67,8 @@ CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QStr
             frameGeom.top() + (frameGeom.height() - window->height()) / 2
         );
     }
+    std::string font(e.attribute("font", "Courier").toStdString());
+    int fontSize = e.attribute("font-size", "14").toInt();
 
     bool activate = parseBool(e.attribute("activate", "true"));
     window->setAttribute(Qt::WA_ShowWithoutActivating, !activate);
@@ -68,23 +76,20 @@ CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QStr
     bool editable = parseBool(e.attribute("editable", "true"));
     window->scintilla()->setReadOnly(!editable);
 
-    bool searchable = parseBool(e.attribute("searchable", "true"));
-    window->toolBar()->actShowSearchPanel->setEnabled(searchable);
+    bool lineNumbers = parseBool(e.attribute("line-numbers", "false"));
+    int maxLines = e.attribute("max-lines", "0").toInt();
 
     int tab_width = e.attribute("tab-width", "4").toInt();
     window->scintilla()->setTabWidth(tab_width);
+    window->toolBar()->actShowSearchPanel->setEnabled(searchable);
 
     bool is_lua = parseBool(e.attribute("is-lua", "false"));
-    // ???
 
-    bool is_vrep_code = parseBool(e.attribute("is-vrep-code", "false"));
-    // ???
+    std::string onClose = e.attribute("on-close", "").toStdString();
 
-    int script_handle = e.attribute("script-handle", "-1").toInt();
-    if(script_handle != -1)
-        window->scintilla()->setText(simGetScriptText(script_handle));
-    else
-        window->scintilla()->setText(initText);
+    bool wrapWord = parseBool(e.attribute("wrap-word", "false"));
+
+    window->scintilla()->setText(initText);
 
     QColor text_col = parseColor(e.attribute("text-col", "50 50 50"));
     QColor background_col = parseColor(e.attribute("background-col", "190 190 190"));
@@ -96,17 +101,18 @@ CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QStr
     QColor operator_col = parseColor(e.attribute("operator-col", "0 0 0"));
     QColor identifier_col = parseColor(e.attribute("identifier-col", "64 64 64"));
     QColor preprocessor_col = parseColor(e.attribute("preprocessor-col", "0 128 128"));
-    QColor keyword1_col = parseColor(e.attribute("keyword1-col", "0 0 255"));
-    QColor keyword2_col = parseColor(e.attribute("keyword2-col", "152 0 0"));
-    QColor keyword3_col = parseColor(e.attribute("keyword3-col", "220 80 20"));
+    QColor keyword1_col = parseColor(e.attribute("keyword1-col", "152 0 0"));
+    QColor keyword2_col = parseColor(e.attribute("keyword2-col", "220 80 20"));
+    QColor keyword3_col = parseColor(e.attribute("keyword3-col", "0 0 255"));
     QColor keyword4_col = parseColor(e.attribute("keyword4-col", "152 64 0"));
-    window->setColorTheme(text_col, background_col, selection_col, comment_col, number_col, string_col, character_col, operator_col, identifier_col, preprocessor_col, keyword1_col, keyword2_col, keyword3_col, keyword4_col);
+
+    std::vector<SScintillaUserKeyword> userKeywords;
 
     for(QDomNode n1 = e.firstChild(); !n1.isNull(); n1 = n1.nextSibling())
     {
         QDomElement e1 = n1.toElement();
         if(e1.isNull()) continue;
-        if(e1.tagName() == "keyword1")
+        if(e1.tagName() == "keywords1")
         {
             QString keywords1 = "";
             for(QDomNode n2 = e1.firstChild(); !n2.isNull(); n2 = n2.nextSibling())
@@ -120,11 +126,16 @@ CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QStr
                     QString calltip = e2.attribute("calltip");
                     if(!keywords1.isEmpty()) keywords1.append(" ");
                     keywords1.append(word);
+                    SScintillaUserKeyword kw;
+                    kw.keyword = word.toStdString();
+                    kw.autocomplete = autocomplete;
+                    kw.callTip = calltip.toStdString();
+                    userKeywords.push_back(kw);
                 }
             }
-            window->scintilla()->SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, keywords1.toLocal8Bit().data());
+            window->scintilla()->SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, keywords1.toStdString().c_str());
         }
-        else if(e1.tagName() == "keyword2")
+        else if(e1.tagName() == "keywords2")
         {
             QString keywords2 = "";
             for(QDomNode n2 = e1.firstChild(); !n2.isNull(); n2 = n2.nextSibling())
@@ -138,19 +149,28 @@ CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QStr
                     QString calltip = e2.attribute("calltip");
                     if(!keywords2.isEmpty()) keywords2.append(" ");
                     keywords2.append(word);
+                    SScintillaUserKeyword kw;
+                    kw.keyword = word.toStdString();
+                    kw.autocomplete = autocomplete;
+                    kw.callTip = calltip.toStdString();
+                    userKeywords.push_back(kw);
                 }
             }
-            window->scintilla()->SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)2, keywords2.toLocal8Bit().data());
+            window->scintilla()->SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)2, keywords2.toStdString().c_str());
         }
     }
 
-    window->show();
-    if(activate)
-    {
-        window->raise();
-        window->activateWindow();
-    }
+    window->setTheme(modalSpecial,lineNumbers, maxLines, is_lua, onClose, wrapWord, font, fontSize, userKeywords, text_col, background_col, selection_col, comment_col, number_col, string_col, character_col, operator_col, identifier_col, preprocessor_col, keyword1_col, keyword2_col, keyword3_col, keyword4_col);
 
+    if (!modalSpecial)
+    {
+        window->show();
+        if (activate)
+        {
+            window->raise();
+            window->activateWindow();
+        }
+    }
 #if defined(LIN_VREP) || defined(MAC_VREP)
     if(!resizable) window->setFixedSize(window->size());
 #endif
@@ -158,12 +178,12 @@ CScintillaDlg * UI::createWindow(bool modal, const QString &initText, const QStr
     return window;
 }
 
-void UI::openModal(const QString &initText, const QString &properties, QSemaphore *sem, QString *text, int *positionAndSize)
+void UI::openModal(const QString &initText, const QString &properties, QString& text, int *positionAndSize)
 {
     ASSERT_THREAD(UI);
 
     CScintillaDlg *editor = createWindow(true, initText, properties);
-    editor->setModal(sem, text, positionAndSize);
+    text=editor->makeModal(positionAndSize).c_str();
 }
 
 void UI::open(const QString &initText, const QString &properties, int *handle)
@@ -181,13 +201,11 @@ void UI::setText(int handle, const QString &text, int insertMode)
     ASSERT_THREAD(UI);
 
     CScintillaDlg *editor = editors.value(handle);
-    if(editor)
-    {
-        editor->scintilla()->setText(text);
-    }
+    if (editor)
+        editor->setText(text.toStdString().c_str(), insertMode);
 }
 
-void UI::getText(int handle, QString *text)
+void UI::getText(int handle, QString *text, int* posAndSize)
 {
     ASSERT_THREAD(UI);
 
@@ -195,6 +213,13 @@ void UI::getText(int handle, QString *text)
     if(editor)
     {
         *text = editor->scintilla()->text();
+        if (posAndSize != nullptr)
+        {
+            posAndSize[0] = editor->x();
+            posAndSize[1] = editor->y();
+            posAndSize[2] = editor->width();
+            posAndSize[3] = editor->height();
+        }
     }
 }
 
@@ -205,6 +230,10 @@ void UI::show(int handle, int showState)
     CScintillaDlg *editor = editors.value(handle);
     if(editor)
     {
+        if (showState)
+            editor->show();
+        else
+            editor->hide();
     }
 }
 
@@ -219,11 +248,16 @@ void UI::close(int handle, int *positionAndSize)
         {
             positionAndSize[0] = editor->x();
             positionAndSize[1] = editor->y();
-            positionAndSize[3] = editor->width();
-            positionAndSize[4] = editor->height();
+            positionAndSize[2] = editor->width();
+            positionAndSize[3] = editor->height();
         }
         delete editor;
         editors.remove(handle);
     }
 }
 
+CScintillaDlg* UI::getEditor(int handle)
+{
+    CScintillaDlg *editor = editors.value(handle);
+    return(editor);
+}

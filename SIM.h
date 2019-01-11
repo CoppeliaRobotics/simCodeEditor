@@ -11,16 +11,19 @@ class SIM : public QObject
 {
     Q_OBJECT
 public:
-    SIM(UI *ui);
+    SIM(UI *theUi);
 public slots:
-    void notifyEvent(const QString &msg, int handle);
+    void notifyEvent(int handle, const QString &eventType, const QString &data);
+
 signals:
-    void openModal(const QString &initText, const QString &properties, QSemaphore *sem, QString *text, int *positionAndSize);
+    void openModal(const QString &initText, const QString &properties, QString& text, int *positionAndSize);
     void open(const QString &initText, const QString &properties, int *handle);
     void setText(int handle, const QString &text, int insertMode);
-    void getText(int handle, QString *text);
+    void getText(int handle, QString *text, int* posAndSize);
     void show(int handle, int showState);
     void close(int handle, int *positionAndSize);
+private:
+    UI* ui;
 };
 
 #endif // SIM_H__INCLUDED

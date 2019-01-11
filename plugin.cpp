@@ -40,19 +40,20 @@ public:
     }
 
     char * codeEditor_openModal(const char *initText, const char *properties, int *positionAndSize)
-    {
+    { // special: blocking until dlg closed
         ASSERT_THREAD(!UI);
 
         DEBUG_OUT << "codeEditor_openModal: initText=" << initText << ", properties=" << properties << std::endl;
 
         QString text;
-        QSemaphore sem;
-        sim->openModal(QString(initText), QString(properties), &sem, &text, positionAndSize);
-        sem.acquire();
-
+        if (QThread::currentThreadId() == UI_THREAD)
+            ui->openModal(QString(initText), QString(properties),text, positionAndSize);
+        else
+            sim->openModal(QString(initText), QString(properties), text, positionAndSize);
+        char* retVal = stringBufferCopy(text);
         DEBUG_OUT << "codeEditor_openModal: done" << std::endl;
 
-        return stringBufferCopy(text);
+        return retVal;
     }
 
     int codeEditor_open(const char *initText, const char *properties)
@@ -60,7 +61,7 @@ public:
         DEBUG_OUT << "codeEditor_open: initText=" << initText << ", properties=" << properties << std::endl;
 
         int handle = -1;
-        if(QThread::currentThreadId() == UI_THREAD)
+        if (QThread::currentThreadId() == UI_THREAD)
             ui->open(QString(initText), QString(properties), &handle);
         else
             sim->open(QString(initText), QString(properties), &handle);
@@ -84,15 +85,15 @@ public:
         return -1;
     }
 
-    char * codeEditor_getText(int handle)
+    char * codeEditor_getText(int handle, int* posAndSize)
     {
         DEBUG_OUT << "codeEditor_getText: handle=" << handle << std::endl;
 
         QString text;
         if(QThread::currentThreadId() == UI_THREAD)
-            ui->getText(handle, &text);
+            ui->getText(handle, &text, posAndSize);
         else
-            sim->getText(handle, &text);
+            sim->getText(handle, &text, posAndSize);
 
         DEBUG_OUT << "codeEditor_getText: done" << std::endl;
 
@@ -126,7 +127,7 @@ public:
 
         return -1;
     }
-
+    
 private:
     UI *ui;
     SIM *sim;

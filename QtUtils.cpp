@@ -16,9 +16,9 @@ QColor parseColor(const QString &colorStr)
 {
     QColor ret;
     QStringList colorStrLst = colorStr.split(" ");
-    ret.setRed(colorStrLst[0].toInt());
+    ret.setRed(colorStrLst[2].toInt());
     ret.setGreen(colorStrLst[1].toInt());
-    ret.setBlue(colorStrLst[2].toInt());
+    ret.setBlue(colorStrLst[0].toInt());
     return ret;
 }
 
