@@ -6,6 +6,7 @@
 #include <SciLexer.h>
 #include <QGuiApplication>
 #include <qshortcut.h>
+#include <qlineedit.h>
 
 CScintillaDlg::CScintillaDlg(bool toolbar, bool statusbar,bool canRestart,bool searchable, UI *ui, QWidget* pParent)
     : QDialog(pParent),
@@ -44,7 +45,7 @@ CScintillaDlg::CScintillaDlg(bool toolbar, bool statusbar,bool canRestart,bool s
     scintilla_->SendScintilla(QsciScintillaBase::SCI_SETUSETABS,(int)0);
 
     connect(toolBar_->actReload, &QAction::triggered, this, &CScintillaDlg::reloadScript);
-    connect(toolBar_->actShowSearchPanel, &QAction::toggled, searchPanel_, &SearchAndReplacePanel::setVisible);
+    connect(toolBar_->actShowSearchPanel, &QAction::toggled, searchPanel_, &SearchAndReplacePanel::setVisibility);
     connect(toolBar_->actUndo, &QAction::triggered, scintilla_, &QsciScintilla::undo);
     connect(toolBar_->actRedo, &QAction::triggered, scintilla_, &QsciScintilla::redo);
     connect(toolBar_->actUnindent, &QAction::triggered, this, &CScintillaDlg::unindent);
@@ -478,7 +479,7 @@ SearchAndReplacePanel::SearchAndReplacePanel(CScintillaDlg *parent)
       parent(parent)
 {
     QGridLayout *layout = new QGridLayout;
-    layout->setContentsMargins(11, 0, 0, 0);
+    layout->setContentsMargins(10, 10, 10, 10);
     layout->setColumnStretch(1, 10);
     layout->addWidget(chkRegExp = new QCheckBox("Regular expression"), 1, 4);
     layout->addWidget(chkCaseSens = new QCheckBox("Case sensitive"), 2, 4);
@@ -509,12 +510,45 @@ SearchAndReplacePanel::~SearchAndReplacePanel()
 {
 }
 
+void SearchAndReplacePanel::setVisibility(bool v)
+{
+    QWidget::setVisible(v);
+    if (v)
+    {
+        int line, index;
+        parent->scintilla()->getCursorPosition(&line, &index);
+        parent->scintilla()->ensureLineVisible(line);
+        int txtL = parent->scintilla()->SendScintilla(QsciScintillaBase::SCI_GETSELTEXT, (unsigned long)0, (long)0) - 1;
+        if (txtL >= 1)
+        {
+            char* txt = new char[txtL + 1];
+            parent->scintilla()->SendScintilla(QsciScintillaBase::SCI_GETSELTEXT, (unsigned long)0, txt);
+            editFind->setEditText(txt);
+            editFind->lineEdit()->selectAll();
+            editFind->setFocus();
+            delete[] txt;
+        }
+    }
+}
+
 void SearchAndReplacePanel::show()
 {
     QWidget::show();
     int line, index;
     parent->scintilla()->getCursorPosition(&line, &index);
     parent->scintilla()->ensureLineVisible(line);
+
+    int txtL = parent->scintilla()->SendScintilla(QsciScintillaBase::SCI_GETSELTEXT, (unsigned long)0, (long)0) - 1;
+    if (txtL >= 1)
+    {
+        char* txt = new char[txtL + 1];
+        parent->scintilla()->SendScintilla(QsciScintillaBase::SCI_GETSELTEXT, (unsigned long)0, txt);
+        editFind->setEditText(txt);
+        editFind->lineEdit()->selectAll();
+        editFind->setFocus();
+        delete[] txt;
+    }
+
     emit shown();
 }
 

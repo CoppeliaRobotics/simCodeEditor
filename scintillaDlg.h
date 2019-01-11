@@ -117,6 +117,7 @@ public:
     virtual ~SearchAndReplacePanel();
 
 public slots:
+    void setVisibility(bool v);
     void show();
     void hide();
 
