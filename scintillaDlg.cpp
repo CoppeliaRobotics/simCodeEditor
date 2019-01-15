@@ -409,8 +409,24 @@ void CScintillaDlg::updateCursorSelectionDisplay()
     statusBar_->setCursorInfo(fromLine, fromIndex);
 }
 
+inline bool isDarkMode(QWidget *w)
+{
+    QColor bg = w->palette().color(QPalette::Window),
+           fg = w->palette().color(QPalette::WindowText);
+    return bg.value() < fg.value();
+}
+
+inline QPixmap loadPixmap(QWidget *w, const uchar *data, int len)
+{
+    QImage im;
+    im.loadFromData(data, len);
+    if(isDarkMode(w))
+        im.invertPixels();
+    return QPixmap::fromImage(im);
+}
+
 #include "icons/icons.cpp"
-#define ICON(x) QPixmap x; x.loadFromData(x ## _png, x ## _png_len)
+#define ICON(x) QPixmap x = loadPixmap(this, x ## _png, x ## _png_len)
 
 ToolBar::ToolBar(bool canRestart,CScintillaDlg *parent)
     : QToolBar(parent),
