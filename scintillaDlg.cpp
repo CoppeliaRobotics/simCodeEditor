@@ -541,9 +541,9 @@ void SearchAndReplacePanel::setVisibility(bool v)
             parent->scintilla()->SendScintilla(QsciScintillaBase::SCI_GETSELTEXT, (unsigned long)0, txt);
             editFind->setEditText(txt);
             editFind->lineEdit()->selectAll();
-            editFind->setFocus();
             delete[] txt;
         }
+        editFind->setFocus();
     }
 }
 
@@ -561,9 +561,9 @@ void SearchAndReplacePanel::show()
         parent->scintilla()->SendScintilla(QsciScintillaBase::SCI_GETSELTEXT, (unsigned long)0, txt);
         editFind->setEditText(txt);
         editFind->lineEdit()->selectAll();
-        editFind->setFocus();
         delete[] txt;
     }
+    editFind->setFocus();
 
     emit shown();
 }
