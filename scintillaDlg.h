@@ -135,6 +135,8 @@ private:
     QComboBox *editFind, *editReplace;
     QPushButton *btnFind, *btnReplace, *btnClose;
     QCheckBox *chkRegExp, *chkCaseSens;
+
+    friend class CScintillaDlg;
 };
 
 class StatusBar : public QStatusBar

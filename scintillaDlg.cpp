@@ -27,6 +27,9 @@ CScintillaDlg::CScintillaDlg(bool toolbar, bool statusbar,bool canRestart,bool s
     {
         QShortcut* shortcut = new QShortcut(QKeySequence(tr("Ctrl+f", "Find")), this);
         connect(shortcut, &QShortcut::activated, searchPanel_, &SearchAndReplacePanel::show);
+        connect(searchPanel_, &SearchAndReplacePanel::shown, [=]{
+            searchPanel_->editFind->setEditText(scintilla_->selectedText());
+        });
     }
 
     QVBoxLayout *bl=new QVBoxLayout(this);
