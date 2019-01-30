@@ -15,13 +15,13 @@ CScintillaDlg * UI::createWindow(bool modalSpecial, const QString &initText, con
     QDomElement e = doc.documentElement();
     if(e.tagName() != "editor") e = {};
 
-    QWidget *parent = (QWidget*)simGetMainWindow(1);
+    QWidget *parent = (QWidget *)simGetMainWindow(1);
 
     bool toolBar = parseBool(e.attribute("toolbar", "false"));
     bool statusBar = parseBool(e.attribute("statusbar", "false"));
     bool canRestart = parseBool(e.attribute("can-restart", "false"));
     bool searchable = parseBool(e.attribute("searchable", "true"));
-    CScintillaDlg *window = new CScintillaDlg(toolBar,statusBar, canRestart, searchable,this, parent);
+    CScintillaDlg *window = new CScintillaDlg(toolBar, statusBar, canRestart, searchable, this, parent);
 
     window->setWindowTitle(e.attribute("title", "Editor"));
 
@@ -160,7 +160,7 @@ CScintillaDlg * UI::createWindow(bool modalSpecial, const QString &initText, con
         }
     }
 
-    window->setTheme(modalSpecial,lineNumbers, maxLines, is_lua, onClose, wrapWord, font, fontSize, userKeywords, text_col, background_col, selection_col, comment_col, number_col, string_col, character_col, operator_col, identifier_col, preprocessor_col, keyword1_col, keyword2_col, keyword3_col, keyword4_col);
+    window->setTheme(modalSpecial, lineNumbers, maxLines, is_lua, onClose, wrapWord, font, fontSize, userKeywords, text_col, background_col, selection_col, comment_col, number_col, string_col, character_col, operator_col, identifier_col, preprocessor_col, keyword1_col, keyword2_col, keyword3_col, keyword4_col);
 
     if (!modalSpecial)
     {
@@ -183,7 +183,7 @@ void UI::openModal(const QString &initText, const QString &properties, QString& 
     ASSERT_THREAD(UI);
 
     CScintillaDlg *editor = createWindow(true, initText, properties);
-    text=editor->makeModal(positionAndSize).c_str();
+    text = editor->makeModal(positionAndSize).c_str();
 }
 
 void UI::open(const QString &initText, const QString &properties, int *handle)
