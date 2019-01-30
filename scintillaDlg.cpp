@@ -3,10 +3,10 @@
 #include "debug.h"
 #include <algorithm> 
 #include <QCloseEvent>
-#include <SciLexer.h>
 #include <QGuiApplication>
-#include <qshortcut.h>
-#include <qlineedit.h>
+#include <QShortcut>
+#include <QLineEdit>
+#include <SciLexer.h>
 
 CScintillaDlg::CScintillaDlg(bool toolbar, bool statusbar,bool canRestart,bool searchable, UI *ui, QWidget* pParent)
     : QDialog(pParent),
