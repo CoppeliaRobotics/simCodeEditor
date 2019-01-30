@@ -22,7 +22,10 @@ void SIM::notifyEvent(int handle, const QString &eventType, const QString &data)
 {
     ASSERT_THREAD(!UI);
 
-    QString xml = "<event origin='codeEditor' msg='%1' handle='%2' data='%3'/>";
-    simEventNotification(xml.arg(eventType).arg(handle).arg(data).toStdString().c_str());
+    QString xml(
+        QStringLiteral("<event origin='codeEditor' msg='%1' handle='%2' data='%3'/>")
+            .arg(eventType, QString::number(handle), data)
+    );
+    simEventNotification(xml.toUtf8().data());
 }
 
