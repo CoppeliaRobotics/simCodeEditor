@@ -22,7 +22,6 @@ public:
     void getText(int handle, QString *text, int* posAndSize);
     void show(int handle, int showState);
     void close(int handle, int *positionAndSize);
-    CScintillaDlg* getEditor(int handle);
 
 signals:
     void notifyEvent(int handle, const QString &eventType, const QString &data);

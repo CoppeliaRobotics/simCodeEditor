@@ -255,9 +255,3 @@ void UI::close(int handle, int *positionAndSize)
         editors.remove(handle);
     }
 }
-
-CScintillaDlg* UI::getEditor(int handle)
-{
-    CScintillaDlg *editor = editors.value(handle);
-    return(editor);
-}
