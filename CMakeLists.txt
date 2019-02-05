@@ -52,6 +52,7 @@ set(SOURCES
     SIM.cpp
     QtUtils.cpp
     debug.cpp
+    common.cpp
     tinyxml2/tinyxml2.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/external/v_repPlusPlus/Plugin.cpp
     #${CMAKE_CURRENT_BINARY_DIR}/generated/stubs.cpp

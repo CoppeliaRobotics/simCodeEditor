@@ -5,7 +5,7 @@ TEMPLATE = lib
 
 DEFINES -= UNICODE
 CONFIG += shared
-QT += widgets xml
+QT += core gui widgets xml printsupport
 
 *-msvc* {
     QMAKE_CXXFLAGS += -O2
@@ -58,6 +58,7 @@ SOURCES += \
     SIM.cpp \
     QtUtils.cpp \
     ../common/v_repLib.cpp \
+    common.cpp
 
 HEADERS +=\
     tinyxml2/tinyxml2.h \
@@ -69,6 +70,7 @@ HEADERS +=\
     SIM.h \
     QtUtils.h \
     ../include/v_repLib.h \
+    common.h
 
 unix:!symbian {
     maemo5 {

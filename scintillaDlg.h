@@ -16,16 +16,39 @@
 #include <QStatusBar>
 #include <QComboBox>
 #include <QStyle>
+#include "common.h"
 
 class UI;
 class ToolBar;
 class SearchAndReplacePanel;
 class StatusBar;
+class CScintillaDlg;
 
-struct SScintillaUserKeyword {
-    std::string keyword;
-    std::string callTip;
-    bool autocomplete;
+class CScintillaEdit : public QsciScintilla
+{
+    Q_OBJECT
+
+public:
+    CScintillaEdit(CScintillaDlg *dialog);
+    inline const EditorOptions & editorOptions() { return opts; }
+    void setEditorOptions(const EditorOptions &opts);
+
+public slots:
+    void setText(const char* txt, int insertMode);
+    void setAStyle(int style, QColor fore, QColor back, int size=-1, const char *face = nullptr);
+    void onCharAdded(int charAdded);
+    void onModified(int, int, const char *, int, int, int, int, int, int, int);
+    void onTextChanged();
+    void onCursorPosChanged(int line, int index);
+    void onSelectionChanged();
+    void indentSelectedText();
+    void unindentSelectedText();
+
+private:
+    std::string getCallTip(const char* txt);
+
+    CScintillaDlg *dialog;
+    EditorOptions opts;
 };
 
 class CScintillaDlg : public QDialog
@@ -33,51 +56,40 @@ class CScintillaDlg : public QDialog
     Q_OBJECT
 
 public:
-    CScintillaDlg(bool toolbar,bool statusbar,bool canRestart,bool searchable,UI *ui, QWidget* pParent = nullptr);
+    CScintillaDlg(const EditorOptions &opts, UI *ui, QWidget* pParent = nullptr);
     virtual ~CScintillaDlg();
 
-    inline QsciScintilla * scintilla() {return scintilla_;}
+    void setEditorOptions(const EditorOptions &opts);
+    inline const EditorOptions & editorOptions() { return opts; }
+    CScintillaEdit * activeEditor();
     inline ToolBar * toolBar() {return toolBar_;}
     inline SearchAndReplacePanel * searchPanel() {return searchPanel_;}
     inline StatusBar * statusBar() {return statusBar_;}
     void setHandle(int handle);
+    void setText(const QString &text);
     void setText(const char* txt, int insertMode);
+    QString text();
     std::string makeModal(int *positionAndSize);
-    void setAStyle(int style,QColor fore,QColor back,int size=-1,const char *face=0);
-    void setTheme(bool modalSpecial,bool lineNumbers, int maxLines, bool isLua,const std::string& onClose,bool wrapWord,const std::string& theFont,int theFontSize, const std::vector<SScintillaUserKeyword>& theUserKeywords,QColor text_col, QColor background_col, QColor selection_col, QColor comment_col, QColor number_col, QColor string_col, QColor character_col, QColor operator_col, QColor identifier_col, QColor preprocessor_col, QColor keyword1_col, QColor keyword2_col, QColor keyword3_col, QColor keyword4_col);
 
 private:
     void closeEvent(QCloseEvent *event);
-    std::string getCallTip(const char* txt);
 
 private slots:
-    void charAdded(int charAdded);
-    void modified(int, int, const char *, int, int, int, int, int, int, int);
-    void textChanged();
-    void cursorPosChanged(int line, int index);
-    void selectionChanged();
     void reloadScript();
-    void indent();
-    void unindent();
-
-private:
+public slots:
     void updateCursorSelectionDisplay();
 
+private:
     UI *ui;
     ToolBar *toolBar_;
-    QsciScintilla *scintilla_;
+    QMap<QString, CScintillaEdit*> editors_;
     SearchAndReplacePanel *searchPanel_;
     StatusBar *statusBar_;
     int handle;
     int scriptTypeOrHandle;
-    int fontSize;
-    int maxLines;
-    QString onClose;
-    std::string font;
-    std::vector<SScintillaUserKeyword> userKeywords;
+    EditorOptions opts;
     QString modalText;
     int modalPosAndSize[4];
-    bool isModalSpecial = false;
 };
 
 class ToolBar : public QToolBar
