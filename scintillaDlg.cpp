@@ -8,6 +8,8 @@
 #include <QShortcut>
 #include <QLineEdit>
 #include <SciLexer.h>
+#include <QDebug>
+#include <QMenu>
 #include "v_repLib.h"
 
 CScintillaEdit::CScintillaEdit(CScintillaDlg *d)
@@ -19,8 +21,8 @@ CScintillaEdit::CScintillaEdit(CScintillaDlg *d)
     setTabWidth(4);
     SendScintilla(QsciScintillaBase::SCI_SETUSETABS, 0);
 
-    connect(this, SIGNAL(SCN_CHARADDED(int)), this, SLOT(charAdded(int)));
-    connect(this, SIGNAL(SCN_MODIFIED(int,int,const char*,int,int,int,int,int,int,int)), this, SLOT(modified(int,int,const char*,int,int,int,int,int,int,int)));
+    connect(this, SIGNAL(SCN_CHARADDED(int)), this, SLOT(onCharAdded(int)));
+    connect(this, SIGNAL(SCN_MODIFIED(int,int,const char*,int,int,int,int,int,int,int)), this, SLOT(onModified(int,int,const char*,int,int,int,int,int,int,int)));
     connect(this, &QsciScintilla::textChanged, this, &CScintillaEdit::onTextChanged);
     connect(this, &QsciScintilla::selectionChanged, this, &CScintillaEdit::onSelectionChanged);
     connect(this, &QsciScintilla::cursorPositionChanged, this, &CScintillaEdit::onCursorPosChanged);
@@ -84,6 +86,24 @@ void CScintillaEdit::setEditorOptions(const EditorOptions &o)
         sep = " ";
     }
     SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, ss.str().c_str());
+}
+
+void CScintillaEdit::contextMenuEvent(QContextMenuEvent *event)
+{
+    // extract file name at cursor position:
+    int line = lineAt(event->pos());
+    QString word = wordAtPoint(event->pos());
+    QString sel = selectedText();
+    QString fileName = !sel.isEmpty() ? sel : word;
+
+    QMenu *menu = createStandardContextMenu();
+    menu->addSeparator();
+    connect(menu->addAction(QStringLiteral("Open '%1'...").arg(fileName)),
+            &QAction::triggered, [this, fileName] {
+        dialog->openExternalFile(fileName);
+    });
+    menu->exec(event->globalPos());
+    delete menu;
 }
 
 void CScintillaEdit::setText(const char* txt, int insertMode)
@@ -317,6 +337,26 @@ void CScintillaEdit::unindentSelectedText()
     endUndoAction();
 }
 
+void CScintillaEdit::setExternalFile(const QString &filePath)
+{
+    externalFile_ = filePath;
+    if(filePath.isNull()) return;
+
+    QFile f(filePath);
+    if(f.open(QIODevice::ReadOnly))
+    {
+        QString content = f.readAll();
+        f.close();
+
+        setText(content.toUtf8().data(), 0);
+    }
+}
+
+QString CScintillaEdit::externalFile()
+{
+    return externalFile_;
+}
+
 std::string CScintillaEdit::getCallTip(const char* txt)
 {
     for (size_t i = 0; i < opts.userKeywords.size(); i++)
@@ -334,8 +374,11 @@ CScintillaDlg::CScintillaDlg(const EditorOptions &o, UI *ui, QWidget* pParent)
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
-    auto scintilla_ = new CScintillaEdit(this);
-    editors_.insert("", scintilla_);
+    stacked_ = new QStackedWidget;
+    activeEditor_ = new CScintillaEdit(this);
+    editors_.insert("", activeEditor_);
+    stacked_->addWidget(activeEditor_);
+
     toolBar_ = new ToolBar(o.canRestart,this);
     if (!o.toolBar)
         toolBar_->setVisible(false);
@@ -349,7 +392,7 @@ CScintillaDlg::CScintillaDlg(const EditorOptions &o, UI *ui, QWidget* pParent)
         QShortcut* shortcut = new QShortcut(QKeySequence(tr("Ctrl+f", "Find")), this);
         connect(shortcut, &QShortcut::activated, searchPanel_, &SearchAndReplacePanel::show);
         connect(searchPanel_, &SearchAndReplacePanel::shown, [=]{
-            searchPanel_->editFind->setEditText(scintilla_->selectedText());
+            searchPanel_->editFind->setEditText(activeEditor()->selectedText());
         });
     }
 
@@ -358,7 +401,7 @@ CScintillaDlg::CScintillaDlg(const EditorOptions &o, UI *ui, QWidget* pParent)
     bl->setSpacing(0);
     setLayout(bl);
     bl->addWidget(toolBar_);
-    bl->addWidget(scintilla_);
+    bl->addWidget(stacked_);
     bl->addWidget(searchPanel_);
     bl->addWidget(statusBar_);
 
@@ -376,9 +419,23 @@ CScintillaDlg::CScintillaDlg(const EditorOptions &o, UI *ui, QWidget* pParent)
     connect(toolBar_->actUnindent, &QAction::triggered, [this]() {
         activeEditor()->unindentSelectedText();
     });
+    connect(toolBar_->openFiles.actSave, &QAction::triggered, [this]() {
+
+    });
+    connect(toolBar_->openFiles.actClose, &QAction::triggered, [this]() {
+        auto editor = qvariant_cast<CScintillaEdit*>(toolBar_->openFiles.combo->currentData());
+        if(!editor->externalFile().isEmpty())
+            closeExternalFile(editor);
+    });
+    connect(toolBar_->openFiles.combo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), [this]() {
+        auto editor = qvariant_cast<CScintillaEdit*>(toolBar_->openFiles.combo->currentData());
+        switchEditor(editor);
+    });
 
     connect(searchPanel_, &SearchAndReplacePanel::shown, toolBar_, &ToolBar::updateButtons);
     connect(searchPanel_, &SearchAndReplacePanel::hidden, toolBar_, &ToolBar::updateButtons);
+
+    toolBar_->updateButtons();
 }
 
 CScintillaDlg::~CScintillaDlg() 
@@ -444,6 +501,58 @@ void CScintillaDlg::setEditorOptions(const EditorOptions &o)
 #endif
 }
 
+CScintillaEdit * CScintillaDlg::activeEditor()
+{
+    return activeEditor_;
+}
+
+CScintillaEdit * CScintillaDlg::openExternalFile(const QString &filePath)
+{
+    if(editors_.contains(filePath))
+        return editors_.value(filePath);
+
+    auto editor = new CScintillaEdit(this);
+    editor->setEditorOptions(opts);
+    editor->setExternalFile(filePath);
+    editors_.insert(filePath, editor);
+    stacked_->addWidget(editor);
+
+    switchEditor(editor);
+
+    return editor;
+}
+
+void CScintillaDlg::closeExternalFile(const QString &filePath)
+{
+    auto editor = editors_.value(filePath);
+    if(!editor) return;
+    closeExternalFile(editor);
+}
+
+void CScintillaDlg::closeExternalFile(CScintillaEdit *editor)
+{
+    if(editor->externalFile().isNull()) return;
+    stacked_->removeWidget(editor);
+    editors_.remove(editor->externalFile());
+    editor->deleteLater();
+    //toolBar_->updateButtons();
+    switchEditor(editors_.value(""));
+}
+
+void CScintillaDlg::switchEditor(CScintillaEdit *editor)
+{
+    if(!editor) return;
+
+    stacked_->setCurrentWidget(editor);
+    activeEditor_ = editor;
+    toolBar_->updateButtons();
+}
+
+void CScintillaDlg::setHandle(int handle)
+{
+    this->handle = handle;
+}
+
 void CScintillaDlg::setText(const QString &text)
 {
     setText(text.toUtf8().data(), 0);
@@ -457,17 +566,6 @@ void CScintillaDlg::setText(const char* txt, int insertMode)
 QString CScintillaDlg::text()
 {
     return editors_[""]->text();
-}
-
-CScintillaEdit * CScintillaDlg::activeEditor()
-{
-    // FIXME: return active editor, not the script editor
-    return editors_[""];
-}
-
-void CScintillaDlg::setHandle(int handle)
-{
-    this->handle = handle;
 }
 
 std::string CScintillaDlg::makeModal(int *positionAndSize)
@@ -580,6 +678,13 @@ ToolBar::ToolBar(bool canRestart,CScintillaDlg *parent)
     l->addWidget(funcNav.combo);
     actFuncNav = addWidget(funcNav.widget);
     actFuncNav->setVisible(false);
+
+    ICON(save);
+    addAction(openFiles.actSave = new QAction(QIcon(save), "Save current file"));
+    openFiles.combo = new QComboBox;
+    addWidget(openFiles.combo);
+    ICON(close);
+    addAction(openFiles.actClose = new QAction(QIcon(close), "Close current file"));
 }
 
 ToolBar::~ToolBar()
@@ -588,16 +693,36 @@ ToolBar::~ToolBar()
 
 void ToolBar::updateButtons()
 {
-    actUndo->setEnabled(parent->activeEditor()->isUndoAvailable());
-    actRedo->setEnabled(parent->activeEditor()->isRedoAvailable());
+    auto activeEditor = parent->activeEditor();
+    actUndo->setEnabled(activeEditor->isUndoAvailable());
+    actRedo->setEnabled(activeEditor->isRedoAvailable());
 
     int fromLine, fromIndex, toLine, toIndex;
-    parent->activeEditor()->getSelection(&fromLine, &fromIndex, &toLine, &toIndex);
+    activeEditor->getSelection(&fromLine, &fromIndex, &toLine, &toIndex);
     bool hasSel = fromLine != -1;
     actIndent->setEnabled(hasSel);
     actUnindent->setEnabled(hasSel);
 
     actShowSearchPanel->setChecked(parent->searchPanel()->isVisible());
+
+    openFiles.actClose->setEnabled(!activeEditor->externalFile().isNull());
+    openFiles.actSave->setEnabled(!activeEditor->externalFile().isNull());
+
+    int i = 0, sel = -1;
+    bool obs = openFiles.combo->blockSignals(true);
+    openFiles.combo->clear();
+    const auto &editors = parent->editors();
+    for(auto path : editors.keys())
+    {
+        QString name("<embedded script>");
+        if(!path.isEmpty()) name = path;
+        auto editor = editors[path];
+        openFiles.combo->addItem(name, QVariant::fromValue(editor));
+        if(editor == parent->activeEditor()) sel = i;
+        i++;
+    }
+    openFiles.combo->setCurrentIndex(sel);
+    openFiles.combo->blockSignals(obs);
 }
 
 SearchAndReplacePanel::SearchAndReplacePanel(CScintillaDlg *parent)

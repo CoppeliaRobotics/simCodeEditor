@@ -16,6 +16,7 @@
 #include <QStatusBar>
 #include <QComboBox>
 #include <QStyle>
+#include <QStackedWidget>
 #include "common.h"
 
 class UI;
@@ -32,6 +33,7 @@ public:
     CScintillaEdit(CScintillaDlg *dialog);
     inline const EditorOptions & editorOptions() { return opts; }
     void setEditorOptions(const EditorOptions &opts);
+    void contextMenuEvent(QContextMenuEvent *event);
 
 public slots:
     void setText(const char* txt, int insertMode);
@@ -43,12 +45,15 @@ public slots:
     void onSelectionChanged();
     void indentSelectedText();
     void unindentSelectedText();
+    void setExternalFile(const QString &filePath);
+    QString externalFile();
 
 private:
     std::string getCallTip(const char* txt);
 
     CScintillaDlg *dialog;
     EditorOptions opts;
+    QString externalFile_;
 };
 
 class CScintillaDlg : public QDialog
@@ -62,6 +67,12 @@ public:
     void setEditorOptions(const EditorOptions &opts);
     inline const EditorOptions & editorOptions() { return opts; }
     CScintillaEdit * activeEditor();
+    CScintillaEdit * openExternalFile(const QString &filePath);
+    void closeExternalFile(const QString &filePath);
+    void closeExternalFile(CScintillaEdit *editor);
+    void switchEditor(CScintillaEdit *editor);
+    inline const QMap<QString, CScintillaEdit*> & editors() {return editors_;}
+
     inline ToolBar * toolBar() {return toolBar_;}
     inline SearchAndReplacePanel * searchPanel() {return searchPanel_;}
     inline StatusBar * statusBar() {return statusBar_;}
@@ -83,6 +94,8 @@ private:
     UI *ui;
     ToolBar *toolBar_;
     QMap<QString, CScintillaEdit*> editors_;
+    CScintillaEdit *activeEditor_;
+    QStackedWidget *stacked_;
     SearchAndReplacePanel *searchPanel_;
     StatusBar *statusBar_;
     int handle;
@@ -90,6 +103,8 @@ private:
     EditorOptions opts;
     QString modalText;
     int modalPosAndSize[4];
+
+    friend class Toolbar;
 };
 
 class ToolBar : public QToolBar
@@ -111,13 +126,18 @@ public:
     QAction *actUnindent;
     QAction *actIndent;
     QAction *actFuncNav;
-private:
-    CScintillaDlg *parent;
     struct {
         QWidget *widget;
         QLabel *label;
         QComboBox *combo;
     } funcNav;
+    struct {
+        QAction *actSave;
+        QComboBox *combo;
+        QAction *actClose;
+    } openFiles;
+private:
+    CScintillaDlg *parent;
 };
 
 class SearchAndReplacePanel : public QWidget
