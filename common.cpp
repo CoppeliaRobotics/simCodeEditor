@@ -2,6 +2,7 @@
 #include "QtUtils.h"
 #include <QDomDocument>
 #include <QDomElement>
+#include <QFileInfo>
 
 void EditorOptions::readFromXML(const QString &xml)
 {
@@ -106,4 +107,23 @@ void EditorOptions::readFromXML(const QString &xml)
             //window->setKeywords(2, userKeywords);
         }
     }
+
+    // FIXME: parse XML and add *directories* to luaSearchPath
+    //        in the *correct* order (low index => high priority):
+    luaSearchPath.push_back("/Users/me/Dev/CoppeliaRobotics/build/output.macos/lua");
+}
+
+std::string EditorOptions::resolveLuaFilePath(const std::string &f)
+{
+    if(f == "") return "";
+
+    for(auto path : luaSearchPath)
+    {
+        std::string fullPath = path + "/" + f;
+        QFileInfo i(QString::fromStdString(fullPath));
+        if(i.exists())
+            return fullPath;
+    }
+
+    return "";
 }

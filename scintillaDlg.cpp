@@ -107,10 +107,15 @@ void CScintillaEdit::contextMenuEvent(QContextMenuEvent *event)
         auto match = m.next();
         if(match.hasMatch())
         {
-            if(!match.captured(2).isEmpty())
-                matches.append(match.captured(2));
-            if(!match.captured(3).isEmpty())
-                matches.append(match.captured(3));
+            for(int i = 2; i <= 3; i++)
+            {
+                std::string fp = opts.resolveLuaFilePath(match.captured(2).toStdString());
+                if(fp != "")
+                {
+                    QString m = QString::fromStdString(fp);
+                    if(!matches.contains(m)) matches.append(m);
+                }
+            }
         }
     }
 

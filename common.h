@@ -61,7 +61,10 @@ struct EditorOptions
     QColor keyword3_col;
     QColor keyword4_col;
 
+    std::vector<std::string> luaSearchPath;
+
     void readFromXML(const QString &xml);
+    std::string resolveLuaFilePath(const std::string &f);
 };
 
 #endif // COMMON_H
