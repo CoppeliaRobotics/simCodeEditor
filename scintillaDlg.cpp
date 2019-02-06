@@ -324,6 +324,8 @@ void CScintillaEdit::onModified(int, int, const char *, int, int, int, int, int,
 
 void CScintillaEdit::onTextChanged()
 {
+    if(!externalFile_.path.isEmpty())
+        externalFile_.edited = true;
     dialog->toolBar()->updateButtons();
 }
 
@@ -363,7 +365,9 @@ void CScintillaEdit::unindentSelectedText()
 
 void CScintillaEdit::setExternalFile(const QString &filePath)
 {
-    externalFile_ = filePath;
+    externalFile_.path = filePath;
+    externalFile_.edited = false;
+
     if(filePath.isNull()) return;
 
     QFile f(filePath);
@@ -372,13 +376,23 @@ void CScintillaEdit::setExternalFile(const QString &filePath)
         QString content = f.readAll();
         f.close();
 
+        bool obs = blockSignals(true);
         setText(content.toUtf8().data(), 0);
+        blockSignals(obs);
     }
+    dialog->toolBar()->updateButtons();
 }
 
 QString CScintillaEdit::externalFile()
 {
-    return externalFile_;
+    return externalFile_.path;
+}
+
+bool CScintillaEdit::needsSaving()
+{
+    if(externalFile_.path.isEmpty())
+        return false;
+    return externalFile_.edited;
 }
 
 std::string CScintillaEdit::getCallTip(const char* txt)
@@ -729,8 +743,8 @@ void ToolBar::updateButtons()
 
     actShowSearchPanel->setChecked(parent->searchPanel()->isVisible());
 
-    openFiles.actClose->setEnabled(!activeEditor->externalFile().isNull());
-    openFiles.actSave->setEnabled(!activeEditor->externalFile().isNull());
+    openFiles.actClose->setEnabled(!activeEditor->externalFile().isEmpty());
+    openFiles.actSave->setEnabled(!activeEditor->needsSaving());
 
     int i = 0, sel = -1;
     bool obs = openFiles.combo->blockSignals(true);
@@ -741,6 +755,7 @@ void ToolBar::updateButtons()
         QString name("<embedded script>");
         if(!path.isEmpty()) name = path;
         auto editor = editors[path];
+        if(editor->needsSaving()) name = "* " + name;
         openFiles.combo->addItem(name, QVariant::fromValue(editor));
         if(editor == parent->activeEditor()) sel = i;
         i++;

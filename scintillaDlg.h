@@ -46,14 +46,20 @@ public slots:
     void indentSelectedText();
     void unindentSelectedText();
     void setExternalFile(const QString &filePath);
+
+public:
     QString externalFile();
+    bool needsSaving();
 
 private:
     std::string getCallTip(const char* txt);
 
     CScintillaDlg *dialog;
     EditorOptions opts;
-    QString externalFile_;
+    struct {
+        QString path;
+        bool edited;
+    } externalFile_;
 };
 
 class CScintillaDlg : public QDialog
