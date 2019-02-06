@@ -546,14 +546,16 @@ CScintillaEdit * CScintillaDlg::activeEditor()
 
 CScintillaEdit * CScintillaDlg::openExternalFile(const QString &filePath)
 {
-    if(editors_.contains(filePath))
-        return editors_.value(filePath);
+    CScintillaEdit *editor = editors_.value(filePath);
 
-    auto editor = new CScintillaEdit(this);
-    editor->setEditorOptions(opts);
-    editor->setExternalFile(filePath);
-    editors_.insert(filePath, editor);
-    stacked_->addWidget(editor);
+    if(!editor)
+    {
+        editor = new CScintillaEdit(this);
+        editor->setEditorOptions(opts);
+        editor->setExternalFile(filePath);
+        editors_.insert(filePath, editor);
+        stacked_->addWidget(editor);
+    }
 
     switchEditor(editor);
 
