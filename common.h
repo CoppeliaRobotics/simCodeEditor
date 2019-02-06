@@ -36,7 +36,7 @@ struct EditorOptions
     bool activate;
     bool editable;
 
-    bool modalSpecial;
+    bool modalSpecial {false};
     bool lineNumbers;
     int maxLines;
     int tab_width;
