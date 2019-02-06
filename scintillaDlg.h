@@ -46,6 +46,7 @@ public slots:
     void indentSelectedText();
     void unindentSelectedText();
     void setExternalFile(const QString &filePath);
+    void saveExternalFile();
 
 public:
     QString externalFile();

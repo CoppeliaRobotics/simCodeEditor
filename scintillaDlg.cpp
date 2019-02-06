@@ -7,11 +7,12 @@
 #include <QGuiApplication>
 #include <QShortcut>
 #include <QLineEdit>
-#include <SciLexer.h>
 #include <QDebug>
 #include <QMenu>
 #include <QRegularExpression>
+#include <QMessageBox>
 #include "v_repLib.h"
+#include <SciLexer.h>
 
 CScintillaEdit::CScintillaEdit(CScintillaDlg *d)
     : dialog(d)
@@ -383,6 +384,16 @@ void CScintillaEdit::setExternalFile(const QString &filePath)
     dialog->toolBar()->updateButtons();
 }
 
+void CScintillaEdit::saveExternalFile()
+{
+    if(externalFile_.path.isEmpty()) return;
+    if(!externalFile_.edited) return;
+
+    // TODO:
+    //  - save contents to file
+    //  - reset externalFile_.edited flag
+}
+
 QString CScintillaEdit::externalFile()
 {
     return externalFile_.path;
@@ -458,12 +469,19 @@ CScintillaDlg::CScintillaDlg(const EditorOptions &o, UI *ui, QWidget* pParent)
         activeEditor()->unindentSelectedText();
     });
     connect(toolBar_->openFiles.actSave, &QAction::triggered, [this]() {
-
+        auto editor = qvariant_cast<CScintillaEdit*>(toolBar_->openFiles.combo->currentData());
+        if(!editor->externalFile().isEmpty())
+            editor->saveExternalFile();
     });
     connect(toolBar_->openFiles.actClose, &QAction::triggered, [this]() {
         auto editor = qvariant_cast<CScintillaEdit*>(toolBar_->openFiles.combo->currentData());
         if(!editor->externalFile().isEmpty())
+        {
+            if(editor->needsSaving())
+                if(QMessageBox::Yes != QMessageBox::question(this, "", QStringLiteral("File %1 has not been saved since last change.\n\nAre you sure you want to close it?").arg(editor->externalFile())))
+                    return;
             closeExternalFile(editor);
+        }
     });
     connect(toolBar_->openFiles.combo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), [this]() {
         auto editor = qvariant_cast<CScintillaEdit*>(toolBar_->openFiles.combo->currentData());
@@ -631,6 +649,12 @@ std::string CScintillaDlg::makeModal(int *positionAndSize)
 
 void CScintillaDlg::closeEvent(QCloseEvent *event)
 {
+    if(containsUnsavedFiles() && QMessageBox::Yes != QMessageBox::question(this, "", QStringLiteral("This window contains files which have been modified and not saved.\n\nAre you sure you want to close it?")))
+    {
+        event->ignore();
+        return;
+    }
+
     if(opts.modalSpecial)
     {
         modalText = editors_.value("")->text();
