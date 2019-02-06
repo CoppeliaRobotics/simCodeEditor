@@ -121,7 +121,8 @@ void CScintillaEdit::contextMenuEvent(QContextMenuEvent *event)
     }
 
     QMenu *menu = createStandardContextMenu();
-    menu->addSeparator();
+    if(!matches.isEmpty())
+        menu->addSeparator();
     for(auto m : matches)
         connect(menu->addAction(QStringLiteral("Open '%1'...").arg(m)),
                 &QAction::triggered, [this, m] {
