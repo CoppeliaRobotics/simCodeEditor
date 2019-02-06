@@ -746,7 +746,7 @@ void ToolBar::updateButtons()
     actShowSearchPanel->setChecked(parent->searchPanel()->isVisible());
 
     openFiles.actClose->setEnabled(!activeEditor->externalFile().isEmpty());
-    openFiles.actSave->setEnabled(!activeEditor->needsSaving());
+    openFiles.actSave->setEnabled(activeEditor->needsSaving());
 
     int i = 0, sel = -1;
     bool obs = openFiles.combo->blockSignals(true);
