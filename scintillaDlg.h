@@ -78,6 +78,7 @@ public:
     void closeExternalFile(CScintillaEdit *editor);
     void switchEditor(CScintillaEdit *editor);
     inline const QMap<QString, CScintillaEdit*> & editors() {return editors_;}
+    bool containsUnsavedFiles();
 
     inline ToolBar * toolBar() {return toolBar_;}
     inline SearchAndReplacePanel * searchPanel() {return searchPanel_;}

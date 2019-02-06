@@ -588,6 +588,14 @@ void CScintillaDlg::switchEditor(CScintillaEdit *editor)
     toolBar_->updateButtons();
 }
 
+bool CScintillaDlg::containsUnsavedFiles()
+{
+    for(auto editor : editors_)
+        if(editor->needsSaving())
+            return true;
+    return false;
+}
+
 void CScintillaDlg::setHandle(int handle)
 {
     this->handle = handle;
