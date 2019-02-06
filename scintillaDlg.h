@@ -31,6 +31,7 @@ class CScintillaEdit : public QsciScintilla
 
 public:
     CScintillaEdit(CScintillaDlg *dialog);
+    bool isActive() const;
     inline const EditorOptions & editorOptions() { return opts; }
     void setEditorOptions(const EditorOptions &opts);
     void contextMenuEvent(QContextMenuEvent *event);
@@ -45,12 +46,13 @@ public slots:
     void onSelectionChanged();
     void indentSelectedText();
     void unindentSelectedText();
-    void setExternalFile(const QString &filePath);
+    void openExternalFile(const QString &filePath);
     void saveExternalFile();
 
 public:
     QString externalFile();
     bool needsSaving();
+    bool canSave();
 
 private:
     std::string getCallTip(const char* txt);

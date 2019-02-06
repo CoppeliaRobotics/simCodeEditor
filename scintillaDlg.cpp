@@ -11,6 +11,7 @@
 #include <QMenu>
 #include <QRegularExpression>
 #include <QMessageBox>
+#include <QFileInfo>
 #include "v_repLib.h"
 #include <SciLexer.h>
 
@@ -28,6 +29,11 @@ CScintillaEdit::CScintillaEdit(CScintillaDlg *d)
     connect(this, &QsciScintilla::textChanged, this, &CScintillaEdit::onTextChanged);
     connect(this, &QsciScintilla::selectionChanged, this, &CScintillaEdit::onSelectionChanged);
     connect(this, &QsciScintilla::cursorPositionChanged, this, &CScintillaEdit::onCursorPosChanged);
+}
+
+bool CScintillaEdit::isActive() const
+{
+    return dialog->activeEditor() == this;
 }
 
 void CScintillaEdit::setEditorOptions(const EditorOptions &o)
@@ -365,7 +371,7 @@ void CScintillaEdit::unindentSelectedText()
     endUndoAction();
 }
 
-void CScintillaEdit::setExternalFile(const QString &filePath)
+void CScintillaEdit::openExternalFile(const QString &filePath)
 {
     externalFile_.path = filePath;
     externalFile_.edited = false;
@@ -382,17 +388,24 @@ void CScintillaEdit::setExternalFile(const QString &filePath)
         setText(content.toUtf8().data(), 0);
         blockSignals(obs);
     }
+    QFileInfo i(filePath);
+    setReadOnly(!i.isWritable());
     dialog->toolBar()->updateButtons();
 }
 
 void CScintillaEdit::saveExternalFile()
 {
     if(externalFile_.path.isEmpty()) return;
-    if(!externalFile_.edited) return;
 
-    // TODO:
-    //  - save contents to file
-    //  - reset externalFile_.edited flag
+    QFile f(externalFile_.path);
+    if(f.open(QIODevice::WriteOnly))
+    {
+        f.write(text().toUtf8());
+        f.close();
+        externalFile_.edited = false;
+        dialog->toolBar()->updateButtons();
+    }
+    else QMessageBox::information(parentWidget(), "", QStringLiteral("Cannot write to file %1.").arg(externalFile_.path));
 }
 
 QString CScintillaEdit::externalFile()
@@ -405,6 +418,11 @@ bool CScintillaEdit::needsSaving()
     if(externalFile_.path.isEmpty())
         return false;
     return externalFile_.edited;
+}
+
+bool CScintillaEdit::canSave()
+{
+    return !externalFile_.path.isEmpty();
 }
 
 std::string CScintillaEdit::getCallTip(const char* txt)
@@ -430,21 +448,26 @@ CScintillaDlg::CScintillaDlg(const EditorOptions &o, UI *ui, QWidget* pParent)
     stacked_->addWidget(activeEditor_);
 
     toolBar_ = new ToolBar(o.canRestart,this);
-    if (!o.toolBar)
+    if(!o.toolBar)
         toolBar_->setVisible(false);
     searchPanel_ = new SearchAndReplacePanel(this);
     statusBar_ = new StatusBar(this);
-    if (!o.statusBar)
+    if(!o.statusBar)
         statusBar_->setVisible(false);
 
-    if (o.searchable)
+    if(o.searchable)
     {
-        QShortcut* shortcut = new QShortcut(QKeySequence(tr("Ctrl+f", "Find")), this);
+        QShortcut *shortcut = new QShortcut(QKeySequence(tr("Ctrl+f", "Find")), this);
         connect(shortcut, &QShortcut::activated, searchPanel_, &SearchAndReplacePanel::show);
         connect(searchPanel_, &SearchAndReplacePanel::shown, [=]{
             searchPanel_->editFind->setEditText(activeEditor()->selectedText());
         });
     }
+
+    QShortcut *saveShortcut = new QShortcut(QKeySequence(tr("Ctrl+s", "Save")), this);
+    connect(saveShortcut, &QShortcut::activated, [this] {
+        activeEditor_->saveExternalFile();
+    });
 
     QVBoxLayout *bl=new QVBoxLayout(this);
     bl->setContentsMargins(0,0,0,0);
@@ -571,7 +594,7 @@ CScintillaEdit * CScintillaDlg::openExternalFile(const QString &filePath)
     {
         editor = new CScintillaEdit(this);
         editor->setEditorOptions(opts);
-        editor->setExternalFile(filePath);
+        editor->openExternalFile(filePath);
         editors_.insert(filePath, editor);
         stacked_->addWidget(editor);
     }
