@@ -10,6 +10,7 @@
 #include <SciLexer.h>
 #include <QDebug>
 #include <QMenu>
+#include <QRegularExpression>
 #include "v_repLib.h"
 
 CScintillaEdit::CScintillaEdit(CScintillaDlg *d)
@@ -90,18 +91,36 @@ void CScintillaEdit::setEditorOptions(const EditorOptions &o)
 
 void CScintillaEdit::contextMenuEvent(QContextMenuEvent *event)
 {
-    // extract file name at cursor position:
-    int line = lineAt(event->pos());
-    QString word = wordAtPoint(event->pos());
-    QString sel = selectedText();
-    QString fileName = !sel.isEmpty() ? sel : word;
+    // extract file name at selection or cursor position:
+
+    QString txt = selectedText();
+    //QString word = wordAtPoint(event->pos());
+
+    if(txt.isEmpty())
+        txt = text(lineAt(event->pos()));
+
+    QVector<QString> matches;
+    QRegularExpression re("('([^']+)'|\"([^\"]+)\")");
+    auto m = re.globalMatch(txt);
+    while(m.hasNext())
+    {
+        auto match = m.next();
+        if(match.hasMatch())
+        {
+            if(!match.captured(2).isEmpty())
+                matches.append(match.captured(2));
+            if(!match.captured(3).isEmpty())
+                matches.append(match.captured(3));
+        }
+    }
 
     QMenu *menu = createStandardContextMenu();
     menu->addSeparator();
-    connect(menu->addAction(QStringLiteral("Open '%1'...").arg(fileName)),
-            &QAction::triggered, [this, fileName] {
-        dialog->openExternalFile(fileName);
-    });
+    for(auto m : matches)
+        connect(menu->addAction(QStringLiteral("Open '%1'...").arg(m)),
+                &QAction::triggered, [this, m] {
+            dialog->openExternalFile(m);
+        });
     menu->exec(event->globalPos());
     delete menu;
 }
