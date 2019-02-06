@@ -507,9 +507,17 @@ CScintillaDlg::CScintillaDlg(const EditorOptions &o, UI *ui, QWidget* pParent)
             closeExternalFile(editor);
         }
     });
-    connect(toolBar_->openFiles.combo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), [this]() {
+    connect(toolBar_->openFiles.combo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), [this] {
         auto editor = qvariant_cast<CScintillaEdit*>(toolBar_->openFiles.combo->currentData());
         switchEditor(editor);
+    });
+    connect(toolBar_->funcNav.combo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), [this] {
+        auto combo = toolBar_->funcNav.combo;
+        int line = combo->currentData().toInt();
+        activeEditor()->ensureLineVisible(line);
+        bool obs = combo->blockSignals(true);
+        combo->setCurrentIndex(-1);
+        combo->blockSignals(obs);
     });
 
     connect(searchPanel_, &SearchAndReplacePanel::shown, toolBar_, &ToolBar::updateButtons);
@@ -762,18 +770,8 @@ ToolBar::ToolBar(bool canRestart,CScintillaDlg *parent)
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     addWidget(spacer);
 
-    funcNav.label = new QLabel("Go to function: ");
     funcNav.combo = new QComboBox;
-    funcNav.combo->addItem("functionNavigatorPlaceholder(...)");
-    funcNav.widget = new QWidget;
-    QHBoxLayout *l = new QHBoxLayout;
-    l->setSpacing(0);
-    l->setContentsMargins(0,0,0,0);
-    funcNav.widget->setLayout(l);
-    l->addWidget(funcNav.label);
-    l->addWidget(funcNav.combo);
-    actFuncNav = addWidget(funcNav.widget);
-    actFuncNav->setVisible(false);
+    addWidget(funcNav.combo);
 
     ICON(save);
     addAction(openFiles.actSave = new QAction(QIcon(save), "Save current file"));
@@ -785,6 +783,22 @@ ToolBar::ToolBar(bool canRestart,CScintillaDlg *parent)
 
 ToolBar::~ToolBar()
 {
+}
+
+void getFunctionDefs(const QString &lua, QVector<QString> &names, QVector<int> &pos)
+{
+    QMap<QString, int> ret;
+    QRegularExpression regexp("("
+        "function\\s+([a-zA-Z_0-9]+)\\s*(\\(.*\\))"
+    "|" "([a-zA-Z0-9_]+)\\s*=\\s*function\\s*(\\(.*\\))"
+    ")");
+    auto i = regexp.globalMatch(lua);
+    while(i.hasNext())
+    {
+        const auto &m = i.next();
+        names.append(m.captured(2) + m.captured(3) + m.captured(4) + m.captured(5));
+        pos.append(qMax(m.capturedStart(2), m.capturedStart(4)));
+    }
 }
 
 void ToolBar::updateButtons()
@@ -820,6 +834,20 @@ void ToolBar::updateButtons()
     }
     openFiles.combo->setCurrentIndex(sel);
     openFiles.combo->blockSignals(obs);
+
+    bool obs1 = funcNav.combo->blockSignals(true);
+    funcNav.combo->clear();
+    QVector<QString> names;
+    QVector<int> pos;
+    getFunctionDefs(parent->activeEditor()->text(), names, pos);
+    for(int i = 0; i < names.count(); i++)
+    {
+        int line, index;
+        parent->activeEditor()->lineIndexFromPosition(pos[i], &line, &index);
+        funcNav.combo->addItem(names[i], QVariant(line));
+    }
+    funcNav.combo->setCurrentIndex(-1);
+    funcNav.combo->blockSignals(obs1);
 }
 
 SearchAndReplacePanel::SearchAndReplacePanel(CScintillaDlg *parent)

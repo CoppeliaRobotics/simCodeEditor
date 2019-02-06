@@ -137,15 +137,13 @@ public:
     QAction *actIndent;
     QAction *actFuncNav;
     struct {
-        QWidget *widget;
-        QLabel *label;
-        QComboBox *combo;
-    } funcNav;
-    struct {
         QAction *actSave;
         QComboBox *combo;
         QAction *actClose;
     } openFiles;
+    struct {
+        QComboBox *combo;
+    } funcNav;
 private:
     CScintillaDlg *parent;
 };
