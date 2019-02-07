@@ -769,7 +769,7 @@ ToolBar::ToolBar(bool canRestart,CScintillaDlg *parent)
     ICON(save);
     addAction(openFiles.actSave = new QAction(QIcon(save), "Save current file"));
     openFiles.combo = new QComboBox;
-    addWidget(openFiles.combo);
+    openFiles.actCombo = addWidget(openFiles.combo);
     ICON(close);
     addAction(openFiles.actClose = new QAction(QIcon(close), "Close current file"));
 }

@@ -140,6 +140,7 @@ public:
     struct {
         QAction *actSave;
         QComboBox *combo;
+        QAction *actCombo;
         QAction *actClose;
     } openFiles;
     struct {
