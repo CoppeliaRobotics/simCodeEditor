@@ -782,8 +782,8 @@ void getFunctionDefs(const QString &lua, QVector<QString> &names, QVector<int> &
 {
     QMap<QString, int> ret;
     QRegularExpression regexp("("
-        "function\\s+([a-zA-Z_0-9]+)\\s*(\\(.*\\))"
-    "|" "([a-zA-Z0-9_]+)\\s*=\\s*function\\s*(\\(.*\\))"
+        "function\\s+([a-zA-Z0-9_.]+)\\s*(\\(.*\\))"
+    "|" "([a-zA-Z0-9_.]+)\\s*=\\s*function\\s*(\\(.*\\))"
     ")");
     auto i = regexp.globalMatch(lua);
     while(i.hasNext())
