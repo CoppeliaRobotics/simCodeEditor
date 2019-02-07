@@ -827,6 +827,7 @@ void ToolBar::updateButtons()
     }
     openFiles.combo->setCurrentIndex(sel);
     openFiles.combo->blockSignals(obs);
+    openFiles.setVisible(editors.count() > 1);
 
     funcNav.menu->clear();
     QVector<QString> names;

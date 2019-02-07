@@ -142,6 +142,12 @@ public:
         QComboBox *combo;
         QAction *actCombo;
         QAction *actClose;
+        inline void setVisible(bool v)
+        {
+            actSave->setVisible(v);
+            actCombo->setVisible(v);
+            actClose->setVisible(v);
+        }
     } openFiles;
     struct {
         QAction *act;
