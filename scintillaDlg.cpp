@@ -11,6 +11,7 @@
 #include <QRegularExpression>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QToolButton>
 #include "v_repLib.h"
 #include <SciLexer.h>
 
@@ -756,6 +757,10 @@ ToolBar::ToolBar(bool canRestart,CScintillaDlg *parent)
     funcNav.act = funcNav.menu->menuAction();
     funcNav.act->setIcon(QIcon(func));
     addAction(funcNav.act);
+    QWidget *widget = widgetForAction(funcNav.act);
+    QToolButton *button = qobject_cast<QToolButton*>(widget);
+    if(button)
+        connect(funcNav.act, &QAction::triggered, button, &QToolButton::showMenu);
 
     QWidget *spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
