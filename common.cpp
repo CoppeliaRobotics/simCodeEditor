@@ -15,7 +15,7 @@ void EditorOptions::readFromXML(const QString &xml)
     statusBar = parseBool(e.attribute("statusbar", "false"));
     canRestart = parseBool(e.attribute("can-restart", "false"));
     searchable = parseBool(e.attribute("searchable", "true"));
-    windowTitle = e.attribute("title", "Editor").toStdString();
+    windowTitle = e.attribute("title", "Editor");
     resizable = parseBool(e.attribute("resizable", "true"));
     closeable = parseBool(e.attribute("closeable", "true"));
     modal = parseBool(e.attribute("modal", "false"));
@@ -30,7 +30,7 @@ void EditorOptions::readFromXML(const QString &xml)
         placement = EditorOptions::Placement::Relative;
     else if(placement == "center")
         placement = EditorOptions::Placement::Center;
-    fontFace = e.attribute("font", "Courier").toStdString();
+    fontFace = e.attribute("font", "Courier");
     fontSize = e.attribute("font-size", "14").toInt();
     activate = parseBool(e.attribute("activate", "true"));
     editable = parseBool(e.attribute("editable", "true"));
@@ -38,7 +38,7 @@ void EditorOptions::readFromXML(const QString &xml)
     maxLines = e.attribute("max-lines", "0").toInt();
     tab_width = e.attribute("tab-width", "4").toInt();
     isLua = parseBool(e.attribute("is-lua", "false"));
-    onClose = e.attribute("on-close", "").toStdString();
+    onClose = e.attribute("on-close", "");
     wrapWord = parseBool(e.attribute("wrap-word", "false"));
     text_col = parseColor(e.attribute("text-col", "50 50 50"));
     background_col = parseColor(e.attribute("background-col", "190 190 190"));
@@ -73,9 +73,9 @@ void EditorOptions::readFromXML(const QString &xml)
                     if(!keywords1.isEmpty()) keywords1.append(" ");
                     keywords1.append(word);
                     UserKeyword kw;
-                    kw.keyword = word.toStdString();
+                    kw.keyword = word;
                     kw.autocomplete = autocomplete;
-                    kw.callTip = calltip.toStdString();
+                    kw.callTip = calltip;
                     userKeywords.push_back(kw);
                 }
             }
@@ -97,9 +97,9 @@ void EditorOptions::readFromXML(const QString &xml)
                     if(!keywords2.isEmpty()) keywords2.append(" ");
                     keywords2.append(word);
                     UserKeyword kw;
-                    kw.keyword = word.toStdString();
+                    kw.keyword = word;
                     kw.autocomplete = autocomplete;
-                    kw.callTip = calltip.toStdString();
+                    kw.callTip = calltip;
                     userKeywords.push_back(kw);
                 }
             }
@@ -113,14 +113,14 @@ void EditorOptions::readFromXML(const QString &xml)
     luaSearchPath.push_back("/Users/me/Dev/CoppeliaRobotics/build/output.macos/lua");
 }
 
-std::string EditorOptions::resolveLuaFilePath(const std::string &f)
+QString EditorOptions::resolveLuaFilePath(const QString &f)
 {
     if(f == "") return "";
 
     for(auto path : luaSearchPath)
     {
-        std::string fullPath = path + "/" + f;
-        QFileInfo i(QString::fromStdString(fullPath));
+        QString fullPath = path + "/" + f;
+        QFileInfo i(fullPath);
         if(i.exists())
             return fullPath;
     }

@@ -55,7 +55,7 @@ public:
     bool canSave();
 
 private:
-    std::string getCallTip(const char* txt);
+    QString getCallTip(const QString &txt);
 
     CScintillaDlg *dialog;
     EditorOptions opts;

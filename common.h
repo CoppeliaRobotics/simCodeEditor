@@ -1,16 +1,16 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <vector>
-#include <string>
+#include <QString>
+#include <QVector>
 #include <QColor>
 #include <QSize>
 #include <QPoint>
 
 struct UserKeyword
 {
-    std::string keyword;
-    std::string callTip;
+    QString keyword;
+    QString callTip;
     bool autocomplete;
 };
 
@@ -20,7 +20,7 @@ struct EditorOptions
     bool statusBar;
     bool canRestart;
     bool searchable;
-    std::string windowTitle;
+    QString windowTitle;
     bool resizable;
     bool closeable;
     bool modal;
@@ -41,11 +41,11 @@ struct EditorOptions
     int maxLines;
     int tab_width;
     bool isLua;
-    std::string onClose;
+    QString onClose;
     bool wrapWord;
-    std::string fontFace;
+    QString fontFace;
     int fontSize;
-    std::vector<UserKeyword> userKeywords;
+    QVector<UserKeyword> userKeywords;
     QColor text_col;
     QColor background_col;
     QColor selection_col;
@@ -61,10 +61,10 @@ struct EditorOptions
     QColor keyword3_col;
     QColor keyword4_col;
 
-    std::vector<std::string> luaSearchPath;
+    QVector<QString> luaSearchPath;
 
     void readFromXML(const QString &xml);
-    std::string resolveLuaFilePath(const std::string &f);
+    QString resolveLuaFilePath(const QString &f);
 };
 
 #endif // COMMON_H

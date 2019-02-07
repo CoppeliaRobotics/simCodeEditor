@@ -2,7 +2,6 @@
 #include "UI.h"
 #include "debug.h"
 #include <algorithm>
-#include <sstream>
 #include <QCloseEvent>
 #include <QGuiApplication>
 #include <QShortcut>
@@ -45,7 +44,7 @@ void CScintillaEdit::setEditorOptions(const EditorOptions &o)
 
     // theme
 
-    setAStyle(QsciScintillaBase::STYLE_DEFAULT, o.text_col, o.background_col, o.fontSize, o.fontFace.c_str()); // set global default style
+    setAStyle(QsciScintillaBase::STYLE_DEFAULT, o.text_col, o.background_col, o.fontSize, o.fontFace.toUtf8().data()); // set global default style
     SendScintilla(QsciScintillaBase::SCI_SETCARETFORE,(unsigned long)QColor(Qt::black).rgb());
     SendScintilla(QsciScintillaBase::SCI_STYLECLEARALL); // set all styles
 
@@ -86,14 +85,13 @@ void CScintillaEdit::setEditorOptions(const EditorOptions &o)
     SendScintilla(QsciScintillaBase::SCI_INDICSETALPHA,(unsigned long)20,(long)160);
     SendScintilla(QsciScintillaBase::SCI_INDICSETFORE,(unsigned long)20,(long)o.selection_col.rgb());
 
-    std::stringstream ss;
-    std::string sep = "";
+    QString ss, sep;
     for(auto kw : o.userKeywords)
     {
-        ss << sep << kw.keyword;
+        ss += sep + kw.keyword;
         sep = " ";
     }
-    SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, ss.str().c_str());
+    SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, ss.toUtf8().data());
 }
 
 void CScintillaEdit::contextMenuEvent(QContextMenuEvent *event)
@@ -116,12 +114,9 @@ void CScintillaEdit::contextMenuEvent(QContextMenuEvent *event)
         {
             for(int i = 2; i <= 3; i++)
             {
-                std::string fp = opts.resolveLuaFilePath(match.captured(2).toStdString());
-                if(fp != "")
-                {
-                    QString m = QString::fromStdString(fp);
-                    if(!matches.contains(m)) matches.append(m);
-                }
+                QString fp = opts.resolveLuaFilePath(match.captured(2));
+                if(fp != "" && !matches.contains(fp))
+                    matches.append(fp);
             }
         }
     }
@@ -233,12 +228,12 @@ void CScintillaEdit::onCharAdded(int charAdded)
                     if (startword!=endword)
                     {
                         s.assign(line.begin()+startword+1,line.begin()+endword+1);
-                        s=getCallTip(s.c_str());
+                        s=getCallTip(QString::fromStdString(s)).toStdString();
                     }
                     if (s!="")
                     {
                         // tabs and window scroll are problematic : pos-=line.size()+startword;
-                        setAStyle(QsciScintillaBase::STYLE_CALLTIP,Qt::black,Qt::white,opts.fontSize,opts.fontFace.c_str());
+                        setAStyle(QsciScintillaBase::STYLE_CALLTIP,Qt::black,Qt::white,opts.fontSize,opts.fontFace.toUtf8().data());
                         scintilla_->SendScintilla(QsciScintillaBase::SCI_CALLTIPUSESTYLE,(int)0);
 
                         int cursorPosInPixelsFromLeftWindowBorder=scintilla_->SendScintilla(QsciScintillaBase::SCI_POINTXFROMPOSITION,(int)0,(unsigned long)pos);
@@ -283,9 +278,9 @@ void CScintillaEdit::onCharAdded(int charAdded)
 
                         for (size_t i = 0; i < opts.userKeywords.size(); i++)
                         {
-                            if ((opts.userKeywords[i].autocomplete) && (opts.userKeywords[i].keyword.size() >= theWord.size()) && (opts.userKeywords[i].keyword.compare(0, theWord.size(), theWord) == 0))
+                            if ((opts.userKeywords[i].autocomplete) && (opts.userKeywords[i].keyword.size() >= theWord.size()) && (opts.userKeywords[i].keyword.toStdString().compare(0, theWord.size(), theWord) == 0))
                             {
-                                std::string n(opts.userKeywords[i].keyword);
+                                std::string n(opts.userKeywords[i].keyword.toStdString());
                                 if (!hasDot)
                                 {
                                     size_t dp = n.find('.');
@@ -425,14 +420,12 @@ bool CScintillaEdit::canSave()
     return !externalFile_.path.isEmpty();
 }
 
-std::string CScintillaEdit::getCallTip(const char* txt)
+QString CScintillaEdit::getCallTip(const QString &txt)
 {
-    for (size_t i = 0; i < opts.userKeywords.size(); i++)
-    {
-        if ((strcmp(txt, opts.userKeywords[i].keyword.c_str()) == 0) && (opts.userKeywords[i].callTip.size() > 0))
-            return(opts.userKeywords[i].callTip);
-    }
-    return("");
+    for(auto &k : opts.userKeywords)
+        if(txt == k.keyword && !k.callTip.isEmpty())
+            return k.callTip;
+    return "";
 }
 
 CScintillaDlg::CScintillaDlg(const EditorOptions &o, UI *ui, QWidget* pParent)
@@ -538,7 +531,7 @@ void CScintillaDlg::setEditorOptions(const EditorOptions &o)
         e->setEditorOptions(o);
 
     QWidget *parent = (QWidget *)simGetMainWindow(1);
-    setWindowTitle(QString::fromStdString(o.windowTitle));
+    setWindowTitle(o.windowTitle);
     statusBar()->setSizeGripEnabled(o.resizable);
     setModal(o.modal);
     Qt::WindowFlags flags = Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowSystemMenuHint; // | Qt::WindowStaysOnTopHint;
@@ -699,13 +692,13 @@ void CScintillaDlg::closeEvent(QCloseEvent *event)
     else
     {
         event->ignore();
-        ui->notifyEvent(handle, "closeEditor", QString::fromStdString(opts.onClose));
+        ui->notifyEvent(handle, "closeEditor", opts.onClose);
     }
 }
 
 void CScintillaDlg::reloadScript()
 {
-    ui->notifyEvent(handle, "restartScript", QString::fromStdString(opts.onClose));
+    ui->notifyEvent(handle, "restartScript", opts.onClose);
 }
 
 void CScintillaDlg::updateCursorSelectionDisplay()
