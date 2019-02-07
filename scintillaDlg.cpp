@@ -843,6 +843,7 @@ void ToolBar::updateButtons()
         });
         funcNav.menu->addAction(a);
     }
+    funcNav.act->setEnabled(!names.isEmpty());
 }
 
 SearchAndReplacePanel::SearchAndReplacePanel(CScintillaDlg *parent)
