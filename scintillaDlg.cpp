@@ -839,7 +839,10 @@ void ToolBar::updateButtons()
         parent->activeEditor()->lineIndexFromPosition(pos[i], &line, &index);
         QAction *a = new QAction(names[i]);
         connect(a, &QAction::triggered, [this, line] {
-            parent->activeEditor()->ensureLineVisible(line);
+            auto e = parent->activeEditor();
+            e->ensureLineVisible(line);
+            e->setSelection(line, 0, line + 1, 0);
+            QTimer::singleShot(200, [=] {e->setSelection(line, 0, line, 0);});
         });
         funcNav.menu->addAction(a);
     }
