@@ -504,14 +504,6 @@ CScintillaDlg::CScintillaDlg(const EditorOptions &o, UI *ui, QWidget* pParent)
         auto editor = qvariant_cast<CScintillaEdit*>(toolBar_->openFiles.combo->currentData());
         switchEditor(editor);
     });
-    connect(toolBar_->funcNav.combo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), [this] {
-        auto combo = toolBar_->funcNav.combo;
-        int line = combo->currentData().toInt();
-        activeEditor()->ensureLineVisible(line);
-        bool obs = combo->blockSignals(true);
-        combo->setCurrentIndex(-1);
-        combo->blockSignals(obs);
-    });
 
     connect(searchPanel_, &SearchAndReplacePanel::shown, toolBar_, &ToolBar::updateButtons);
     connect(searchPanel_, &SearchAndReplacePanel::hidden, toolBar_, &ToolBar::updateButtons);
@@ -759,12 +751,15 @@ ToolBar::ToolBar(bool canRestart,CScintillaDlg *parent)
     ICON(indent);
     addAction(actIndent = new QAction(QIcon(indent), "Indent"));
 
+    ICON(func);
+    funcNav.menu = new QMenu;
+    funcNav.act = funcNav.menu->menuAction();
+    funcNav.act->setIcon(QIcon(func));
+    addAction(funcNav.act);
+
     QWidget *spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     addWidget(spacer);
-
-    funcNav.combo = new QComboBox;
-    addWidget(funcNav.combo);
 
     ICON(save);
     addAction(openFiles.actSave = new QAction(QIcon(save), "Save current file"));
@@ -828,8 +823,7 @@ void ToolBar::updateButtons()
     openFiles.combo->setCurrentIndex(sel);
     openFiles.combo->blockSignals(obs);
 
-    bool obs1 = funcNav.combo->blockSignals(true);
-    funcNav.combo->clear();
+    funcNav.menu->clear();
     QVector<QString> names;
     QVector<int> pos;
     getFunctionDefs(parent->activeEditor()->text(), names, pos);
@@ -837,10 +831,12 @@ void ToolBar::updateButtons()
     {
         int line, index;
         parent->activeEditor()->lineIndexFromPosition(pos[i], &line, &index);
-        funcNav.combo->addItem(names[i], QVariant(line));
+        QAction *a = new QAction(names[i]);
+        connect(a, &QAction::triggered, [this, line] {
+            parent->activeEditor()->ensureLineVisible(line);
+        });
+        funcNav.menu->addAction(a);
     }
-    funcNav.combo->setCurrentIndex(-1);
-    funcNav.combo->blockSignals(obs1);
 }
 
 SearchAndReplacePanel::SearchAndReplacePanel(CScintillaDlg *parent)

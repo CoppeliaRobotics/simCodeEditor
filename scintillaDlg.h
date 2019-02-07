@@ -17,6 +17,7 @@
 #include <QComboBox>
 #include <QStyle>
 #include <QStackedWidget>
+#include <QMenu>
 #include "common.h"
 
 class UI;
@@ -142,7 +143,8 @@ public:
         QAction *actClose;
     } openFiles;
     struct {
-        QComboBox *combo;
+        QAction *act;
+        QMenu *menu;
     } funcNav;
 private:
     CScintillaDlg *parent;
