@@ -1,23 +1,7 @@
 #pragma once
 
 #include <Qsci/qsciscintilla.h>
-#include <Qsci/qscilexerlua.h>
-#include <Qsci/qscistyle.h>
-#include <QDialog>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QGridLayout>
-#include <QPushButton>
-#include <QCheckBox>
-#include <QLabel>
-#include <QToolBar>
-#include <QAction>
-#include <QSemaphore>
-#include <QStatusBar>
-#include <QComboBox>
-#include <QStyle>
-#include <QStackedWidget>
-#include <QMenu>
+#include <QtWidgets>
 #include "common.h"
 
 class UI;

@@ -2,23 +2,14 @@
 #include "UI.h"
 #include "debug.h"
 #include <algorithm>
-#include <QCloseEvent>
-#include <QGuiApplication>
-#include <QShortcut>
-#include <QLineEdit>
-#include <QDebug>
-#include <QMenu>
-#include <QRegularExpression>
-#include <QMessageBox>
-#include <QFileInfo>
-#include <QToolButton>
 #include "v_repLib.h"
 #include <SciLexer.h>
+#include <Qsci/qscilexerlua.h>
 
 CScintillaEdit::CScintillaEdit(CScintillaDlg *d)
     : dialog(d)
 {
-    QsciLexerLua* lexer=new QsciLexerLua;
+    QsciLexerLua *lexer = new QsciLexerLua;
     setLexer(lexer);
     SendScintilla(QsciScintillaBase::SCI_SETSTYLEBITS, 5);
     setTabWidth(4);
