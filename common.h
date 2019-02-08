@@ -67,4 +67,8 @@ struct EditorOptions
     QString resolveLuaFilePath(const QString &f);
 };
 
+char * stringBufferCopy(const QString &str);
+QColor parseColor(const QString &colorStr);
+bool parseBool(const QString &boolStr);
+
 #endif // COMMON_H

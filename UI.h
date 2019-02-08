@@ -6,7 +6,7 @@
 #include <QSemaphore>
 #include <QMap>
 
-class CScintillaDlg;
+class Dialog;
 
 class UI : public QObject
 {
@@ -14,7 +14,7 @@ class UI : public QObject
 public:
 public slots:
 private:
-    CScintillaDlg * createWindow(bool modalSpecial, const QString &initText, const QString &properties);
+    Dialog * createWindow(bool modalSpecial, const QString &initText, const QString &properties);
 public:
     void openModal(const QString &initText, const QString &properties, QString& text, int *positionAndSize);
     void open(const QString &initText, const QString &properties, int *handle);
@@ -28,7 +28,7 @@ signals:
 
 private:
     int nextEditorHandle = 103800;
-    QMap<int, CScintillaDlg*> editors;
+    QMap<int, Dialog*> editors;
 };
 
 #endif // UI_H__INCLUDED

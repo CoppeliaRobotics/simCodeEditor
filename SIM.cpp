@@ -2,7 +2,6 @@
 #include "UI.h"
 #include "v_repLib.h"
 #include "debug.h"
-#include "scintillaDlg.h"
 
 SIM::SIM(UI *theUi)
 {

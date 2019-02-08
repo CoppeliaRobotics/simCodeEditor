@@ -53,24 +53,29 @@ SOURCES += \
     tinyxml2/tinyxml2.cpp \
     plugin.cpp \
     debug.cpp \
-    scintillaDlg.cpp \
     UI.cpp \
     SIM.cpp \
-    QtUtils.cpp \
     ../common/v_repLib.cpp \
-    common.cpp
+    common.cpp \
+    dialog.cpp \
+    editor.cpp \
+    searchandreplacepanel.cpp \
+    toolbar.cpp \
+    statusbar.cpp
 
 HEADERS +=\
     tinyxml2/tinyxml2.h \
     plugin.h \
-    codeEditor.h \
     debug.h \
-    scintillaDlg.h \
     UI.h \
     SIM.h \
-    QtUtils.h \
     ../include/v_repLib.h \
-    common.h
+    common.h \
+    dialog.h \
+    editor.h \
+    searchandreplacepanel.h \
+    toolbar.h \
+    statusbar.h
 
 unix:!symbian {
     maemo5 {

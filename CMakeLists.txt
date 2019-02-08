@@ -46,11 +46,14 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 set(SOURCES
-    scintillaDlg.cpp
+    dialog.cpp
+    editor.cpp
+    toolbar.cpp
+    statusbar.cpp
+    searchandreplacepanel.cpp
     plugin.cpp
     UI.cpp
     SIM.cpp
-    QtUtils.cpp
     debug.cpp
     common.cpp
     tinyxml2/tinyxml2.cpp

@@ -1,11 +1,11 @@
 #include "UI.h"
 #include "debug.h"
 #include "v_repLib.h"
-#include "scintillaDlg.h"
+#include "dialog.h"
 #include "common.h"
 #include <QDebug>
 
-CScintillaDlg * UI::createWindow(bool modalSpecial, const QString &initText, const QString &properties)
+Dialog * UI::createWindow(bool modalSpecial, const QString &initText, const QString &properties)
 {
     ASSERT_THREAD(UI);
 
@@ -13,7 +13,7 @@ CScintillaDlg * UI::createWindow(bool modalSpecial, const QString &initText, con
     o.readFromXML(properties);
 
     QWidget *parent = (QWidget *)simGetMainWindow(1);
-    CScintillaDlg *window = new CScintillaDlg(o, this, parent);
+    Dialog *window = new Dialog(o, this, parent);
     window->setText(initText);
     window->setEditorOptions(o);
     window->show();
@@ -24,7 +24,7 @@ void UI::openModal(const QString &initText, const QString &properties, QString& 
 {
     ASSERT_THREAD(UI);
 
-    CScintillaDlg *editor = createWindow(true, initText, properties);
+    Dialog *editor = createWindow(true, initText, properties);
     text = editor->makeModal(positionAndSize).c_str();
 }
 
@@ -32,7 +32,7 @@ void UI::open(const QString &initText, const QString &properties, int *handle)
 {
     ASSERT_THREAD(UI);
 
-    CScintillaDlg *editor = createWindow(false, initText, properties);
+    Dialog *editor = createWindow(false, initText, properties);
     *handle = nextEditorHandle++;
     editor->setHandle(*handle);
     editors[*handle] = editor;
@@ -42,7 +42,7 @@ void UI::setText(int handle, const QString &text, int insertMode)
 {
     ASSERT_THREAD(UI);
 
-    CScintillaDlg *editor = editors.value(handle);
+    Dialog *editor = editors.value(handle);
     if(editor)
         editor->setText(text.toStdString().c_str(), insertMode);
 }
@@ -51,7 +51,7 @@ void UI::getText(int handle, QString *text, int* posAndSize)
 {
     ASSERT_THREAD(UI);
 
-    CScintillaDlg *editor = editors.value(handle);
+    Dialog *editor = editors.value(handle);
     if(editor)
     {
         *text = editor->text();
@@ -69,7 +69,7 @@ void UI::show(int handle, int showState)
 {
     ASSERT_THREAD(UI);
 
-    CScintillaDlg *editor = editors.value(handle);
+    Dialog *editor = editors.value(handle);
     if(editor)
     {
         if(showState)
@@ -83,7 +83,7 @@ void UI::close(int handle, int *positionAndSize)
 {
     ASSERT_THREAD(UI);
 
-    CScintillaDlg *editor = editors.value(handle);
+    Dialog *editor = editors.value(handle);
     if(editor)
     {
         if(positionAndSize)
