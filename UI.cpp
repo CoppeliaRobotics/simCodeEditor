@@ -14,8 +14,8 @@ Dialog * UI::createWindow(bool modalSpecial, const QString &initText, const QStr
 
     QWidget *parent = (QWidget *)simGetMainWindow(1);
     Dialog *window = new Dialog(o, this, parent);
-    window->setText(initText);
     window->setEditorOptions(o);
+    window->setText(initText);
     window->show();
     return window;
 }
@@ -31,7 +31,6 @@ void UI::openModal(const QString &initText, const QString &properties, QString& 
 void UI::open(const QString &initText, const QString &properties, int *handle)
 {
     ASSERT_THREAD(UI);
-
     Dialog *editor = createWindow(false, initText, properties);
     *handle = nextEditorHandle++;
     editor->setHandle(*handle);

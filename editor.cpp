@@ -148,7 +148,6 @@ void Editor::setText(const char* txt, int insertMode)
         QsciScintilla::setText(txt);
     else
         append(txt);
-
     bool ro = isReadOnly();
     SendScintilla(QsciScintillaBase::SCI_SETREADONLY, (int)0);
 
