@@ -21,6 +21,7 @@ public slots:
     void setText(const char* txt, int insertMode);
     void setAStyle(int style, QColor fore, QColor back, int size=-1, const char *face = nullptr);
     void onCharAdded(int charAdded);
+    void onUpdateUi(int updated);
     void onModified(int, int, const char *, int, int, int, int, int, int, int);
     void onTextChanged();
     void onCursorPosChanged(int line, int index);

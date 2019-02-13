@@ -18,6 +18,7 @@ Editor::Editor(Dialog *d)
     connect(this, &QsciScintilla::textChanged, this, &Editor::onTextChanged);
     connect(this, &QsciScintilla::selectionChanged, this, &Editor::onSelectionChanged);
     connect(this, &QsciScintilla::cursorPositionChanged, this, &Editor::onCursorPosChanged);
+    connect(this, SIGNAL(SCN_UPDATEUI(int)), this, SLOT(onUpdateUi(int)));
 }
 
 bool Editor::isActive() const
@@ -51,6 +52,11 @@ void Editor::setEditorOptions(const EditorOptions &o)
     SendScintilla(QsciScintillaBase::SCI_SETMARGINWIDTHN, (unsigned long)1, (long)0);
     SendScintilla(QsciScintillaBase::SCI_SETSELBACK,(unsigned long)1,(long)o.selection_col.rgb()); // selection color
 
+    SendScintilla(QsciScintillaBase::SCI_INDICSETSTYLE, (unsigned long)20, (long)QsciScintillaBase::INDIC_STRAIGHTBOX);
+    SendScintilla(QsciScintillaBase::SCI_INDICSETALPHA, (unsigned long)20, (long)160);
+    SendScintilla(QsciScintillaBase::SCI_INDICSETFORE, (unsigned long)20, (long)o.selection_col.rgb());
+
+
     setAStyle(SCE_LUA_WORD2, o.keyword1_col, o.background_col);
     setAStyle(SCE_LUA_WORD3, o.keyword2_col, o.background_col);
 
@@ -83,6 +89,39 @@ void Editor::setEditorOptions(const EditorOptions &o)
     }
     SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, ss.toUtf8().data());
 }
+
+void Editor::onUpdateUi(int updated)
+{   // highlight all occurences of selected text:
+    SendScintilla(QsciScintillaBase::SCI_SETINDICATORCURRENT, (int)20);
+
+    int totTextLength = SendScintilla(QsciScintillaBase::SCI_GETLENGTH);
+    SendScintilla(QsciScintillaBase::SCI_INDICATORCLEARRANGE, (unsigned long)0, (long)totTextLength);
+
+    int txtL = SendScintilla(QsciScintillaBase::SCI_GETSELTEXT, (unsigned long)0, (long)0) - 1;
+    if (txtL >= 1)
+    {
+        int selStart = SendScintilla(QsciScintillaBase::SCI_GETSELECTIONSTART);
+
+        char* txt = new char[txtL + 1];
+        SendScintilla(QsciScintillaBase::SCI_GETSELTEXT, (unsigned long)0, txt);
+
+        SendScintilla(QsciScintillaBase::SCI_SETSEARCHFLAGS, QsciScintillaBase::SCFIND_MATCHCASE | QsciScintillaBase::SCFIND_WHOLEWORD);
+        SendScintilla(QsciScintillaBase::SCI_SETTARGETSTART, (int)0);
+        SendScintilla(QsciScintillaBase::SCI_SETTARGETEND, (int)totTextLength);
+
+        int p = SendScintilla(QsciScintillaBase::SCI_SEARCHINTARGET, (unsigned long)txtL, txt);
+        while (p != -1)
+        {
+            if (p != selStart)
+                SendScintilla(QsciScintillaBase::SCI_INDICATORFILLRANGE, (unsigned long)p, (long)strlen(txt));
+            SendScintilla(QsciScintillaBase::SCI_SETTARGETSTART, (int)p + 1);
+            SendScintilla(QsciScintillaBase::SCI_SETTARGETEND, (int)totTextLength);
+            p = SendScintilla(QsciScintillaBase::SCI_SEARCHINTARGET, (unsigned long)txtL, txt);
+        }
+        delete[] txt;
+    }
+}
+
 
 void Editor::contextMenuEvent(QContextMenuEvent *event)
 {
