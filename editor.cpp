@@ -89,10 +89,29 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
     // extract file name at selection or cursor position:
 
     QString txt = selectedText();
-    //QString word = wordAtPoint(event->pos());
 
     if(txt.isEmpty())
         txt = text(lineAt(event->pos()));
+    else
+    {
+        if ((txt.count('\'') < 2) && (txt.count('\"') < 2))
+        {
+            QChar s = txt.at(0);
+            QChar e = txt.at(txt.size() - 1);
+            if ((s != "'") && (s != "\""))
+            {
+                if ((e != "'") && (e != "\""))
+                    txt = "'" + txt + "'";
+                else
+                    txt = e + txt;
+            }
+            else
+            {
+                if ((e != "'") && (e != "\""))
+                    txt = txt + s;
+            }
+        }
+    }
 
     QVector<QString> matches;
     QRegularExpression re("('([^']+)'|\"([^\"]+)\")");
@@ -104,7 +123,7 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
         {
             for(int i = 2; i <= 3; i++)
             {
-                QString fp = opts.resolveLuaFilePath(match.captured(2));
+                QString fp = opts.resolveLuaFilePath(match.captured(i));
                 if(fp != "" && !matches.contains(fp))
                     matches.append(fp);
             }

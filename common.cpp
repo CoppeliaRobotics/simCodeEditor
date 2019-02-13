@@ -110,9 +110,13 @@ void EditorOptions::readFromXML(const QString &xml)
         }
     }
 
-    // FIXME: parse XML and add *directories* to luaSearchPath
-    //        in the *correct* order (low index => high priority):
-    luaSearchPath.push_back("/Users/me/Dev/CoppeliaRobotics/build/output.macos/lua");
+    QString searchPaths = e.attribute("lua-search-paths", "");
+    QStringList spl = searchPaths.split(";");
+    for (int i = 0; i < spl.size(); i++)
+    {
+        if (spl.at(i).size() > 1)
+            luaSearchPath.push_back(spl.at(i));
+    }
 }
 
 QString EditorOptions::resolveLuaFilePath(const QString &f)
@@ -121,7 +125,9 @@ QString EditorOptions::resolveLuaFilePath(const QString &f)
 
     for(auto path : luaSearchPath)
     {
-        QString fullPath = path + "/" + f;
+        QString fullPath = path;
+        fullPath.replace("?",f);
+        fullPath.replace("//","/");
         QFileInfo i(fullPath);
         if(i.exists())
             return fullPath;
