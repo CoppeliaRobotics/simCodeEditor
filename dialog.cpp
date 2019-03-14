@@ -229,6 +229,27 @@ QString Dialog::text()
     return editors_[""]->text();
 }
 
+void Dialog::show()
+{
+    if (!isVisible())
+    {
+        QDialog::show();
+        if (memorizedPos[0] != -999999)
+            move(memorizedPos[0], memorizedPos[1]);
+    }
+}
+
+void Dialog::hide()
+{
+    if (isVisible())
+    {
+        memorizedPos[0] = x();
+        memorizedPos[1] = y();
+        QDialog::hide();
+    }
+}
+
+
 std::string Dialog::makeModal(int *positionAndSize)
 {
     opts.modalSpecial = true;

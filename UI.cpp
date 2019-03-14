@@ -71,7 +71,7 @@ void UI::show(int handle, int showState)
     Dialog *editor = editors.value(handle);
     if(editor)
     {
-        if(showState)
+        if (showState)
             editor->show();
         else
             editor->hide();

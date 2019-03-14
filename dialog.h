@@ -28,6 +28,9 @@ public:
     inline const QMap<QString, Editor*> & editors() {return editors_;}
     bool containsUnsavedFiles();
 
+    void show();
+    void hide();
+
     inline ToolBar * toolBar() {return toolBar_;}
     inline SearchAndReplacePanel * searchPanel() {return searchPanel_;}
     inline StatusBar * statusBar() {return statusBar_;}
@@ -58,6 +61,7 @@ private:
     EditorOptions opts;
     QString modalText;
     int modalPosAndSize[4];
+    int memorizedPos[2] = { -999999,-999999 };
 
     friend class Toolbar;
 };
