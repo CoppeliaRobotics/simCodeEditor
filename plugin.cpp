@@ -11,6 +11,7 @@ class Plugin : public vrep::Plugin
 public:
     void onStart()
     {
+        sim = nullptr;
         uiThread();
 
         if(simGetBooleanParameter(sim_boolparam_headless) > 0)
@@ -45,12 +46,14 @@ public:
         ASSERT_THREAD(!UI);
 
         DEBUG_OUT << "codeEditor_openModal: initText=" << initText << ", properties=" << properties << std::endl;
-
         QString text;
         if (QThread::currentThreadId() == UI_THREAD)
             ui->openModal(QString(initText), QString(properties),text, positionAndSize);
         else
-            sim->openModal(QString(initText), QString(properties), text, positionAndSize);
+        {
+            if (sim!=nullptr)
+                sim->openModal(QString(initText), QString(properties), text, positionAndSize);
+        }
         char* retVal = stringBufferCopy(text);
         DEBUG_OUT << "codeEditor_openModal: done" << std::endl;
 
@@ -65,8 +68,10 @@ public:
         if (QThread::currentThreadId() == UI_THREAD)
             ui->open(QString(initText), QString(properties), &handle);
         else
-            sim->open(QString(initText), QString(properties), &handle);
-
+        {
+            if (sim != nullptr)
+                sim->open(QString(initText), QString(properties), &handle);
+        }
         DEBUG_OUT << "codeEditor_open: done" << std::endl;
 
         return handle;
@@ -79,8 +84,10 @@ public:
         if(QThread::currentThreadId() == UI_THREAD)
             ui->setText(handle, QString(text), insertMode);
         else
-            sim->setText(handle, QString(text), insertMode);
-
+        {
+            if (sim != nullptr)
+                sim->setText(handle, QString(text), insertMode);
+        }
         DEBUG_OUT << "codeEditor_setText: done" << std::endl;
 
         return -1;
@@ -94,8 +101,10 @@ public:
         if(QThread::currentThreadId() == UI_THREAD)
             ui->getText(handle, &text, posAndSize);
         else
-            sim->getText(handle, &text, posAndSize);
-
+        {
+            if (sim != nullptr)
+                sim->getText(handle, &text, posAndSize);
+        }
         DEBUG_OUT << "codeEditor_getText: done" << std::endl;
 
         return stringBufferCopy(text);
@@ -108,8 +117,10 @@ public:
         if(QThread::currentThreadId() == UI_THREAD)
             ui->show(handle, showState);
         else
-            sim->show(handle, showState);
-
+        {
+            if (sim != nullptr)
+                sim->show(handle, showState);
+        }
         DEBUG_OUT << "codeEditor_show: done" << std::endl;
 
         return -1;
@@ -122,8 +133,10 @@ public:
         if(QThread::currentThreadId() == UI_THREAD)
             ui->close(handle, positionAndSize);
         else
-            sim->close(handle, positionAndSize);
-
+        {
+            if (sim != nullptr)
+                sim->close(handle, positionAndSize);
+        }
         DEBUG_OUT << "codeEditor_close: done" << std::endl;
 
         return -1;
