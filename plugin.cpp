@@ -27,18 +27,22 @@ public:
 
     void onEnd()
     {
+        delete ui;
+
         UI_THREAD = NULL;
         SIM_THREAD = NULL;
     }
 
-    void onInstancePass(const vrep::InstancePassFlags &flags, bool first)
+    void onFirstInstancePass(const vrep::InstancePassFlags &flags)
     {
-        if(first)
-        {
-            simThread();
+        simThread();
 
-            sim = new SIM(ui);
-        }
+        sim = new SIM(ui);
+    }
+
+    void onLastInstancePass(const vrep::InstancePassFlags &flags, bool first)
+    {
+        delete sim;
     }
 
     char * codeEditor_openModal(const char *initText, const char *properties, int *positionAndSize)
