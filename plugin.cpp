@@ -11,7 +11,6 @@ class Plugin : public vrep::Plugin
 public:
     void onStart()
     {
-        sim = nullptr;
         uiThread();
 
         if(simGetBooleanParameter(sim_boolparam_headless) > 0)
@@ -28,6 +27,7 @@ public:
     void onEnd()
     {
         delete ui;
+        ui = nullptr;
 
         UI_THREAD = NULL;
         SIM_THREAD = NULL;
@@ -43,6 +43,7 @@ public:
     void onLastInstancePass(const vrep::InstancePassFlags &flags, bool first)
     {
         delete sim;
+        sim = nullptr;
     }
 
     char * codeEditor_openModal(const char *initText, const char *properties, int *positionAndSize)
