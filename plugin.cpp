@@ -40,7 +40,7 @@ public:
         sim = new SIM(ui);
     }
 
-    void onLastInstancePass(const vrep::InstancePassFlags &flags, bool first)
+    void onLastInstancePass()
     {
         delete sim;
         sim = nullptr;
