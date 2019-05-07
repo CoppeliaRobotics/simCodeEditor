@@ -52,11 +52,13 @@ public:
 
         DEBUG_OUT << "codeEditor_openModal: initText=" << initText << ", properties=" << properties << std::endl;
         QString text;
-        if (QThread::currentThreadId() == UI_THREAD)
+        if(QThread::currentThreadId() == UI_THREAD)
+        {
             ui->openModal(QString(initText), QString(properties),text, positionAndSize);
+        }
         else
         {
-            if (sim!=nullptr)
+            if(sim)
                 sim->openModal(QString(initText), QString(properties), text, positionAndSize);
         }
         char* retVal = stringBufferCopy(text);
@@ -70,11 +72,11 @@ public:
         DEBUG_OUT << "codeEditor_open: initText=" << initText << ", properties=" << properties << std::endl;
 
         int handle = -1;
-        if (QThread::currentThreadId() == UI_THREAD)
+        if(QThread::currentThreadId() == UI_THREAD)
             ui->open(QString(initText), QString(properties), &handle);
         else
         {
-            if (sim != nullptr)
+            if(sim)
                 sim->open(QString(initText), QString(properties), &handle);
         }
         DEBUG_OUT << "codeEditor_open: done" << std::endl;
@@ -90,7 +92,7 @@ public:
             ui->setText(handle, QString(text), insertMode);
         else
         {
-            if (sim != nullptr)
+            if(sim)
                 sim->setText(handle, QString(text), insertMode);
         }
         DEBUG_OUT << "codeEditor_setText: done" << std::endl;
@@ -107,7 +109,7 @@ public:
             ui->getText(handle, &text, posAndSize);
         else
         {
-            if (sim != nullptr)
+            if(sim)
                 sim->getText(handle, &text, posAndSize);
         }
         DEBUG_OUT << "codeEditor_getText: done" << std::endl;
@@ -123,7 +125,7 @@ public:
             ui->show(handle, showState);
         else
         {
-            if (sim != nullptr)
+            if(sim)
                 sim->show(handle, showState);
         }
         DEBUG_OUT << "codeEditor_show: done" << std::endl;
@@ -139,14 +141,14 @@ public:
             ui->close(handle, positionAndSize);
         else
         {
-            if (sim != nullptr)
+            if(sim)
                 sim->close(handle, positionAndSize);
         }
         DEBUG_OUT << "codeEditor_close: done" << std::endl;
 
         return -1;
     }
-    
+
 private:
     UI *ui;
     SIM *sim;
@@ -158,30 +160,30 @@ VREP_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
 
 VREP_DLLEXPORT char * codeEditor_openModal(const char *initText, const char *properties, int *positionAndSize)
 {
-    return vrepPlugin.codeEditor_openModal(initText, properties, positionAndSize);
+    return vrepPlugin->codeEditor_openModal(initText, properties, positionAndSize);
 }
 
 VREP_DLLEXPORT int codeEditor_open(const char *initText, const char *properties)
 {
-    return vrepPlugin.codeEditor_open(initText, properties);
+    return vrepPlugin->codeEditor_open(initText, properties);
 }
 
 VREP_DLLEXPORT int codeEditor_setText(int handle, const char *text, int insertMode)
 {
-    return vrepPlugin.codeEditor_setText(handle, text, insertMode);
+    return vrepPlugin->codeEditor_setText(handle, text, insertMode);
 }
 
 VREP_DLLEXPORT char * codeEditor_getText(int handle, int *positionAndSize)
 {
-    return vrepPlugin.codeEditor_getText(handle,positionAndSize);
+    return vrepPlugin->codeEditor_getText(handle,positionAndSize);
 }
 
 VREP_DLLEXPORT int codeEditor_show(int handle, int showState)
 {
-    return vrepPlugin.codeEditor_show(handle, showState);
+    return vrepPlugin->codeEditor_show(handle, showState);
 }
 
 VREP_DLLEXPORT int codeEditor_close(int handle, int *positionAndSize)
 {
-    return vrepPlugin.codeEditor_close(handle, positionAndSize);
+    return vrepPlugin->codeEditor_close(handle, positionAndSize);
 }
