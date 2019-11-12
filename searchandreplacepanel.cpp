@@ -10,29 +10,61 @@ SearchAndReplacePanel::SearchAndReplacePanel(Dialog *parent)
     QGridLayout *layout = new QGridLayout;
     layout->setContentsMargins(10, 10, 10, 10);
     layout->setColumnStretch(1, 10);
-    layout->addWidget(chkRegExp = new QCheckBox("Regular expression"), 1, 4);
-    layout->addWidget(chkCaseSens = new QCheckBox("Case sensitive"), 2, 4);
+    layout->addWidget(chkRegExp = new QCheckBox("Regular expression"), 1, 5);
+    layout->addWidget(chkCaseSens = new QCheckBox("Case sensitive"), 2, 5);
     layout->addWidget(lblFind = new QLabel("Find:"), 1, 0);
     lblFind->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     layout->addWidget(editFind = new QComboBox, 1, 1, 1, 2);
     editFind->setEditable(true);
     editFind->setInsertPolicy(QComboBox::InsertAtTop);
-    layout->addWidget(btnFind = new QPushButton("Find"), 1, 3);
-    layout->addWidget(btnClose = new QPushButton, 1, 5);
+    editFind->completer()->setCaseSensitivity(Qt::CaseSensitive);
+    connect(editFind->lineEdit(), &QLineEdit::returnPressed, [=] {
+        find();
+    });
+    layout->addWidget(btnFind = new QToolButton, 1, 3);
+    QAction *actFind = new QAction("Find");
+    QAction *actReplace = new QAction("Replace");
+    QAction *actReplaceAndFind = new QAction("Replace and find");
+    btnFind->setDefaultAction(actFind);
+    btnFind->setToolTip("");
+    layout->addWidget(btnClose = new QPushButton, 1, 6);
     layout->addWidget(lblReplace = new QLabel("Replace with:"), 2, 0);
     lblReplace->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     layout->addWidget(editReplace = new QComboBox, 2, 1, 1, 2);
     editReplace->setEditable(true);
     editReplace->setInsertPolicy(QComboBox::InsertAtTop);
-    layout->addWidget(btnReplace = new QPushButton("Replace"), 2, 3);
+    layout->addWidget(btnReplace = new QToolButton, 2, 3);
+    btnReplace->setPopupMode(QToolButton::MenuButtonPopup);
+    btnReplace->setDefaultAction(actReplace);
+    btnReplace->setToolTip("");
+    QMenu *m = new QMenu(parent);
+    m->addAction(actReplace);
+    m->addAction(actReplaceAndFind);
+    btnReplace->setMenu(m);
     setLayout(layout);
     btnClose->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton));
     btnClose->setFlat(true);
     btnClose->setStyleSheet("margin-left: 5px; margin-right: 5px; font-size: 14pt;");
     connect(btnClose, &QPushButton::clicked, this, &SearchAndReplacePanel::hide);
-    connect(btnFind, &QPushButton::clicked, this, &SearchAndReplacePanel::find);
-    connect(btnReplace, &QPushButton::clicked, this, &SearchAndReplacePanel::replace);
+    connect(actFind, &QAction::triggered, [=] (bool v) {
+        find();
+    });
+    connect(actReplace, &QAction::triggered, [=] (bool v) {
+        btnReplace->setDefaultAction(actReplace);
+        btnReplace->setToolTip("");
+        replace();
+    });
+    connect(actReplaceAndFind, &QAction::triggered, [=] (bool v) {
+        btnReplace->setDefaultAction(actReplaceAndFind);
+        btnReplace->setToolTip("");
+        replace();
+        find();
+    });
     hide();
+
+    QList<QWidget*> w = {editFind, editReplace, btnFind, btnReplace};
+    for(int i = 0; i < w.size() - 1; i++)
+        setTabOrder(w[i], w[i + 1]);
 }
 
 SearchAndReplacePanel::~SearchAndReplacePanel()
@@ -85,6 +117,12 @@ void SearchAndReplacePanel::hide()
 {
     QWidget::hide();
     emit hidden();
+}
+
+void SearchAndReplacePanel::toggle()
+{
+    if(isVisible()) hide();
+    else show();
 }
 
 void SearchAndReplacePanel::find()

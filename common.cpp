@@ -4,7 +4,7 @@
 #include <QFileInfo>
 #include <QByteArray>
 #include <QStringList>
-#include "v_repLib.h"
+#include "simLib.h"
 
 void EditorOptions::readFromXML(const QString &xml)
 {

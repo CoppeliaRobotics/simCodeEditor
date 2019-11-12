@@ -49,14 +49,33 @@ ToolBar::ToolBar(bool canRestart, Dialog *parent)
     addAction(actIndent = new QAction(QIcon(indent), "Indent"));
 
     ICON(func);
-    funcNav.menu = new QMenu;
+    funcNav.menu = new QMenu(parent);
     funcNav.act = funcNav.menu->menuAction();
     funcNav.act->setIcon(QIcon(func));
     addAction(funcNav.act);
-    QWidget *widget = widgetForAction(funcNav.act);
-    QToolButton *button = qobject_cast<QToolButton*>(widget);
-    if(button)
-        connect(funcNav.act, &QAction::triggered, button, &QToolButton::showMenu);
+    QWidget *funcNavWidget = widgetForAction(funcNav.act);
+    QToolButton *funcNavButton = qobject_cast<QToolButton*>(funcNavWidget);
+    if(funcNavButton)
+    {
+        funcNavButton->setToolTip("Function navigator");
+        connect(funcNav.act, &QAction::triggered, funcNavButton, &QToolButton::showMenu);
+    }
+
+    ICON(snippet);
+    snippetLib.menu = new QMenu(parent);
+    snippetLib.act = snippetLib.menu->menuAction();
+    snippetLib.act->setIcon(QIcon(snippet));
+    addAction(snippetLib.act);
+    QWidget *snippetLibWidget = widgetForAction(snippetLib.act);
+    QToolButton *snippetButton = qobject_cast<QToolButton*>(snippetLibWidget);
+    if(snippetButton)
+    {
+        snippetButton->setToolTip("Snippets library");
+        connect(snippetLib.act, &QAction::triggered, snippetButton, &QToolButton::showMenu);
+    }
+    snippetsLibrary.load();
+    snippetsLibrary.fillMenu(parent, snippetLib.menu);
+    snippetLib.act->setVisible(!snippetsLibrary.empty());
 
     QWidget *spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -68,6 +87,10 @@ ToolBar::ToolBar(bool canRestart, Dialog *parent)
     openFiles.actCombo = addWidget(openFiles.combo);
     ICON(close);
     addAction(openFiles.actClose = new QAction(QIcon(close), "Close current file"));
+
+    addAction(actCloseHelp = new QAction("Close help"));
+    actCloseHelp->setVisible(false);
+    connect(actCloseHelp, &QAction::triggered, [=] {parent->hideHelp();});
 }
 
 ToolBar::~ToolBar()
@@ -143,4 +166,11 @@ void ToolBar::updateButtons()
         funcNav.menu->addAction(a);
     }
     funcNav.act->setEnabled(!names.isEmpty());
+
+    if(snippetsLibrary.changed())
+    {
+        snippetsLibrary.load();
+        snippetsLibrary.fillMenu(parent, snippetLib.menu);
+        snippetLib.act->setVisible(!snippetsLibrary.empty());
+    }
 }

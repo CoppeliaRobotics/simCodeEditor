@@ -17,7 +17,9 @@ class Dialog : public QDialog
 public:
     Dialog(const EditorOptions &opts, UI *ui, QWidget* pParent = nullptr);
     virtual ~Dialog();
-
+protected:
+    virtual void keyPressEvent(QKeyEvent *event) override;
+public:
     void setEditorOptions(const EditorOptions &opts);
     inline const EditorOptions & editorOptions() { return opts; }
     Editor * activeEditor();
@@ -40,10 +42,17 @@ public:
     QString text();
     std::string makeModal(int *positionAndSize);
 
+    void showHelp();
+    void showHelp(const QUrl &url);
+    void hideHelp();
+protected:
+    void showHelp(bool v);
+
 private:
     void closeEvent(QCloseEvent *event);
 
 private slots:
+    void reject();
     void reloadScript();
 public slots:
     void updateCursorSelectionDisplay();
@@ -54,6 +63,7 @@ private:
     QMap<QString, Editor*> editors_;
     Editor *activeEditor_;
     QStackedWidget *stacked_;
+    QTextBrowser *textBrowser_;
     SearchAndReplacePanel *searchPanel_;
     StatusBar *statusBar_;
     int handle;

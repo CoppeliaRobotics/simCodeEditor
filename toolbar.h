@@ -3,6 +3,8 @@
 
 #include <QtWidgets>
 
+#include "snippets.h"
+
 class Dialog;
 
 class ToolBar : public QToolBar
@@ -23,7 +25,6 @@ public:
     QAction *actRedo;
     QAction *actUnindent;
     QAction *actIndent;
-    QAction *actFuncNav;
     struct {
         QAction *actSave;
         QComboBox *combo;
@@ -40,9 +41,15 @@ public:
         QAction *act;
         QMenu *menu;
     } funcNav;
+    struct {
+        QAction *act;
+        QMenu *menu;
+    } snippetLib;
+    QAction *actCloseHelp;
 
 private:
     Dialog *parent;
+    SnippetsLibrary snippetsLibrary;
 };
 
 #endif // TOOLBAR_H

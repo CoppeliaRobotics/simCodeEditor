@@ -1,12 +1,13 @@
 #include "plugin.h"
 #include "SIM.h"
 #include "UI.h"
-#include "v_repPlusPlus/Plugin.h"
+#include "simPlusPlus/Plugin.h"
 #include "common.h"
 #include "debug.h"
-#include <QString>
+#include "api_index.cpp"
+#include <QtCore>
 
-class Plugin : public vrep::Plugin
+class Plugin : public sim::Plugin
 {
 public:
     void onStart()
@@ -21,6 +22,19 @@ public:
 
         ui = new UI;
 
+        // load api index
+        {
+            QDir appDir(QCoreApplication::applicationDirPath());
+            if(!appDir.cd("helpFiles")) return;
+            int i = 0;
+            while(api_index[i])
+            {
+                QString k(api_index[i++]);
+                QString v(api_index[i++]);
+                apiReferenceMap[k] = appDir.absolutePath() + "/" + v;
+            }
+        }
+
         DEBUG_OUT << "CodeEditor plugin initialized" << std::endl;
     }
 
@@ -33,7 +47,7 @@ public:
         SIM_THREAD = NULL;
     }
 
-    void onFirstInstancePass(const vrep::InstancePassFlags &flags)
+    void onFirstInstancePass(const sim::InstancePassFlags &flags)
     {
         simThread();
 
@@ -149,41 +163,52 @@ public:
         return -1;
     }
 
+    QString apiReferenceForSymbol(const QString &sym)
+    {
+        return apiReferenceMap.value(sym, "");
+    }
+
 private:
     UI *ui;
     SIM *sim;
+    QMap<QString, QString> apiReferenceMap;
 };
 
-VREP_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
+SIM_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
+
+QString apiReferenceForSymbol(const QString &sym)
+{
+    return simPlugin->apiReferenceForSymbol(sym);
+}
 
 // plugin entrypoints:
 
-VREP_DLLEXPORT char * codeEditor_openModal(const char *initText, const char *properties, int *positionAndSize)
+SIM_DLLEXPORT char * codeEditor_openModal(const char *initText, const char *properties, int *positionAndSize)
 {
-    return vrepPlugin->codeEditor_openModal(initText, properties, positionAndSize);
+    return simPlugin->codeEditor_openModal(initText, properties, positionAndSize);
 }
 
-VREP_DLLEXPORT int codeEditor_open(const char *initText, const char *properties)
+SIM_DLLEXPORT int codeEditor_open(const char *initText, const char *properties)
 {
-    return vrepPlugin->codeEditor_open(initText, properties);
+    return simPlugin->codeEditor_open(initText, properties);
 }
 
-VREP_DLLEXPORT int codeEditor_setText(int handle, const char *text, int insertMode)
+SIM_DLLEXPORT int codeEditor_setText(int handle, const char *text, int insertMode)
 {
-    return vrepPlugin->codeEditor_setText(handle, text, insertMode);
+    return simPlugin->codeEditor_setText(handle, text, insertMode);
 }
 
-VREP_DLLEXPORT char * codeEditor_getText(int handle, int *positionAndSize)
+SIM_DLLEXPORT char * codeEditor_getText(int handle, int *positionAndSize)
 {
-    return vrepPlugin->codeEditor_getText(handle,positionAndSize);
+    return simPlugin->codeEditor_getText(handle,positionAndSize);
 }
 
-VREP_DLLEXPORT int codeEditor_show(int handle, int showState)
+SIM_DLLEXPORT int codeEditor_show(int handle, int showState)
 {
-    return vrepPlugin->codeEditor_show(handle, showState);
+    return simPlugin->codeEditor_show(handle, showState);
 }
 
-VREP_DLLEXPORT int codeEditor_close(int handle, int *positionAndSize)
+SIM_DLLEXPORT int codeEditor_close(int handle, int *positionAndSize)
 {
-    return vrepPlugin->codeEditor_close(handle, positionAndSize);
+    return simPlugin->codeEditor_close(handle, positionAndSize);
 }

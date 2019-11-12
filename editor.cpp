@@ -1,6 +1,7 @@
 #include "editor.h"
 #include "dialog.h"
 #include "toolbar.h"
+#include "plugin.h"
 #include <SciLexer.h>
 #include <Qsci/qscilexerlua.h>
 
@@ -11,6 +12,9 @@ Editor::Editor(Dialog *d)
     setLexer(lexer);
     SendScintilla(QsciScintillaBase::SCI_SETSTYLEBITS, 5);
     setTabWidth(4);
+    setTabIndents(true);
+    setBackspaceUnindents(true);
+    setAutoIndent(true);
     SendScintilla(QsciScintillaBase::SCI_SETUSETABS, 0);
 
     connect(this, SIGNAL(SCN_CHARADDED(int)), this, SLOT(onCharAdded(int)));
@@ -88,6 +92,9 @@ void Editor::setEditorOptions(const EditorOptions &o)
         sep = " ";
     }
     SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, ss.toUtf8().data());
+
+    SendScintilla(QsciScintillaBase::SCI_STYLESETHOTSPOT, SCE_LUA_WORD2, 1);
+    setHotspotUnderline(true);
 }
 
 void Editor::onUpdateUi(int updated)
@@ -122,63 +129,80 @@ void Editor::onUpdateUi(int updated)
     }
 }
 
-
 void Editor::contextMenuEvent(QContextMenuEvent *event)
 {
-    // extract file name at selection or cursor position:
-
-    QString txt = selectedText();
-
-    if(txt.isEmpty())
-        txt = text(lineAt(event->pos()));
-    else
-    {
-        if ((txt.count('\'') < 2) && (txt.count('\"') < 2))
-        {
-            QChar s = txt.at(0);
-            QChar e = txt.at(txt.size() - 1);
-            if ((s != "'") && (s != "\""))
-            {
-                if ((e != "'") && (e != "\""))
-                    txt = "'" + txt + "'";
-                else
-                    txt = e + txt;
-            }
-            else
-            {
-                if ((e != "'") && (e != "\""))
-                    txt = txt + s;
-            }
-        }
-    }
-
-    QVector<QString> matches;
-    QRegularExpression re("('([^']+)'|\"([^\"]+)\")");
-    auto m = re.globalMatch(txt);
-    while(m.hasNext())
-    {
-        auto match = m.next();
-        if(match.hasMatch())
-        {
-            for(int i = 2; i <= 3; i++)
-            {
-                QString fp = opts.resolveLuaFilePath(match.captured(i));
-                if(fp != "" && !matches.contains(fp))
-                    matches.append(fp);
-            }
-        }
-    }
+    QString tok = tokenAt(event->pos());
 
     QMenu *menu = createStandardContextMenu();
-    if(!matches.isEmpty())
-        menu->addSeparator();
-    for(auto m : matches)
-        connect(menu->addAction(QStringLiteral("Open '%1'...").arg(m)),
-                &QAction::triggered, [this, m] {
-            dialog->openExternalFile(m);
-        });
+
+    if((tok.front() == '\'' && tok.back() == '\'') || (tok.front() == '"' && tok.back() == '"'))
+    {
+        QString tok1 = tok.mid(1, tok.size() - 2);
+        QString fp = opts.resolveLuaFilePath(tok1);
+        if(fp != "")
+        {
+            menu->addSeparator();
+            connect(menu->addAction(QStringLiteral("Open '%1'...").arg(tok1)), &QAction::triggered, [=] {
+                dialog->openExternalFile(fp);
+            });
+        }
+    }
+
+    for(const auto &k : opts.userKeywords)
+    {
+        if(k.keyword == tok)
+        {
+            QString refUrl = apiReferenceForSymbol(tok);
+            if(refUrl == "") continue;
+
+            menu->addSeparator();
+            connect(menu->addAction(QStringLiteral("Open reference for %1...").arg(tok)), &QAction::triggered, [=] {
+#if 1
+                QDesktopServices::openUrl(QUrl::fromLocalFile(refUrl));
+#else
+                dialog->showHelp(QUrl(QUrl::fromLocalFile(refUrl)));
+#endif
+            });
+        }
+    }
+
     menu->exec(event->globalPos());
     delete menu;
+}
+
+QString Editor::tokenAtPosition(int pos)
+{
+    int style = SendScintilla(SCI_GETSTYLEAT, (long)pos, (long)0);
+    int start = pos, end = pos, newstyle = style;
+    while(start > 0)
+    {
+        newstyle = SendScintilla(SCI_GETSTYLEAT, (long)start - 1, (long)0);
+        if(newstyle == style) start--;
+        else break;
+    }
+    int length = SendScintilla(SCI_GETTEXTLENGTH, (long)0, (long)0);
+    while(end < (length-1))
+    {
+        newstyle = SendScintilla(SCI_GETSTYLEAT, (long)end + 1, (long)0);
+        if(newstyle == style) end++;
+        else break;
+    }
+    end++;
+    char *buf = new char[end - start + 1];
+    SendScintilla(SCI_GETTEXTRANGE, (long)start, (long)end, buf);
+    QString txt(buf);
+    delete buf;
+    return txt;
+}
+
+int Editor::positionFromPoint(const QPoint &p)
+{
+    return SendScintilla(SCI_POSITIONFROMPOINT, (long)p.x(), (long)p.y());
+}
+
+QString Editor::tokenAt(const QPoint &p)
+{
+    return tokenAtPosition(positionFromPoint(p));
 }
 
 void Editor::setText(const char* txt, int insertMode)

@@ -3,7 +3,7 @@
 #include "toolbar.h"
 #include "statusbar.h"
 #include "searchandreplacepanel.h"
-#include "v_repLib.h"
+#include "simLib.h"
 #include "UI.h"
 
 Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
@@ -17,8 +17,10 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
     activeEditor_ = new Editor(this);
     editors_.insert("", activeEditor_);
     stacked_->addWidget(activeEditor_);
+    textBrowser_ = new QTextBrowser;
+    textBrowser_->setVisible(false);
 
-    toolBar_ = new ToolBar(o.canRestart,this);
+    toolBar_ = new ToolBar(o.canRestart, this);
     if(!o.toolBar)
         toolBar_->setVisible(false);
     searchPanel_ = new SearchAndReplacePanel(this);
@@ -29,7 +31,7 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
     if(o.searchable)
     {
         QShortcut *shortcut = new QShortcut(QKeySequence(tr("Ctrl+f", "Find")), this);
-        connect(shortcut, &QShortcut::activated, searchPanel_, &SearchAndReplacePanel::show);
+        connect(shortcut, &QShortcut::activated, searchPanel_, &SearchAndReplacePanel::toggle);
         connect(searchPanel_, &SearchAndReplacePanel::shown, [=]{
             searchPanel_->editFind->setEditText(activeEditor()->selectedText());
         });
@@ -40,12 +42,15 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
         activeEditor_->saveExternalFile();
     });
 
-    QVBoxLayout *bl=new QVBoxLayout(this);
+    QVBoxLayout *bl = new QVBoxLayout;
     bl->setContentsMargins(0,0,0,0);
     bl->setSpacing(0);
     setLayout(bl);
     bl->addWidget(toolBar_);
-    bl->addWidget(stacked_);
+    QHBoxLayout *hb = new QHBoxLayout;
+    hb->addWidget(stacked_);
+    hb->addWidget(textBrowser_);
+    bl->addLayout(hb);
     bl->addWidget(searchPanel_);
     bl->addWidget(statusBar_);
 
@@ -94,6 +99,14 @@ Dialog::~Dialog()
     // scintilla_ is normally automatically destroyed!
 }
 
+void Dialog::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter || event->key() == Qt::Key_Escape)
+        event->ignore();
+    else
+        QDialog::keyPressEvent(event);
+}
+
 void Dialog::setEditorOptions(const EditorOptions &o)
 {
     opts = o;
@@ -105,7 +118,7 @@ void Dialog::setEditorOptions(const EditorOptions &o)
     statusBar()->setSizeGripEnabled(o.resizable);
     setModal(o.modal);
     Qt::WindowFlags flags = Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowSystemMenuHint; // | Qt::WindowStaysOnTopHint;
-#ifdef MAC_VREP
+#ifdef MAC_SIM
     flags |= Qt::Tool;
 #else
     flags |= Qt::Dialog;
@@ -147,7 +160,7 @@ void Dialog::setEditorOptions(const EditorOptions &o)
             activateWindow();
         }
     }
-#if defined(LIN_VREP) || defined(MAC_VREP)
+#if defined(LIN_SIM) || defined(MAC_SIM)
     if(!o.resizable) setFixedSize(size());
 #endif
 }
@@ -263,8 +276,55 @@ std::string Dialog::makeModal(int *positionAndSize)
     return(modalText.toStdString());
 }
 
-void Dialog::closeEvent(QCloseEvent *event)
+void Dialog::showHelp()
 {
+    showHelp(true);
+}
+
+void Dialog::showHelp(const QUrl &url)
+{
+    showHelp(true);
+    textBrowser_->setSource(url);
+}
+
+void Dialog::hideHelp()
+{
+    showHelp(false);
+}
+
+void Dialog::showHelp(bool v)
+{
+    stacked_->setVisible(!v);
+    textBrowser_->setVisible(v);
+    toolBar_->actReload->setVisible(!v);
+    toolBar_->actShowSearchPanel->setVisible(!v);
+    toolBar_->actUndo->setVisible(!v);
+    toolBar_->actRedo->setVisible(!v);
+    toolBar_->actUnindent->setVisible(!v);
+    toolBar_->actIndent->setVisible(!v);
+    toolBar_->funcNav.act->setVisible(!v);
+    toolBar_->snippetLib.act->setVisible(!v);
+    toolBar_->actCloseHelp->setVisible(v);
+    toolBar_->openFiles.setVisible(!v && editors_.count() > 1);
+    if(v && searchPanel_->isVisible())
+        searchPanel_->hide();
+}
+
+void Dialog::reject()
+{
+    if(searchPanel_->isVisible())
+    {
+        searchPanel_->hide();
+    }
+}
+
+ void Dialog::closeEvent(QCloseEvent *event)
+ {
+    if(searchPanel_->isVisible())
+    {
+        searchPanel_->hide();
+    }
+
     if(containsUnsavedFiles() && QMessageBox::Yes != QMessageBox::question(this, "", QStringLiteral("This window contains files which have been modified and not saved.\n\nAre you sure you want to close it?")))
     {
         event->ignore();

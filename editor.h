@@ -16,6 +16,9 @@ public:
     inline const EditorOptions & editorOptions() { return opts; }
     void setEditorOptions(const EditorOptions &opts);
     void contextMenuEvent(QContextMenuEvent *event);
+    QString tokenAtPosition(int pos);
+    int positionFromPoint(const QPoint &p);
+    QString tokenAt(const QPoint &p);
 
 public slots:
     void setText(const char* txt, int insertMode);

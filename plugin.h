@@ -6,5 +6,9 @@
 #define PLUGIN_NAME "CodeEditor"
 #define PLUGIN_VERSION 1
 
+#include <QString>
+
+QString apiReferenceForSymbol(const QString &sym);
+
 #endif // PLUGIN_H_INCLUDED
 

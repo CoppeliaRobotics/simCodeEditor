@@ -1,6 +1,6 @@
 include(config.pri)
 
-TARGET = v_repExtCodeEditor
+TARGET = simExtCodeEditor
 TEMPLATE = lib
 
 DEFINES -= UNICODE
@@ -38,15 +38,15 @@ INCLUDEPATH += $$QSCINTILLA_INCLUDEPATH
 LIBS += $$QSCINTILLA_LIBS
 
 win32 {
-    DEFINES += WIN_VREP
+    DEFINES += WIN_SIM
 }
 
 macx {
-    DEFINES += MAC_VREP
+    DEFINES += MAC_SIM
 }
 
 unix:!macx {
-    DEFINES += LIN_VREP
+    DEFINES += LIN_SIM
 }
 
 SOURCES += \
@@ -55,7 +55,7 @@ SOURCES += \
     debug.cpp \
     UI.cpp \
     SIM.cpp \
-    ../common/v_repLib.cpp \
+    ../common/simLib.cpp \
     common.cpp \
     dialog.cpp \
     editor.cpp \
@@ -69,7 +69,7 @@ HEADERS +=\
     debug.h \
     UI.h \
     SIM.h \
-    ../include/v_repLib.h \
+    ../include/simLib.h \
     common.h \
     dialog.h \
     editor.h \

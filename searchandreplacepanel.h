@@ -17,6 +17,7 @@ public slots:
     void setVisibility(bool v);
     void show();
     void hide();
+    void toggle();
 
 private slots:
     void find();
@@ -28,10 +29,15 @@ signals:
 
 private:
     Dialog *parent;
-    QLabel *lblFind, *lblReplace;
-    QComboBox *editFind, *editReplace;
-    QPushButton *btnFind, *btnReplace, *btnClose;
-    QCheckBox *chkRegExp, *chkCaseSens;
+    QLabel *lblFind;
+    QLabel *lblReplace;
+    QComboBox *editFind;
+    QComboBox *editReplace;
+    QToolButton *btnFind;
+    QToolButton *btnReplace;
+    QPushButton *btnClose;
+    QCheckBox *chkRegExp;
+    QCheckBox *chkCaseSens;
 
     friend class Dialog;
 };
