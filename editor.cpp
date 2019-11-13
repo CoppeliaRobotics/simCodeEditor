@@ -93,8 +93,10 @@ void Editor::setEditorOptions(const EditorOptions &o)
     }
     SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, ss.toUtf8().data());
 
+#if 0
     SendScintilla(QsciScintillaBase::SCI_STYLESETHOTSPOT, SCE_LUA_WORD2, 1);
     setHotspotUnderline(true);
+#endif
 }
 
 void Editor::onUpdateUi(int updated)
@@ -191,7 +193,7 @@ QString Editor::tokenAtPosition(int pos)
     char *buf = new char[end - start + 1];
     SendScintilla(SCI_GETTEXTRANGE, (long)start, (long)end, buf);
     QString txt(buf);
-    delete buf;
+    delete[] buf;
     return txt;
 }
 
