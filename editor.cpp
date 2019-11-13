@@ -154,16 +154,14 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
     {
         if(k.keyword == tok)
         {
-            QString refUrl = apiReferenceForSymbol(tok);
-            if(refUrl == "") continue;
-
+            QUrl refUrl = apiReferenceForSymbol(tok);
+            if(refUrl.isEmpty()) continue;
             menu->addSeparator();
             connect(menu->addAction(QStringLiteral("Open reference for %1...").arg(tok)), &QAction::triggered, [=] {
-                QUrl url(QUrl::fromLocalFile(refUrl));
 #if 1
-                QDesktopServices::openUrl(url);
+                QDesktopServices::openUrl(refUrl);
 #else
-                dialog->showHelp(url);
+                dialog->showHelp(refUrl);
 #endif
             });
         }

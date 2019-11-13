@@ -7,8 +7,9 @@
 #define PLUGIN_VERSION 1
 
 #include <QString>
+#include <QUrl>
 
-QString apiReferenceForSymbol(const QString &sym);
+QUrl apiReferenceForSymbol(const QString &sym);
 
 #endif // PLUGIN_H_INCLUDED
 

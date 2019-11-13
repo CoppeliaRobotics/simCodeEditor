@@ -166,9 +166,21 @@ public:
         return -1;
     }
 
-    QString apiReferenceForSymbol(const QString &sym)
+    QUrl apiReferenceForSymbol(const QString &sym)
     {
-        return apiReferenceMap.value(sym, "");
+        QMap<QString, QString>::const_iterator i = apiReferenceMap.find(sym);
+        if(i == apiReferenceMap.end()) return {};
+        QString refUrl = i.value();
+        int anchorPos = refUrl.lastIndexOf("#");
+        QString anchor;
+        if(anchorPos >= 0)
+        {
+            anchor = refUrl.mid(anchorPos + 1);
+            refUrl = refUrl.left(anchorPos);
+        }
+        QUrl url(QUrl::fromLocalFile(refUrl));
+        url.setFragment(anchor);
+        return url;
     }
 
 private:
@@ -179,7 +191,7 @@ private:
 
 SIM_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
 
-QString apiReferenceForSymbol(const QString &sym)
+QUrl apiReferenceForSymbol(const QString &sym)
 {
     return simPlugin->apiReferenceForSymbol(sym);
 }
