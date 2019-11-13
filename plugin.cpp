@@ -25,6 +25,9 @@ public:
         // load api index
         {
             QDir appDir(QCoreApplication::applicationDirPath());
+#ifdef MAC_SIM
+            if(!appDir.cd("../../..")) return;
+#endif
             if(!appDir.cd("helpFiles")) return;
             int i = 0;
             while(api_index[i])

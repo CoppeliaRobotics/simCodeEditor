@@ -159,10 +159,11 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
 
             menu->addSeparator();
             connect(menu->addAction(QStringLiteral("Open reference for %1...").arg(tok)), &QAction::triggered, [=] {
+                QUrl url(QUrl::fromLocalFile(refUrl));
 #if 1
-                QDesktopServices::openUrl(QUrl::fromLocalFile(refUrl));
+                QDesktopServices::openUrl(url);
 #else
-                dialog->showHelp(QUrl(QUrl::fromLocalFile(refUrl)));
+                dialog->showHelp(url);
 #endif
             });
         }
