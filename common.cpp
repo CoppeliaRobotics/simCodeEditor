@@ -62,7 +62,6 @@ void EditorOptions::readFromXML(const QString &xml)
         if(e1.isNull()) continue;
         if(e1.tagName() == "keywords1")
         {
-            QString keywords1 = "";
             for(QDomNode n2 = e1.firstChild(); !n2.isNull(); n2 = n2.nextSibling())
             {
                 QDomElement e2 = n2.toElement();
@@ -72,21 +71,17 @@ void EditorOptions::readFromXML(const QString &xml)
                     QString word = e2.attribute("word");
                     bool autocomplete = parseBool(e2.attribute("autocomplete"));
                     QString calltip = e2.attribute("calltip");
-                    if(!keywords1.isEmpty()) keywords1.append(" ");
-                    keywords1.append(word);
                     UserKeyword kw;
                     kw.keyword = word;
                     kw.autocomplete = autocomplete;
                     kw.callTip = calltip;
+                    kw.keywordType = 1;
                     userKeywords.push_back(kw);
                 }
             }
-            //window->scintilla()->SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, keywords1.toStdString().c_str());
-            //window->setKeywords(1, o.userKeywords);
         }
         else if(e1.tagName() == "keywords2")
         {
-            QString keywords2 = "";
             for(QDomNode n2 = e1.firstChild(); !n2.isNull(); n2 = n2.nextSibling())
             {
                 QDomElement e2 = n2.toElement();
@@ -96,17 +91,14 @@ void EditorOptions::readFromXML(const QString &xml)
                     QString word = e2.attribute("word");
                     bool autocomplete = parseBool(e2.attribute("autocomplete"));
                     QString calltip = e2.attribute("calltip");
-                    if(!keywords2.isEmpty()) keywords2.append(" ");
-                    keywords2.append(word);
                     UserKeyword kw;
                     kw.keyword = word;
                     kw.autocomplete = autocomplete;
                     kw.callTip = calltip;
+                    kw.keywordType = 2;
                     userKeywords.push_back(kw);
                 }
             }
-            //window->scintilla()->SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)2, keywords2.toStdString().c_str());
-            //window->setKeywords(2, userKeywords);
         }
     }
 

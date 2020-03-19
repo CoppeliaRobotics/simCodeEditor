@@ -85,13 +85,22 @@ void Editor::setEditorOptions(const EditorOptions &o)
     SendScintilla(QsciScintillaBase::SCI_INDICSETALPHA,(unsigned long)20,(long)160);
     SendScintilla(QsciScintillaBase::SCI_INDICSETFORE,(unsigned long)20,(long)o.selection_col.rgb());
 
-    QString ss, sep;
+    QString ss1, sep1, ss2, sep2;
     for(auto kw : o.userKeywords)
     {
-        ss += sep + kw.keyword;
-        sep = " ";
+        if (kw.keywordType == 1)
+        {
+            ss1 += sep1 + kw.keyword;
+            sep1 = " ";
+        }
+        else
+        {
+            ss2 += sep2 + kw.keyword;
+            sep2 = " ";
+        }
     }
-    SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, ss.toUtf8().data());
+    SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, ss1.toUtf8().data());
+    SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)2, ss2.toUtf8().data());
 
 #if 0
     SendScintilla(QsciScintillaBase::SCI_STYLESETHOTSPOT, SCE_LUA_WORD2, 1);

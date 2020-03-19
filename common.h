@@ -12,6 +12,7 @@ struct UserKeyword
     QString keyword;
     QString callTip;
     bool autocomplete;
+    int keywordType;
 };
 
 struct EditorOptions
