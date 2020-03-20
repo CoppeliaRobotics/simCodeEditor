@@ -63,6 +63,8 @@ void Editor::setEditorOptions(const EditorOptions &o)
 
     setAStyle(SCE_LUA_WORD2, o.keyword1_col, o.background_col);
     setAStyle(SCE_LUA_WORD3, o.keyword2_col, o.background_col);
+    setAStyle(SCE_LUA_WORD7, o.keyword1_col, o.background_col);
+    setAStyle(SCE_LUA_WORD8, o.keyword2_col, o.background_col);
 
     if(o.isLua)
     {
@@ -99,8 +101,14 @@ void Editor::setEditorOptions(const EditorOptions &o)
             sep2 = " ";
         }
     }
-    SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, ss1.toUtf8().data());
-    SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)2, ss2.toUtf8().data());
+    if (!o.isLua)
+    {
+        for (int i=0;i<8;i++)
+            SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)i, "");
+    }
+
+    SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)6, ss1.toUtf8().data());
+    SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)7, ss2.toUtf8().data());
 
 #if 0
     SendScintilla(QsciScintillaBase::SCI_STYLESETHOTSPOT, SCE_LUA_WORD2, 1);
