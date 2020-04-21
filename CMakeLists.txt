@@ -100,5 +100,5 @@ add_library(simExtCodeEditor SHARED ${SOURCES})
 add_dependencies(simExtCodeEditor generate_api_index)
 target_link_libraries(simExtCodeEditor ${LIBRARIES})
 
-install(TARGETS simExtCodeEditor DESTINATION ${COPPELIASIM_ROOT_DIR})
+install(TARGETS simExtCodeEditor DESTINATION ${COPPELIASIM_PLUGINS_DIR})
 
