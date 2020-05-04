@@ -17,8 +17,8 @@ public:
         if(simGetBooleanParameter(sim_boolparam_headless) > 0)
             throw std::runtime_error("cannot load in headless mode");
 
-        simSetModuleInfo(PLUGIN_NAME, 0, "Code Editor Plugin", 0);
-        simSetModuleInfo(PLUGIN_NAME, 1, BUILD_DATE, 0);
+        setExtVersion("Code Editor Plugin");
+        setBuildDate(BUILD_DATE);
 
         ui = new UI;
 
