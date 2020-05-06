@@ -1,6 +1,5 @@
 #include "UI.h"
-#include "debug.h"
-#include "simLib.h"
+#include "stubs.h"
 #include "dialog.h"
 #include "common.h"
 #include <QDebug>

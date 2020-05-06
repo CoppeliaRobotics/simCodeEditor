@@ -3,7 +3,7 @@
 #include "UI.h"
 #include "simPlusPlus/Plugin.h"
 #include "common.h"
-#include "debug.h"
+#include "stubs.h"
 #include "api_index.cpp"
 #include <QtCore>
 
@@ -16,6 +16,9 @@ public:
 
         if(simGetBooleanParameter(sim_boolparam_headless) > 0)
             throw std::runtime_error("cannot load in headless mode");
+
+        if(!registerScriptStuff())
+            throw std::runtime_error("failed to register script stuff");
 
         setExtVersion("Code Editor Plugin");
         setBuildDate(BUILD_DATE);
@@ -38,7 +41,7 @@ public:
             }
         }
 
-        DEBUG_OUT << "CodeEditor plugin initialized" << std::endl;
+        log(sim_verbosity_loadinfo, "CodeEditor plugin initialized");
     }
 
     void onEnd()
@@ -67,7 +70,7 @@ public:
     { // special: blocking until dlg closed
         ASSERT_THREAD(!UI);
 
-        DEBUG_OUT << "codeEditor_openModal: initText=" << initText << ", properties=" << properties << std::endl;
+        log(sim_verbosity_debug, boost::format("codeEditor_openModal: initText=%s, properties=%s") % initText % properties);
         QString text;
         if(QThread::currentThreadId() == UI_THREAD)
         {
@@ -79,14 +82,15 @@ public:
                 sim->openModal(QString(initText), QString(properties), text, positionAndSize);
         }
         char* retVal = stringBufferCopy(text);
-        DEBUG_OUT << "codeEditor_openModal: done" << std::endl;
+
+        log(sim_verbosity_debug, "codeEditor_openModal: done");
 
         return retVal;
     }
 
     int codeEditor_open(const char *initText, const char *properties)
     {
-        DEBUG_OUT << "codeEditor_open: initText=" << initText << ", properties=" << properties << std::endl;
+        log(sim_verbosity_debug, boost::format("codeEditor_open: initText=%s, properties=%s") % initText % properties);
 
         int handle = -1;
         if(QThread::currentThreadId() == UI_THREAD)
@@ -96,14 +100,15 @@ public:
             if(sim)
                 sim->open(QString(initText), QString(properties), &handle);
         }
-        DEBUG_OUT << "codeEditor_open: done" << std::endl;
+
+        log(sim_verbosity_debug, "codeEditor_open: done");
 
         return handle;
     }
 
     int codeEditor_setText(int handle, const char *text, int insertMode)
     {
-        DEBUG_OUT << "codeEditor_setText: handle=" << handle << ", text=" << text << ", insertMode=" << insertMode << std::endl;
+        log(sim_verbosity_debug, boost::format("codeEditor_setText: handle=%d, text=%s, insertMode=%d") % handle % text % insertMode);
 
         if(QThread::currentThreadId() == UI_THREAD)
             ui->setText(handle, QString(text), insertMode);
@@ -112,14 +117,15 @@ public:
             if(sim)
                 sim->setText(handle, QString(text), insertMode);
         }
-        DEBUG_OUT << "codeEditor_setText: done" << std::endl;
+
+        log(sim_verbosity_debug, "codeEditor_setText: done");
 
         return -1;
     }
 
     char * codeEditor_getText(int handle, int* posAndSize)
     {
-        DEBUG_OUT << "codeEditor_getText: handle=" << handle << std::endl;
+        log(sim_verbosity_debug, boost::format("codeEditor_getText: handle=%d") % handle);
 
         QString text;
         if(QThread::currentThreadId() == UI_THREAD)
@@ -129,14 +135,15 @@ public:
             if(sim)
                 sim->getText(handle, &text, posAndSize);
         }
-        DEBUG_OUT << "codeEditor_getText: done" << std::endl;
+
+        log(sim_verbosity_debug, "codeEditor_getText: done");
 
         return stringBufferCopy(text);
     }
 
     int codeEditor_show(int handle, int showState)
     {
-        DEBUG_OUT << "codeEditor_show: handle=" << handle << ", showState=" << showState << std::endl;
+        log(sim_verbosity_debug, boost::format("codeEditor_getText: handle=%d, showState=%d") % handle % showState);
 
         if(QThread::currentThreadId() == UI_THREAD)
             ui->show(handle, showState);
@@ -145,14 +152,15 @@ public:
             if(sim)
                 sim->show(handle, showState);
         }
-        DEBUG_OUT << "codeEditor_show: done" << std::endl;
+
+        log(sim_verbosity_debug, "codeEditor_show: done");
 
         return -1;
     }
 
     int codeEditor_close(int handle, int *positionAndSize)
     {
-        DEBUG_OUT << "codeEditor_close: handle=" << handle << std::endl;
+        log(sim_verbosity_debug, boost::format("codeEditor_close: handle=%d") % handle);
 
         if(QThread::currentThreadId() == UI_THREAD)
             ui->close(handle, positionAndSize);
@@ -161,7 +169,8 @@ public:
             if(sim)
                 sim->close(handle, positionAndSize);
         }
-        DEBUG_OUT << "codeEditor_close: done" << std::endl;
+
+        log(sim_verbosity_debug, "codeEditor_close: done");
 
         return -1;
     }

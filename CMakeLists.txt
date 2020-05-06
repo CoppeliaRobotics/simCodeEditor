@@ -55,8 +55,9 @@ if(QSCINTILLA_DIR)
 else()
     message(FATAL_ERROR "Please provide path to QScintilla via -DQSCINTILLA_DIR=...")
 endif()
+add_definitions(-DQT_COMPIL)
 
-#coppeliasim_generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/generated XML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/callbacks.xml LUA_FILE ${CMAKE_CURRENT_SOURCE_DIR}/simExtCustomUI.lua)
+coppeliasim_generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/generated XML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/callbacks.xml LUA_FILE ${CMAKE_CURRENT_SOURCE_DIR}/simExtCodeEditor.lua)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated)
 add_custom_command(
@@ -80,7 +81,6 @@ set(SOURCES
     plugin.cpp
     UI.cpp
     SIM.cpp
-    debug.cpp
     common.cpp
     ${COPPELIASIM_EXPORTED_SOURCES}
 )
