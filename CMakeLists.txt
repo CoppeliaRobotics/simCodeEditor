@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.12)
 project(simExtCodeEditor)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -12,7 +12,7 @@ find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5PrintSupport REQUIRED)
 find_package(Qt5Xml REQUIRED)
-find_package(PythonInterp REQUIRED)
+find_package(Python3 REQUIRED)
 
 if(NOT LIBPLUGIN_DIR)
     if(DEFINED ENV{COPPELIASIM_ROOT_DIR})
@@ -62,7 +62,7 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated)
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generated/api_index.cpp
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/api_index.py
-    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/api_index.py
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/api_index.py
         --input ${COPPELIASIM_ROOT_DIR}/helpFiles
         --output ${CMAKE_CURRENT_BINARY_DIR}/generated/api_index.cpp
 )
