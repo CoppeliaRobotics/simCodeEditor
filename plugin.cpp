@@ -41,7 +41,7 @@ public:
             }
         }
 
-        log(sim_verbosity_loadinfo, "CodeEditor plugin initialized");
+        log(sim_verbosity_loadinfos, "CodeEditor plugin initialized");
     }
 
     void onEnd()
