@@ -206,6 +206,11 @@ QString Editor::tokenAtPosition(int pos)
         else break;
     }
     end++;
+
+    // sanitize bounds:
+    if(start < 0) start = 0;
+    if(end > length) end = length;
+
     char *buf = new char[end - start + 1];
     SendScintilla(SCI_GETTEXTRANGE, (long)start, (long)end, buf);
     QString txt(buf);
