@@ -29,8 +29,13 @@ public:
         {
             QDir appDir(QCoreApplication::applicationDirPath());
 #ifdef MAC_SIM
+#if SIM_PROGRAM_FULL_VERSION_NB < 4010000
             if(!appDir.cd("../../..")) return;
-#endif
+#else
+            // since 4.1.0, we have app bundle layout:
+            if(!appDir.cd("../Resources")) return;
+#endif // SIM_PROGRAM_FULL_VERSION_NB
+#endif // MAC_SIM
             if(!appDir.cd("helpFiles")) return;
             int i = 0;
             while(api_index[i])
