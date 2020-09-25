@@ -31,8 +31,8 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
     if(o.searchable)
     {
         QShortcut *shortcut = new QShortcut(QKeySequence(tr("Ctrl+f", "Find")), this);
-        connect(shortcut, &QShortcut::activated, searchPanel_, &SearchAndReplacePanel::toggle);
-        connect(searchPanel_, &SearchAndReplacePanel::shown, [=]{
+        connect(shortcut, &QShortcut::activated, searchPanel_, [=] {
+            searchPanel_->show();
             searchPanel_->editFind->setEditText(activeEditor()->selectedText());
         });
     }
@@ -97,14 +97,6 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
 Dialog::~Dialog()
 {
     // scintilla_ is normally automatically destroyed!
-}
-
-void Dialog::keyPressEvent(QKeyEvent *event)
-{
-    if(event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter || event->key() == Qt::Key_Escape)
-        event->ignore();
-    else
-        QDialog::keyPressEvent(event);
 }
 
 void Dialog::setEditorOptions(const EditorOptions &o)
@@ -244,17 +236,17 @@ QString Dialog::text()
 
 void Dialog::show()
 {
-    if (!isVisible())
+    if(!isVisible())
     {
         QDialog::show();
-        if (memorizedPos[0] != -999999)
+        if(memorizedPos[0] != -999999)
             move(memorizedPos[0], memorizedPos[1]);
     }
 }
 
 void Dialog::hide()
 {
-    if (isVisible())
+    if(isVisible())
     {
         memorizedPos[0] = x();
         memorizedPos[1] = y();
@@ -270,7 +262,7 @@ std::string Dialog::makeModal(int *positionAndSize)
     exec();
     if(positionAndSize != nullptr)
     {
-        for (size_t i = 0; i < 4; i++)
+        for(size_t i = 0; i < 4; i++)
             positionAndSize[i] = modalPosAndSize[i];
     }
     return(modalText.toStdString());

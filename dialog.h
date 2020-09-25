@@ -17,8 +17,6 @@ class Dialog : public QDialog
 public:
     Dialog(const EditorOptions &opts, UI *ui, QWidget* pParent = nullptr);
     virtual ~Dialog();
-protected:
-    virtual void keyPressEvent(QKeyEvent *event) override;
 public:
     void setEditorOptions(const EditorOptions &opts);
     inline const EditorOptions & editorOptions() { return opts; }
