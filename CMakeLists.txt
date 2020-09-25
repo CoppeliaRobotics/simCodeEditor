@@ -32,7 +32,7 @@ if(NOT "$ENV{QSCINTILLA_DIR}" STREQUAL "")
     set(QSCINTILLA_DIR_DEFAULT "$ENV{QSCINTILLA_DIR}")
 else()
     # arbitrary guess:
-    set(QSCINTILLA_DIR_DEFAULT ${CMAKE_CURRENT_SOURCE_DIR}/../../QScintilla-commercial-2.10.2)
+    set(QSCINTILLA_DIR_DEFAULT ${CMAKE_CURRENT_SOURCE_DIR}/QScintilla_commercial-2.10.8)
 endif()
 set(QSCINTILLA_DIR ${QSCINTILLA_DIR_DEFAULT} CACHE STRING "Path to the QScintilla directory")
 
