@@ -25,6 +25,8 @@ SearchAndReplacePanel::SearchAndReplacePanel(Dialog *parent)
     QAction *actFind = new QAction("Find");
     QAction *actReplace = new QAction("Replace");
     QAction *actReplaceAndFind = new QAction("Replace and find");
+    actReplaceAndFind->setCheckable(true);
+    actReplaceAndFind->setChecked(true);
     btnFind->setDefaultAction(actFind);
     btnFind->setToolTip("");
     layout->addWidget(btnClose = new QPushButton, 1, 6);
@@ -38,7 +40,6 @@ SearchAndReplacePanel::SearchAndReplacePanel(Dialog *parent)
     btnReplace->setDefaultAction(actReplace);
     btnReplace->setToolTip("");
     QMenu *m = new QMenu(parent);
-    m->addAction(actReplace);
     m->addAction(actReplaceAndFind);
     btnReplace->setMenu(m);
     setLayout(layout);
@@ -50,15 +51,8 @@ SearchAndReplacePanel::SearchAndReplacePanel(Dialog *parent)
         find();
     });
     connect(actReplace, &QAction::triggered, [=] (bool v) {
-        btnReplace->setDefaultAction(actReplace);
-        btnReplace->setToolTip("");
         replace();
-    });
-    connect(actReplaceAndFind, &QAction::triggered, [=] (bool v) {
-        btnReplace->setDefaultAction(actReplaceAndFind);
-        btnReplace->setToolTip("");
-        replace();
-        find();
+        if(actReplaceAndFind->isChecked()) find();
     });
     hide();
 
