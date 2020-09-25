@@ -100,5 +100,11 @@ add_library(simExtCodeEditor SHARED ${SOURCES})
 add_dependencies(simExtCodeEditor generate_api_index)
 target_link_libraries(simExtCodeEditor ${LIBRARIES})
 
+if(APPLE)
+    file(RELATIVE_PATH QSCINTILLA_LIB_NAME ${QSCINTILLA_BUILD_DIR} ${QSCINTILLA_LIBRARY})
+    set(QSCINTILLA_LIB_NAME libqscintilla2_qt5.13.dylib)
+    add_custom_command(TARGET simExtCodeEditor POST_BUILD COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change ${QSCINTILLA_LIB_NAME} @executable_path/../Frameworks/${QSCINTILLA_LIB_NAME} $<TARGET_FILE:simExtCodeEditor>)
+endif()
+
 install(TARGETS simExtCodeEditor DESTINATION ${COPPELIASIM_PLUGINS_DIR})
 
