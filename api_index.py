@@ -65,6 +65,6 @@ with open(args.output, 'wt') as f:
     f.write('const char *api_index[] = {\n')
     for k, v in sorted(index.items()):
         v = list(sorted(v, key=score_url))
-        f.write('    "%s", "%s",\n' % (k, v[0]))
+        f.write('    "%s", "%s",\n' % (k, v[0].replace('\\', '\\\\')))
     f.write('    0L\n')
     f.write('};\n')
