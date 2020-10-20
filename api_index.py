@@ -32,7 +32,7 @@ for htmlFile in htmlFiles:
     dirName = relpath(normpath(dirname(htmlFile)), args.input)
     relFile = relpath(normpath(htmlFile), args.input)
     print('Parsing %s...' % relFile)
-    with open(htmlFile, 'rt') as f:
+    with open(htmlFile, 'rt', encoding='utf8') as f:
         soup = BeautifulSoup(f.read(), 'html.parser')
         for a in soup.find_all('a', href=True):
             sym = a.text
