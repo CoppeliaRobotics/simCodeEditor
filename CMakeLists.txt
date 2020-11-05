@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(simExtCodeEditor)
 
-set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_MACOSX_RPATH 1)
