@@ -1,9 +1,11 @@
 #include "editor.h"
 #include "dialog.h"
 #include "toolbar.h"
-#include "plugin.h"
 #include <SciLexer.h>
 #include <Qsci/qscilexerlua.h>
+
+// implemented in plugin.cpp:
+QUrl apiReferenceForSymbol(const QString &sym);
 
 Editor::Editor(Dialog *d)
     : dialog(d)
