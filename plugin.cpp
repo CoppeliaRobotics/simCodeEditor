@@ -1,3 +1,4 @@
+#include "config.h"
 #include "plugin.h"
 #include "SIM.h"
 #include "UI.h"
