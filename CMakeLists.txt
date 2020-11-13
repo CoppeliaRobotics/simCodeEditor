@@ -5,7 +5,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_MACOSX_RPATH 1)
 
-find_package(Boost REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
@@ -35,10 +34,8 @@ else()
 endif()
 set(QSCINTILLA_DIR ${QSCINTILLA_DIR_DEFAULT} CACHE STRING "Path to the QScintilla directory")
 
-include_directories(${COPPELIASIM_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external)
-include_directories(${Boost_INCLUDE_DIRS})
 if(QSCINTILLA_DIR)
     include_directories(${QSCINTILLA_DIR}/Qt4Qt5)
     include_directories(${QSCINTILLA_DIR}/include)
@@ -81,12 +78,9 @@ set(SOURCES
     UI.cpp
     SIM.cpp
     common.cpp
-    ${COPPELIASIM_EXPORTED_SOURCES}
 )
 
 set(LIBRARIES
-    ${Boost_LIBRARIES}
-    ${COPPELIASIM_LIBRARIES}
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
@@ -95,7 +89,7 @@ set(LIBRARIES
     ${QSCINTILLA_LIBRARY}
 )
 
-add_library(simExtCodeEditor SHARED ${SOURCES})
+coppeliasim_add_plugin(simExtCodeEditor SOURCES ${SOURCES})
 add_dependencies(simExtCodeEditor generate_api_index)
 target_link_libraries(simExtCodeEditor ${LIBRARIES})
 
@@ -103,6 +97,3 @@ if(APPLE)
     get_filename_component(QSCINTILLA_LIB_NAME ${QSCINTILLA_LIBRARY} NAME)
     add_custom_command(TARGET simExtCodeEditor POST_BUILD COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change ${QSCINTILLA_LIB_NAME} @executable_path/../Frameworks/${QSCINTILLA_LIB_NAME} $<TARGET_FILE:simExtCodeEditor>)
 endif()
-
-install(TARGETS simExtCodeEditor DESTINATION ${COPPELIASIM_PLUGINS_DIR})
-
