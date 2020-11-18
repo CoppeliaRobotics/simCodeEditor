@@ -79,6 +79,15 @@ set(SOURCES
     common.cpp
 )
 
+if(QSCINTILLA_BUILD_DIR)
+    if(WIN32)
+        list(APPEND SOURCES
+            ${QSCINTILLA_BUILD_DIR}/release/moc_qsciscintilla.cpp
+            ${QSCINTILLA_BUILD_DIR}/release/moc_qsciscintillabase.cpp
+        )
+    endif()
+endif()
+
 set(LIBRARIES
     Qt5::Core
     Qt5::Gui
