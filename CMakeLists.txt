@@ -81,6 +81,7 @@ set(SOURCES
 
 if(QSCINTILLA_BUILD_DIR)
     if(WIN32)
+        file(TO_CMAKE_PATH ${QSCINTILLA_BUILD_DIR} QSCINTILLA_BUILD_DIR)
         list(APPEND SOURCES
             ${QSCINTILLA_BUILD_DIR}/release/moc_qsciscintilla.cpp
             ${QSCINTILLA_BUILD_DIR}/release/moc_qsciscintillabase.cpp
