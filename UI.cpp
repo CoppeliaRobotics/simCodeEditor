@@ -91,7 +91,7 @@ void UI::close(int handle, int *positionAndSize)
             positionAndSize[2] = editor->width();
             positionAndSize[3] = editor->height();
         }
-        delete editor;
+        editor->deleteLater();
         editors.remove(handle);
     }
 }
