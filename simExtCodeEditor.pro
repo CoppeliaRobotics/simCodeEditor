@@ -4,7 +4,7 @@ TARGET = simExtCodeEditor
 TEMPLATE = lib
 
 DEFINES -= UNICODE
-CONFIG += shared
+CONFIG += shared plugin
 QT += core gui widgets xml printsupport
 
 *-msvc* {
