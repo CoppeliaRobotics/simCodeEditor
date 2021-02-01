@@ -118,6 +118,7 @@ set(LIBRARIES
 coppeliasim_add_plugin(simExtCodeEditor SOURCES ${SOURCES})
 add_dependencies(simExtCodeEditor generate_api_index)
 target_link_libraries(simExtCodeEditor ${LIBRARIES})
+coppeliasim_add_plugin_directory(snippets)
 
 if(APPLE)
     get_filename_component(QSCINTILLA_LIB_NAME ${QSCINTILLA_LIBRARY} NAME)
