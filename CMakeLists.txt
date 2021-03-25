@@ -5,7 +5,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_MACOSX_RPATH 1)
 
-find_package(Qt5 COMPONENTS Core Gui Widgets PrintSupport Xml REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets PrintSupport Xml Network REQUIRED)
 find_package(Python3 REQUIRED)
 
 if(NOT LIBPLUGIN_DIR)
@@ -108,6 +108,7 @@ set(LIBRARIES
     Qt5::Widgets
     Qt5::PrintSupport
     Qt5::Xml
+    Qt5::Network
     ${QSCINTILLA_LIBRARY}
 )
 

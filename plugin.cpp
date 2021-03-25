@@ -7,6 +7,7 @@
 #include "stubs.h"
 #include "api_index.cpp"
 #include <QtCore>
+#include <QHostInfo>
 
 class Plugin : public sim::Plugin
 {
@@ -46,6 +47,14 @@ public:
                 apiReferenceMap[k] = appDir.absolutePath() + "/" + v;
             }
         }
+
+        QHostInfo::lookupHost("www.coppeliarobotics.com",
+            [=] (const QHostInfo &info)
+            {
+                if(info.error() == QHostInfo::NoError)
+                    online = true;
+            }
+        );
 
         sim::addLog(sim_verbosity_loadinfos, "CodeEditor plugin initialized");
     }
@@ -198,10 +207,16 @@ public:
         return url;
     }
 
+    bool isOnline() const
+    {
+        return online;
+    }
+
 private:
     UI *ui;
     SIM *sim;
     QMap<QString, QString> apiReferenceMap;
+    bool online = false;
 };
 
 SIM_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
@@ -209,6 +224,11 @@ SIM_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
 QUrl apiReferenceForSymbol(const QString &sym)
 {
     return sim::plugin->apiReferenceForSymbol(sym);
+}
+
+bool isOnline()
+{
+    return sim::plugin->isOnline();
 }
 
 // plugin entrypoints:
