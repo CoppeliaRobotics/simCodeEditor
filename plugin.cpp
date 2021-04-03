@@ -29,22 +29,12 @@ public:
 
         // load api index
         {
-            QDir appDir(QCoreApplication::applicationDirPath());
-#ifdef MAC_SIM
-#if SIM_PROGRAM_FULL_VERSION_NB < 4010000
-            if(!appDir.cd("../../..")) return;
-#else
-            // since 4.1.0, we have app bundle layout:
-            if(!appDir.cd("../Resources")) return;
-#endif // SIM_PROGRAM_FULL_VERSION_NB
-#endif // MAC_SIM
-            if(!appDir.cd("helpFiles")) return;
             int i = 0;
             while(api_index[i])
             {
                 QString k(api_index[i++]);
                 QString v(api_index[i++]);
-                apiReferenceMap[k] = appDir.absolutePath() + "/" + v;
+                apiReferenceMap[k] = v;
             }
         }
 
@@ -190,6 +180,28 @@ public:
         return -1;
     }
 
+    QString apiReferenceBase()
+    {
+        if(isOnline())
+        {
+            return "https://www.coppeliarobotics.com/helpFiles/";
+        }
+        else
+        {
+            QDir appDir(QCoreApplication::applicationDirPath());
+#ifdef MAC_SIM
+#if SIM_PROGRAM_FULL_VERSION_NB < 4010000
+            if(!appDir.cd("../../..")) return {};
+#else
+            // since 4.1.0, we have app bundle layout:
+            if(!appDir.cd("../Resources")) return {};
+#endif // SIM_PROGRAM_FULL_VERSION_NB
+#endif // MAC_SIM
+            if(!appDir.cd("helpFiles")) return {};
+            return "file://" + appDir.absolutePath() + "/";
+        }
+    }
+
     QUrl apiReferenceForSymbol(const QString &sym)
     {
         QMap<QString, QString>::const_iterator i = apiReferenceMap.find(sym);
@@ -202,7 +214,7 @@ public:
             anchor = refUrl.mid(anchorPos + 1);
             refUrl = refUrl.left(anchorPos);
         }
-        QUrl url(QUrl::fromLocalFile(refUrl));
+        QUrl url(apiReferenceBase() + refUrl);
         url.setFragment(anchor);
         return url;
     }
