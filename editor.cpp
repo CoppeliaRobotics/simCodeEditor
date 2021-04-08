@@ -41,7 +41,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
 
     // theme
 
-    setAStyle(QsciScintillaBase::STYLE_DEFAULT, o.text_col, o.background_col, o.fontSize, o.fontFace.toUtf8().data()); // set global default style
+    setAStyle(QsciScintillaBase::STYLE_DEFAULT, o.text_col, o.background_col, o.fontSize, o.fontFace.toUtf8().data(), o.fontBold); // set global default style
     SendScintilla(QsciScintillaBase::SCI_SETCARETFORE,(unsigned long)QColor(Qt::black).rgb());
     SendScintilla(QsciScintillaBase::SCI_STYLECLEARALL); // set all styles
 
@@ -252,14 +252,17 @@ void Editor::setText(const char* txt, int insertMode)
         SendScintilla(QsciScintillaBase::SCI_SETREADONLY, (int)1);
 }
 
-void Editor::setAStyle(int style,QColor fore,QColor back,int size,const char *face)
+void Editor::setAStyle(int style,QColor fore,QColor back,int size,const char *face,bool bold)
 {
     SendScintilla(QsciScintillaBase::SCI_STYLESETFORE,(unsigned long)style,(long)fore.rgb());
     SendScintilla(QsciScintillaBase::SCI_STYLESETBACK,(unsigned long)style,(long)back.rgb());
     if (size>=1)
         SendScintilla(QsciScintillaBase::SCI_STYLESETSIZE,(unsigned long)style,(long)size);
     if (face)
+    {
         SendScintilla(QsciScintillaBase::SCI_STYLESETFONT,(unsigned long)style,face);
+        SendScintilla(QsciScintillaBase::SCI_STYLESETBOLD,(unsigned long)style,bold);
+    }
 }
 
 void Editor::onCharAdded(int charAdded)
@@ -329,7 +332,7 @@ void Editor::onCharAdded(int charAdded)
                     if (s!="")
                     {
                         // tabs and window scroll are problematic : pos-=line.size()+startword;
-                        setAStyle(QsciScintillaBase::STYLE_CALLTIP,Qt::black,Qt::white,opts.fontSize,opts.fontFace.toUtf8().data());
+                        setAStyle(QsciScintillaBase::STYLE_CALLTIP,Qt::black,Qt::white,opts.fontSize,opts.fontFace.toUtf8().data(),opts.fontBold);
                         scintilla_->SendScintilla(QsciScintillaBase::SCI_CALLTIPUSESTYLE,(int)0);
 
                         int cursorPosInPixelsFromLeftWindowBorder=scintilla_->SendScintilla(QsciScintillaBase::SCI_POINTXFROMPOSITION,(int)0,(unsigned long)pos);

@@ -46,6 +46,7 @@ struct EditorOptions
     bool wrapWord;
     QString fontFace;
     int fontSize;
+    bool fontBold;
     QVector<UserKeyword> userKeywords;
     QColor text_col;
     QColor background_col;

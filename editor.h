@@ -22,7 +22,7 @@ public:
 
 public slots:
     void setText(const char* txt, int insertMode);
-    void setAStyle(int style, QColor fore, QColor back, int size=-1, const char *face = nullptr);
+    void setAStyle(int style, QColor fore, QColor back, int size=-1, const char *face = nullptr, bool bold = false);
     void onCharAdded(int charAdded);
     void onUpdateUi(int updated);
     void onModified(int, int, const char *, int, int, int, int, int, int, int);

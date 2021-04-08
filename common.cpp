@@ -34,6 +34,7 @@ void EditorOptions::readFromXML(const QString &xml)
         placement = EditorOptions::Placement::Center;
     fontFace = e.attribute("font", "Courier");
     fontSize = e.attribute("font-size", "14").toInt();
+    fontBold = parseBool(e.attribute("font-bold", "false"));
     activate = parseBool(e.attribute("activate", "true"));
     editable = parseBool(e.attribute("editable", "true"));
     lineNumbers = parseBool(e.attribute("line-numbers", "false"));
