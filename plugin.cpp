@@ -33,8 +33,6 @@ public:
                     online = true;
             }
         );
-
-        sim::addLog(sim_verbosity_loadinfos, "CodeEditor plugin initialized");
     }
 
     void onEnd()
@@ -49,6 +47,10 @@ public:
     void onFirstInstancePass(const sim::InstancePassFlags &flags)
     {
         simThread();
+
+        auto p = sim::getStringNamedParam("CodeEditor.verboseErrors");
+        if(p)
+            verboseErrors = *p == "1" || *p == "true";
 
         sim = new SIM(ui);
     }
@@ -174,7 +176,8 @@ public:
         int dotPos = sym.indexOf('.');
         if(dotPos < 0)
         {
-            sim::addLog(sim_verbosity_errors, "Invalid symbol: \"%s\"", sym.toStdString());
+            if(verboseErrors)
+                sim::addLog(sim_verbosity_errors, "Invalid symbol: \"%s\"", sym.toStdString());
             return {};
         }
         QString mod = sym.left(dotPos);
@@ -186,21 +189,24 @@ public:
 #if SIM_PROGRAM_FULL_VERSION_NB < 4010000
         if(!helpFiles.cd("../../.."))
         {
-            sim::addLog(sim_verbosity_errors, "Bad directory layout (<4.1.0)");
+            if(verboseErrors)
+                sim::addLog(sim_verbosity_errors, "Bad directory layout (<4.1.0)");
             return {};
         }
 #else
         // since 4.1.0, we have app bundle layout:
         if(!helpFiles.cd("../Resources"))
         {
-            sim::addLog(sim_verbosity_errors, "Bad directory layout (can't locate \"Resources\" dir)");
+            if(verboseErrors)
+                sim::addLog(sim_verbosity_errors, "Bad directory layout (can't locate \"Resources\" dir)");
             return {};
         }
 #endif // SIM_PROGRAM_FULL_VERSION_NB
 #endif // MAC_SIM
         if(!helpFiles.cd("helpFiles"))
         {
-            sim::addLog(sim_verbosity_errors, "Bad directory layout (can't locate \"helpFiles\" dir)");
+            if(verboseErrors)
+                sim::addLog(sim_verbosity_errors, "Bad directory layout (can't locate \"helpFiles\" dir)");
             return {};
         }
 
@@ -208,19 +214,22 @@ public:
         QDir idxDir(helpFiles);
         if(!idxDir.cd("index"))
         {
-            sim::addLog(sim_verbosity_errors, "Bad directory layout (missing \"index\" dir inside \"helpFiles\" dir)");
+            if(verboseErrors)
+                sim::addLog(sim_verbosity_errors, "Bad directory layout (missing \"index\" dir inside \"helpFiles\" dir)");
             return {};
         }
         QString idx = mod + ".json";
         if(!idxDir.exists(idx))
         {
-            sim::addLog(sim_verbosity_errors, "File %s not found", idx.toStdString());
+            if(verboseErrors)
+                sim::addLog(sim_verbosity_errors, "File %s not found", idx.toStdString());
             return {};
         }
         QFile idxFile(idxDir.filePath(idx));
         if(!idxFile.open(QIODevice::ReadOnly))
         {
-            sim::addLog(sim_verbosity_errors, "Could not open index file %s for reading", idx.toStdString());
+            if(verboseErrors)
+                sim::addLog(sim_verbosity_errors, "Could not open index file %s for reading", idx.toStdString());
             return {};
         }
         QByteArray idxData = idxFile.readAll();
@@ -231,7 +240,8 @@ public:
         QJsonObject::const_iterator i = idxObj.constFind(mod);
         if(i == idxObj.constEnd())
         {
-            sim::addLog(sim_verbosity_errors, "Bad index file %s (missing \"%s\" key)", idx.toStdString(), mod.toStdString());
+            if(verboseErrors)
+                sim::addLog(sim_verbosity_errors, "Bad index file %s (missing \"%s\" key)", idx.toStdString(), mod.toStdString());
             return {};
         }
         idxObj = i.value().toObject();
@@ -240,13 +250,15 @@ public:
         i = idxObj.constFind(func);
         if(i == idxObj.constEnd())
         {
-            sim::addLog(sim_verbosity_errors, "Key \"%s\" not found in index file %s", func.toStdString(), idx.toStdString());
+            if(verboseErrors)
+                sim::addLog(sim_verbosity_errors, "Key \"%s\" not found in index file %s", func.toStdString(), idx.toStdString());
             return {};
         }
         QString fileName = i.value().toString();
         if(fileName.isNull())
         {
-            sim::addLog(sim_verbosity_errors, "Bad key \"%s\" in index file %s (not a string)", func.toStdString(), idx.toStdString());
+            if(verboseErrors)
+                sim::addLog(sim_verbosity_errors, "Bad key \"%s\" in index file %s (not a string)", func.toStdString(), idx.toStdString());
             return {};
         }
 
@@ -287,6 +299,7 @@ private:
     UI *ui;
     SIM *sim;
     bool online = false;
+    bool verboseErrors = false;
 };
 
 SIM_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
