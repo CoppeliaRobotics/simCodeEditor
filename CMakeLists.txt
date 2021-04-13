@@ -6,7 +6,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_MACOSX_RPATH 1)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets PrintSupport Xml Network REQUIRED)
-find_package(Python3 REQUIRED)
 
 if(NOT LIBPLUGIN_DIR)
     if(DEFINED ENV{COPPELIASIM_ROOT_DIR})
@@ -53,16 +52,6 @@ endif()
 add_definitions(-DQT_COMPIL)
 
 coppeliasim_generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/generated XML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/callbacks.xml LUA_FILE ${CMAKE_CURRENT_SOURCE_DIR}/simCodeEditor.lua)
-
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated)
-add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generated/api_index.cpp
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/api_index.py
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/api_index.py
-        --input ${COPPELIASIM_ROOT_DIR}/helpFiles
-        --output ${CMAKE_CURRENT_BINARY_DIR}/generated/api_index.cpp
-)
-add_custom_target(generate_api_index DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/generated/api_index.cpp)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
@@ -113,7 +102,6 @@ set(LIBRARIES
 )
 
 coppeliasim_add_plugin(simExtCodeEditor SOURCES ${SOURCES})
-add_dependencies(simExtCodeEditor generate_api_index)
 target_link_libraries(simExtCodeEditor ${LIBRARIES})
 coppeliasim_add_plugin_directory(snippets)
 

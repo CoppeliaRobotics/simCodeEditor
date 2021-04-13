@@ -5,7 +5,6 @@
 #include "simPlusPlus/Plugin.h"
 #include "common.h"
 #include "stubs.h"
-#include "api_index.cpp"
 #include <QtCore>
 #include <QHostInfo>
 
@@ -26,17 +25,6 @@ public:
         setBuildDate(BUILD_DATE);
 
         ui = new UI;
-
-        // load api index
-        {
-            int i = 0;
-            while(api_index[i])
-            {
-                QString k(api_index[i++]);
-                QString v(api_index[i++]);
-                apiReferenceMap[k] = v;
-            }
-        }
 
         QHostInfo::lookupHost("www.coppeliarobotics.com",
             [=] (const QHostInfo &info)
@@ -180,42 +168,113 @@ public:
         return -1;
     }
 
-    QString apiReferenceBase()
-    {
-        if(isOnline())
-        {
-            return "https://www.coppeliarobotics.com/helpFiles/";
-        }
-        else
-        {
-            QDir appDir(QCoreApplication::applicationDirPath());
-#ifdef MAC_SIM
-#if SIM_PROGRAM_FULL_VERSION_NB < 4010000
-            if(!appDir.cd("../../..")) return {};
-#else
-            // since 4.1.0, we have app bundle layout:
-            if(!appDir.cd("../Resources")) return {};
-#endif // SIM_PROGRAM_FULL_VERSION_NB
-#endif // MAC_SIM
-            if(!appDir.cd("helpFiles")) return {};
-            return "file://" + appDir.absolutePath() + "/";
-        }
-    }
-
     QUrl apiReferenceForSymbol(const QString &sym)
     {
-        QMap<QString, QString>::const_iterator i = apiReferenceMap.find(sym);
-        if(i == apiReferenceMap.end()) return {};
-        QString refUrl = i.value();
-        int anchorPos = refUrl.lastIndexOf("#");
+        // split symbol (e.g.: "sim.getObjectHandle" -> "sim", "getObjectHandle")
+        int dotPos = sym.indexOf('.');
+        if(dotPos < 0)
+        {
+            sim::addLog(sim_verbosity_errors, "Invalid symbol: \"%s\"", sym.toStdString());
+            return {};
+        }
+        QString mod = sym.left(dotPos);
+        QString func = sym.mid(dotPos + 1);
+
+        // locate local "helpFiles" dir
+        QDir helpFiles(QCoreApplication::applicationDirPath());
+#ifdef MAC_SIM
+#if SIM_PROGRAM_FULL_VERSION_NB < 4010000
+        if(!helpFiles.cd("../../.."))
+        {
+            sim::addLog(sim_verbosity_errors, "Bad directory layout (<4.1.0)");
+            return {};
+        }
+#else
+        // since 4.1.0, we have app bundle layout:
+        if(!helpFiles.cd("../Resources"))
+        {
+            sim::addLog(sim_verbosity_errors, "Bad directory layout (can't locate \"Resources\" dir)");
+            return {};
+        }
+#endif // SIM_PROGRAM_FULL_VERSION_NB
+#endif // MAC_SIM
+        if(!helpFiles.cd("helpFiles"))
+        {
+            sim::addLog(sim_verbosity_errors, "Bad directory layout (can't locate \"helpFiles\" dir)");
+            return {};
+        }
+
+        // read index/<mod>.json file
+        QDir idxDir(helpFiles);
+        if(!idxDir.cd("index"))
+        {
+            sim::addLog(sim_verbosity_errors, "Bad directory layout (missing \"index\" dir inside \"helpFiles\" dir)");
+            return {};
+        }
+        QString idx = mod + ".json";
+        if(!idxDir.exists(idx))
+        {
+            sim::addLog(sim_verbosity_errors, "File %s not found", idx.toStdString());
+            return {};
+        }
+        QFile idxFile(idxDir.filePath(idx));
+        if(!idxFile.open(QIODevice::ReadOnly))
+        {
+            sim::addLog(sim_verbosity_errors, "Could not open index file %s for reading", idx.toStdString());
+            return {};
+        }
+        QByteArray idxData = idxFile.readAll();
+        QJsonDocument idxDoc(QJsonDocument::fromJson(idxData));
+
+        // look for a <mod> key, with an object value
+        QJsonObject idxObj(idxDoc.object());
+        QJsonObject::const_iterator i = idxObj.constFind(mod);
+        if(i == idxObj.constEnd())
+        {
+            sim::addLog(sim_verbosity_errors, "Bad index file %s (missing \"%s\" key)", idx.toStdString(), mod.toStdString());
+            return {};
+        }
+        idxObj = i.value().toObject();
+
+        // then for a <func> key, with a string value
+        i = idxObj.constFind(func);
+        if(i == idxObj.constEnd())
+        {
+            sim::addLog(sim_verbosity_errors, "Key \"%s\" not found in index file %s", func.toStdString(), idx.toStdString());
+            return {};
+        }
+        QString fileName = i.value().toString();
+        if(fileName.isNull())
+        {
+            sim::addLog(sim_verbosity_errors, "Bad key \"%s\" in index file %s (not a string)", func.toStdString(), idx.toStdString());
+            return {};
+        }
+
+        // split fragment if any
+        int anchorPos = fileName.lastIndexOf("#");
         QString anchor;
         if(anchorPos >= 0)
         {
-            anchor = refUrl.mid(anchorPos + 1);
-            refUrl = refUrl.left(anchorPos);
+            anchor = fileName.mid(anchorPos + 1);
+            fileName = fileName.left(anchorPos);
         }
-        QUrl url(apiReferenceBase() + refUrl);
-        url.setFragment(anchor);
+
+        // compose online/offline URL
+        QUrl url;
+        if(isOnline())
+        {
+            url.setScheme("https");
+            url.setHost("www.coppeliarobotics.com");
+            url.setPath("/helpFiles/" + fileName);
+        }
+        else
+        {
+            url.setScheme("file");
+            url.setPath(helpFiles.absolutePath() + "/" + fileName);
+        }
+        if(!anchor.isEmpty())
+            url.setFragment(anchor);
+
         return url;
     }
 
@@ -227,7 +286,6 @@ public:
 private:
     UI *ui;
     SIM *sim;
-    QMap<QString, QString> apiReferenceMap;
     bool online = false;
 };
 
