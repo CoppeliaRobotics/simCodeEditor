@@ -276,12 +276,12 @@ public:
         {
             url.setScheme("https");
             url.setHost("www.coppeliarobotics.com");
-            url.setPath("/helpFiles/" + fileName);
+            url.setPath("/helpFiles/en/" + fileName);
         }
         else
         {
             url.setScheme("file");
-            url.setPath(helpFiles.absolutePath() + "/" + fileName);
+            url.setPath(helpFiles.absolutePath() + "/en/" + fileName);
         }
         if(!anchor.isEmpty())
             url.setFragment(anchor);
