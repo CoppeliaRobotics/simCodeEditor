@@ -173,15 +173,14 @@ public:
     QUrl apiReferenceForSymbol(const QString &sym)
     {
         // split symbol (e.g.: "sim.getObjectHandle" -> "sim", "getObjectHandle")
+        QString mod("__global__");
+        QString func(sym);
         int dotPos = sym.indexOf('.');
-        if(dotPos < 0)
+        if(dotPos >= 0)
         {
-            if(verboseErrors)
-                sim::addLog(sim_verbosity_errors, "Invalid symbol: \"%s\"", sym.toStdString());
-            return {};
+            mod = sym.left(dotPos);
+            func = sym.mid(dotPos + 1);
         }
-        QString mod = sym.left(dotPos);
-        QString func = sym.mid(dotPos + 1);
 
         // locate local "helpFiles" dir
         QDir helpFiles(QCoreApplication::applicationDirPath());
