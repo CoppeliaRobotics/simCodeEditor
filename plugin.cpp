@@ -173,7 +173,7 @@ public:
     QUrl apiReferenceForSymbol(const QString &sym)
     {
         // split symbol (e.g.: "sim.getObjectHandle" -> "sim", "getObjectHandle")
-        QString mod("__global__");
+        QString mod;
         QString func(sym);
         int dotPos = sym.indexOf('.');
         if(dotPos >= 0)
@@ -217,7 +217,7 @@ public:
                 sim::addLog(sim_verbosity_errors, "Bad directory layout (missing \"index\" dir inside \"helpFiles\" dir)");
             return {};
         }
-        QString idx = mod + ".json";
+        QString idx = (mod.isEmpty() ? "__global__" : mod) + ".json";
         if(!idxDir.exists(idx))
         {
             if(verboseErrors)
@@ -234,16 +234,20 @@ public:
         QByteArray idxData = idxFile.readAll();
         QJsonDocument idxDoc(QJsonDocument::fromJson(idxData));
 
-        // look for a <mod> key, with an object value
         QJsonObject idxObj(idxDoc.object());
-        QJsonObject::const_iterator i = idxObj.constFind(mod);
-        if(i == idxObj.constEnd())
+        QJsonObject::const_iterator i;
+        if(!mod.isEmpty())
         {
-            if(verboseErrors)
-                sim::addLog(sim_verbosity_errors, "Bad index file %s (missing \"%s\" key)", idx.toStdString(), mod.toStdString());
-            return {};
+            // look for a <mod> key, with an object value
+            i = idxObj.constFind(mod);
+            if(i == idxObj.constEnd())
+            {
+                if(verboseErrors)
+                    sim::addLog(sim_verbosity_errors, "Bad index file %s (missing \"%s\" key)", idx.toStdString(), mod.toStdString());
+                return {};
+            }
+            idxObj = i.value().toObject();
         }
-        idxObj = i.value().toObject();
 
         // then for a <func> key, with a string value
         i = idxObj.constFind(func);
