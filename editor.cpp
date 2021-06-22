@@ -283,11 +283,12 @@ void Editor::onCharAdded(int charAdded)
             if ( (charAdded=='(')||(charAdded==',') )
             { // Do we need to activate a calltip?
 
-                char linebuf[1000];
-                int current=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURLINE,(unsigned long)999,linebuf);
+                int bufsz=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURLINE,(unsigned long)0,(unsigned long)0);
+                char *linebuf=new char[bufsz];
+                int current=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURLINE,(unsigned long)bufsz,linebuf);
                 int pos=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURRENTPOS);
-                linebuf[current]='\0';
                 std::string line(linebuf);
+                delete[] linebuf;
                 // 1. Find '('. Not perfect, will also detect e.g. "(" or similar
                 int cnt=0;
                 int pahr=-1;
@@ -354,10 +355,12 @@ void Editor::onCharAdded(int charAdded)
                 int p=-1+scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURRENTPOS);
                 if (p>=2)
                 {
-                    char linebuf[1000];
-                    int current=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURLINE,(unsigned long)999,linebuf);
-                    linebuf[current]='\0';
+                    int bufsz=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURLINE,(unsigned long)0,(unsigned long)0);
+                    char *linebuf=new char[bufsz];
+                    int current=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURLINE,(unsigned long)bufsz,linebuf);
+                    int pos=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURRENTPOS);
                     std::string line(linebuf);
+                    delete[] linebuf;
                     int ind=(int)line.size()-1;
                     int cnt=0;
                     std::string theWord;
