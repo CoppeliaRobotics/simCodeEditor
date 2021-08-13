@@ -282,10 +282,10 @@ void Editor::onCharAdded(int charAdded)
         { // Calltip is not active
             if ( (charAdded=='(')||(charAdded==',') )
             { // Do we need to activate a calltip?
-
                 int bufsz=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURLINE,(unsigned long)0,(char*)nullptr);
-                char *linebuf=new char[bufsz];
+                char *linebuf=new char[bufsz+1];
                 int current=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURLINE,(unsigned long)bufsz,linebuf);
+                linebuf[current]='\0';
                 int pos=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURRENTPOS);
                 std::string line(linebuf);
                 delete[] linebuf;
@@ -356,8 +356,9 @@ void Editor::onCharAdded(int charAdded)
                 if (p>=2)
                 {
                     int bufsz=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURLINE,(unsigned long)0,(char*)nullptr);
-                    char *linebuf=new char[bufsz];
+                    char *linebuf=new char[bufsz+1];
                     int current=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURLINE,(unsigned long)bufsz,linebuf);
+                    linebuf[current]='\0';
                     int pos=scintilla_->SendScintilla(QsciScintillaBase::SCI_GETCURRENTPOS);
                     std::string line(linebuf);
                     delete[] linebuf;
