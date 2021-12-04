@@ -172,7 +172,7 @@ public:
 
     QUrl apiReferenceForSymbol(const QString &sym)
     {
-        // split symbol (e.g.: "sim.getObjectHandle" -> "sim", "getObjectHandle")
+        // split symbol (e.g.: "sim.getObject" -> "sim", "getObject")
         QString mod;
         QString func(sym);
         int dotPos = sym.indexOf('.');
