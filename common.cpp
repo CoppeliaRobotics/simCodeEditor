@@ -25,12 +25,12 @@ void EditorOptions::readFromXML(const QString &xml)
     size = QSize(sizeStrLst[0].toInt(), sizeStrLst[1].toInt());
     QStringList posStrLst = e.attribute("position", "50 50").split(" ");
     pos = QPoint(posStrLst[0].toInt(), posStrLst[1].toInt());
-    QString placement = e.attribute("placement", "center");
-    if(placement == "absolute")
+    QString pl = e.attribute("placement", "center");
+    if(pl == "absolute")
         placement = EditorOptions::Placement::Absolute;
-    else if(placement == "relative")
+    else if(pl == "relative")
         placement = EditorOptions::Placement::Relative;
-    else if(placement == "center")
+    else if(pl == "center")
         placement = EditorOptions::Placement::Center;
     fontFace = e.attribute("font", "Courier");
     fontSize = e.attribute("font-size", "14").toInt();
@@ -41,6 +41,13 @@ void EditorOptions::readFromXML(const QString &xml)
     maxLines = e.attribute("max-lines", "0").toInt();
     tab_width = e.attribute("tab-width", "4").toInt();
     isLua = parseBool(e.attribute("is-lua", "false"));
+    QString l = e.attribute("lang", "none");
+    if (l == "none")
+        lang = EditorOptions::Lang::none;
+    else if (l == "lua")
+        lang = EditorOptions::Lang::lua;
+    else if (l == "python")
+        lang = EditorOptions::Lang::python;
     onClose = e.attribute("on-close", "");
     wrapWord = parseBool(e.attribute("wrap-word", "false"));
     text_col = parseColor(e.attribute("text-col", "50 50 50"));

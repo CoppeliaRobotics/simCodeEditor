@@ -3,6 +3,7 @@
 #include "toolbar.h"
 #include <SciLexer.h>
 #include <Qsci/qscilexerlua.h>
+#include <Qsci/qscilexerpython.h>
 
 // implemented in plugin.cpp:
 QUrl apiReferenceForSymbol(const QString &sym);
@@ -10,8 +11,6 @@ QUrl apiReferenceForSymbol(const QString &sym);
 Editor::Editor(Dialog *d)
     : dialog(d)
 {
-    QsciLexerLua *lexer = new QsciLexerLua;
-    setLexer(lexer);
     SendScintilla(QsciScintillaBase::SCI_SETSTYLEBITS, 5);
     setTabWidth(4);
     setTabIndents(true);
@@ -35,6 +34,16 @@ bool Editor::isActive() const
 void Editor::setEditorOptions(const EditorOptions &o)
 {
     opts = o;
+    if (o.lang == EditorOptions::Lang::python)
+    {
+        QsciLexerPython* lexer = new QsciLexerPython;
+        setLexer(lexer);
+    }
+    else
+    {
+        QsciLexerLua* lexer = new QsciLexerLua;
+        setLexer(lexer);
+    }
 
     setReadOnly(!o.editable);
     setTabWidth(o.tab_width);
@@ -62,13 +71,15 @@ void Editor::setEditorOptions(const EditorOptions &o)
     SendScintilla(QsciScintillaBase::SCI_INDICSETALPHA, (unsigned long)20, (long)160);
     SendScintilla(QsciScintillaBase::SCI_INDICSETFORE, (unsigned long)20, (long)o.selection_col.rgb());
 
+    if (o.lang != EditorOptions::Lang::python)
+    {
+        setAStyle(SCE_LUA_WORD2, o.keyword1_col, o.background_col);
+        setAStyle(SCE_LUA_WORD3, o.keyword2_col, o.background_col);
+        setAStyle(SCE_LUA_WORD7, o.keyword1_col, o.background_col);
+        setAStyle(SCE_LUA_WORD8, o.keyword2_col, o.background_col);
+    }
 
-    setAStyle(SCE_LUA_WORD2, o.keyword1_col, o.background_col);
-    setAStyle(SCE_LUA_WORD3, o.keyword2_col, o.background_col);
-    setAStyle(SCE_LUA_WORD7, o.keyword1_col, o.background_col);
-    setAStyle(SCE_LUA_WORD8, o.keyword2_col, o.background_col);
-
-    if(o.isLua)
+    if ( (o.lang == EditorOptions::Lang::lua)||(o.isLua) )
     {
         setFolding(QsciScintilla::BoxedTreeFoldStyle);
         setAStyle(SCE_LUA_COMMENT, o.comment_col, o.background_col);
@@ -83,6 +94,26 @@ void Editor::setEditorOptions(const EditorOptions &o)
         setAStyle(SCE_LUA_WORD, o.keyword3_col, o.background_col);
         setAStyle(SCE_LUA_WORD4, o.keyword4_col, o.background_col);
         setAStyle(SCE_LUA_IDENTIFIER, o.identifier_col, o.background_col);
+    }
+
+    if (o.lang == EditorOptions::Lang::python)
+    {
+        setFolding(QsciScintilla::BoxedTreeFoldStyle);
+        setAStyle(SCE_P_COMMENTLINE, o.comment_col, o.background_col);
+        setAStyle(SCE_P_COMMENTBLOCK, o.comment_col, o.background_col);
+        setAStyle(SCE_P_TRIPLE, o.comment_col, o.background_col);
+        setAStyle(SCE_P_TRIPLEDOUBLE, o.comment_col, o.background_col);
+        setAStyle(SCE_P_NUMBER, o.number_col, o.background_col);
+        setAStyle(SCE_P_STRING, o.string_col, o.background_col);
+        setAStyle(SCE_P_STRINGEOL, o.string_col, o.background_col);
+        setAStyle(SCE_P_CHARACTER, o.character_col, o.background_col);
+        setAStyle(SCE_P_OPERATOR, o.operator_col, o.background_col);
+        setAStyle(SCE_P_WORD, o.keyword3_col, o.background_col); // Python keywords
+//        setAStyle(SCE_P_IDENTIFIER, o.keyword4_col, o.background_col); // obj & variable
+        setAStyle(SCE_P_DEFNAME, o.keyword4_col, o.background_col); // func
+        setAStyle(SCE_P_WORD2, o.keyword4_col, o.number_col); // ?? None
+        setAStyle(SCE_P_CLASSNAME, o.identifier_col, o.string_col); // ?? None
+//        setAStyle(SCE_P_DECORATOR, o.identifier_col, o.number_col); // ?? None
     }
 
     SendScintilla(QsciScintillaBase::SCI_INDICSETSTYLE,(unsigned long)20,(long)QsciScintillaBase::INDIC_STRAIGHTBOX);
@@ -103,7 +134,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
             sep2 = " ";
         }
     }
-    if (!o.isLua)
+    if ( (o.lang == EditorOptions::Lang::none) && (!o.isLua) )
     {
         for (int i=0;i<8;i++)
             SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)i, "");
