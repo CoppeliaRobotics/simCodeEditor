@@ -97,14 +97,24 @@ ToolBar::~ToolBar()
 {
 }
 
-void getFunctionDefs(const QString &lua, QVector<QString> &names, QVector<int> &pos)
+void getFunctionDefs(const EditorOptions &opts, const QString &code, QVector<QString> &names, QVector<int> &pos)
 {
-    QMap<QString, int> ret;
-    QRegularExpression regexp("("
-        "function\\s+([a-zA-Z0-9_.:]+)\\s*(\\(.*\\))"
-    "|" "([a-zA-Z0-9_.]+)\\s*=\\s*function\\s*(\\(.*\\))"
-    ")");
-    auto i = regexp.globalMatch(lua);
+    if(opts.lang == EditorOptions::Lang::None) return;
+    QRegularExpression regexp(
+        opts.lang == EditorOptions::Lang::Lua
+        ?
+            "("
+                "function\\s+([a-zA-Z0-9_.:]+)\\s*(\\(.*\\))"
+            "|" "([a-zA-Z0-9_.]+)\\s*=\\s*function\\s*(\\(.*\\))"
+            ")"
+        :
+        opts.lang == EditorOptions::Lang::Python
+        ?
+            "def\\s+([a-zA-Z0-9_]+)\\s*(\\(.*\\))\\s*:\\s*"
+        :
+            "$_"
+    );
+    auto i = regexp.globalMatch(code);
     while(i.hasNext())
     {
         const auto &m = i.next();
@@ -115,6 +125,8 @@ void getFunctionDefs(const QString &lua, QVector<QString> &names, QVector<int> &
 
 void ToolBar::updateButtons()
 {
+    EditorOptions opts = parent->options();
+
     auto activeEditor = parent->activeEditor();
     actUndo->setEnabled(activeEditor->isUndoAvailable());
     actRedo->setEnabled(activeEditor->isRedoAvailable());
@@ -151,7 +163,7 @@ void ToolBar::updateButtons()
     funcNav.menu->clear();
     QVector<QString> names;
     QVector<int> pos;
-    getFunctionDefs(parent->activeEditor()->text(), names, pos);
+    getFunctionDefs(opts, parent->activeEditor()->text(), names, pos);
     for(int i = 0; i < names.count(); i++)
     {
         int line, index;
