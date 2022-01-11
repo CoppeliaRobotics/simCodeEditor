@@ -47,6 +47,8 @@ struct EditorOptions
         Python
     };
     Lang lang {None};
+    QString langExt {"txt"};
+    QString langComment {""};
     QString snippetsGroup;
     QString onClose;
     bool wrapWord;

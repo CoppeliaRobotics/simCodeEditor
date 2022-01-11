@@ -45,10 +45,10 @@ void SnippetsLibrary::load(const EditorOptions &opts)
     // TODO: add userdir to snippetLocations
 
     for(const auto &dir : snippetLocations)
-        loadFromPath(dir);
+        loadFromPath(opts, dir);
 }
 
-void SnippetsLibrary::loadFromPath(const QString &path)
+void SnippetsLibrary::loadFromPath(const EditorOptions &opts, const QString &path)
 {
     // scan subdirectories:
     QStringList dirs;
@@ -64,7 +64,7 @@ void SnippetsLibrary::loadFromPath(const QString &path)
 
         QMap<QString, QString> dirMeta;
         QString _;
-        readFile(dir + "/__index__.lua", dirMeta, _);
+        readFile(opts, dir + "/__index__." + opts.langExt, dirMeta, _);
         if(relDir == ".") dirMeta["sortKey"] = "~~~~~~~~";
 
         auto k = dirMeta.value("sortKey", relDir);
@@ -77,7 +77,7 @@ void SnippetsLibrary::loadFromPath(const QString &path)
         QFileInfo dirInfo(dir);
         snippetGroup.lastModified[dir] = dirInfo.lastModified();
 
-        QDirIterator iFile(dir, QStringList() << "*.lua", QDir::Files);
+        QDirIterator iFile(dir, QStringList() << "*." + opts.langExt, QDir::Files);
         QStringList files;
         while(iFile.hasNext())
             files << iFile.next();
@@ -89,7 +89,7 @@ void SnippetsLibrary::loadFromPath(const QString &path)
             if(info.baseName() == "__index__") continue;
             Snippet snippet;
             QMap<QString, QString> meta;
-            readFile(file, meta, snippet.content);
+            readFile(opts, file, meta, snippet.content);
             snippet.name = meta.value("name", info.baseName());
             snippet.filePath = file;
             snippet.lastModified = info.lastModified();
@@ -99,7 +99,7 @@ void SnippetsLibrary::loadFromPath(const QString &path)
     }
 }
 
-bool SnippetsLibrary::readFile(const QString &file, QMap<QString, QString> &meta, QString &content) const
+bool SnippetsLibrary::readFile(const EditorOptions &opts, const QString &file, QMap<QString, QString> &meta, QString &content) const
 {
     QFile f(file);
     if(!f.open(QFile::ReadOnly | QFile::Text))
@@ -108,7 +108,7 @@ bool SnippetsLibrary::readFile(const QString &file, QMap<QString, QString> &meta
     QTextStream in(&f);
     content = "";
     QString line;
-    QRegularExpression re("^\\s*--@(\\w+) (.*)$");
+    QRegularExpression re("^\\s*" + opts.langComment + "@(\\w+) (.*)$");
     while(!in.atEnd())
     {
         line = in.readLine();

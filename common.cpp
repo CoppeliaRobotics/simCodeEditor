@@ -45,11 +45,23 @@ void EditorOptions::readFromXML(const QString &xml)
         simAddLog(PLUGIN_NAME, sim_verbosity_errors, "XML contains deprecated 'is-lua' attriibute");
     QString l = e.attribute("lang", "none");
     if (l == "none")
+    {
         lang = EditorOptions::Lang::None;
+        langExt = "txt";
+        langComment = "";
+    }
     else if (l == "lua")
+    {
         lang = EditorOptions::Lang::Lua;
+        langExt = "lua";
+        langComment = "--";
+    }
     else if (l == "python")
+    {
         lang = EditorOptions::Lang::Python;
+        langExt = "py";
+        langComment = "#";
+    }
     snippetsGroup = e.attribute("snippets-group", l);
     onClose = e.attribute("on-close", "");
     wrapWord = parseBool(e.attribute("wrap-word", "false"));

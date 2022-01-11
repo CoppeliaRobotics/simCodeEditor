@@ -34,8 +34,8 @@ public:
     SnippetsLibrary();
     void load(const EditorOptions &opts);
 private:
-    void loadFromPath(const QString &path);
-    bool readFile(const QString &file, QMap<QString, QString> &meta, QString &content) const;
+    void loadFromPath(const EditorOptions &opts, const QString &path);
+    bool readFile(const EditorOptions &opts, const QString &file, QMap<QString, QString> &meta, QString &content) const;
 public:
     bool changed() const;
     bool empty() const;
