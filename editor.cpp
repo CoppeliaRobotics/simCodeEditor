@@ -190,7 +190,7 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
     if((tok.front() == '\'' && tok.back() == '\'') || (tok.front() == '"' && tok.back() == '"'))
     {
         QString tok1 = tok.mid(1, tok.size() - 2);
-        QString fp = opts.resolveLuaFilePath(tok1);
+        QString fp = opts.resolveScriptFilePath(tok1);
         if(fp != "")
         {
             menu->addSeparator();

@@ -71,10 +71,10 @@ struct EditorOptions
     QColor keyword3_col;
     QColor keyword4_col;
 
-    QVector<QString> luaSearchPath;
+    QVector<QString> scriptSearchPath;
 
     void readFromXML(const QString &xml);
-    QString resolveLuaFilePath(const QString &f);
+    QString resolveScriptFilePath(const QString &f);
 };
 
 char * stringBufferCopy(const QString &str);

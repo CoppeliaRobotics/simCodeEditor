@@ -125,20 +125,19 @@ void EditorOptions::readFromXML(const QString &xml)
         }
     }
 
-    QString searchPaths = e.attribute("lua-search-paths", "");
-    QStringList spl = searchPaths.split(";");
+    QStringList spl = e.attribute("search-paths", "").split(";");
     for (int i = 0; i < spl.size(); i++)
     {
         if (spl.at(i).size() > 1)
-            luaSearchPath.push_back(spl.at(i));
+            scriptSearchPath.push_back(spl.at(i));
     }
 }
 
-QString EditorOptions::resolveLuaFilePath(const QString &f)
+QString EditorOptions::resolveScriptFilePath(const QString &f)
 {
     if(f == "") return "";
 
-    for(auto path : luaSearchPath)
+    for(auto path : scriptSearchPath)
     {
         QString fullPath = path;
         fullPath.replace("?",f);
