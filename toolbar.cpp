@@ -97,29 +97,54 @@ ToolBar::~ToolBar()
 {
 }
 
-void getFunctionDefs(const EditorOptions &opts, const QString &code, QVector<QString> &names, QVector<int> &pos)
+void getFunctionDefs(const EditorOptions &opts, const QString &code, QVector<QString> &names, QVector<int> &pos, const QString &re, std::function<QString(QRegularExpressionMatch)> n, std::function<int(QRegularExpressionMatch)> p)
 {
     if(opts.lang == EditorOptions::Lang::None) return;
-    QRegularExpression regexp(
-        opts.lang == EditorOptions::Lang::Lua
-        ?
-            "("
-                "function\\s+([a-zA-Z0-9_.:]+)\\s*(\\(.*\\))"
-            "|" "([a-zA-Z0-9_.]+)\\s*=\\s*function\\s*(\\(.*\\))"
-            ")"
-        :
-        opts.lang == EditorOptions::Lang::Python
-        ?
-            "def\\s+([a-zA-Z0-9_]+)\\s*(\\(.*\\))\\s*:\\s*"
-        :
-            "$_"
-    );
+    QRegularExpression regexp(re);
     auto i = regexp.globalMatch(code);
     while(i.hasNext())
     {
         const auto &m = i.next();
-        names.append(m.captured(2) + m.captured(3) + m.captured(4) + m.captured(5));
-        pos.append(qMax(m.capturedStart(2), m.capturedStart(4)));
+        names.append(n(m));
+        pos.append(p(m));
+    }
+}
+
+void getFunctionDefs(const EditorOptions &opts, const QString &code, QVector<QString> &names, QVector<int> &pos)
+{
+    switch(opts.lang)
+    {
+    case EditorOptions::Lang::None:
+        break;
+    case EditorOptions::Lang::Lua:
+        getFunctionDefs(opts, code, names, pos,
+            "("
+                "function\\s+([a-zA-Z0-9_.:]+)\\s*(\\(.*\\))"
+            "|" "([a-zA-Z0-9_.]+)\\s*=\\s*function\\s*(\\(.*\\))"
+            ")",
+            [&] (QRegularExpressionMatch m)
+            {
+                return m.captured(2) + m.captured(3) + m.captured(4) + m.captured(5);
+            },
+            [&] (QRegularExpressionMatch m)
+            {
+                return qMax(m.capturedStart(2), m.capturedStart(4));
+            }
+        );
+        break;
+    case EditorOptions::Lang::Python:
+        getFunctionDefs(opts, code, names, pos,
+            "def\\s+([a-zA-Z0-9_]+)\\s*(\\(.*\\))\\s*:\\s*",
+            [&] (QRegularExpressionMatch m)
+            {
+                return m.captured(1) + m.captured(2);
+            },
+            [&] (QRegularExpressionMatch m)
+            {
+                return m.capturedStart(1);
+            }
+        );
+        break;
     }
 }
 
