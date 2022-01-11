@@ -42,7 +42,7 @@ void EditorOptions::readFromXML(const QString &xml)
     maxLines = e.attribute("max-lines", "0").toInt();
     tab_width = e.attribute("tab-width", "4").toInt();
     if(e.hasAttribute("is-lua"))
-        simAddLog(PLUGIN_NAME, sim_verbosity_errors, "XML contains deprecated 'is-lua' attriibute");
+        simAddLog(PLUGIN_NAME, sim_verbosity_errors, "XML contains deprecated 'is-lua' attribute");
     QString l = e.attribute("lang", "none");
     if (l == "none")
     {
@@ -125,7 +125,9 @@ void EditorOptions::readFromXML(const QString &xml)
         }
     }
 
-    QStringList spl = e.attribute("search-paths", "").split(";");
+    if(e.hasAttribute("lua-search-paths"))
+        simAddLog(PLUGIN_NAME, sim_verbosity_errors, "XML contains deprecated 'lua-search-paths' attribute");
+    QStringList spl = e.attribute("search-paths", e.attribute("lua-search-paths")).split(";");
     for (int i = 0; i < spl.size(); i++)
     {
         if (spl.at(i).size() > 1)
