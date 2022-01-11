@@ -29,18 +29,20 @@ bool SnippetGroup::empty() const
 
 SnippetsLibrary::SnippetsLibrary()
 {
-    {
-        QDir snippetsDir(QCoreApplication::applicationDirPath());
-        if(!snippetsDir.cd("snippets")) return;
-        snippetLocations << snippetsDir.absolutePath();
-    }
-
-    // TODO: add userdir to snippetLocations
 }
 
-void SnippetsLibrary::load()
+void SnippetsLibrary::load(const EditorOptions &opts)
 {
     snippetGroups.clear();
+
+    QStringList snippetLocations;
+
+    // system-wide snippets:
+    QDir snippetsBaseDir(QCoreApplication::applicationDirPath());
+    if(snippetsBaseDir.cd("snippets") && snippetsBaseDir.cd(opts.snippetsGroup))
+        snippetLocations << snippetsBaseDir.absolutePath();
+
+    // TODO: add userdir to snippetLocations
 
     for(const auto &dir : snippetLocations)
         loadFromPath(dir);

@@ -73,7 +73,7 @@ ToolBar::ToolBar(bool canRestart, Dialog *parent)
         snippetButton->setToolTip("Snippets library");
         connect(snippetLib.act, &QAction::triggered, snippetButton, &QToolButton::showMenu);
     }
-    snippetsLibrary.load();
+    snippetsLibrary.load(parent->options());
     snippetsLibrary.fillMenu(parent, snippetLib.menu);
     snippetLib.act->setVisible(!snippetsLibrary.empty());
 
@@ -169,7 +169,7 @@ void ToolBar::updateButtons()
 
     if(snippetsLibrary.changed())
     {
-        snippetsLibrary.load();
+        snippetsLibrary.load(parent->options());
         snippetsLibrary.fillMenu(parent, snippetLib.menu);
         snippetLib.act->setVisible(!snippetsLibrary.empty());
     }

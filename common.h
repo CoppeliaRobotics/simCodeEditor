@@ -47,6 +47,7 @@ struct EditorOptions
         Python
     };
     Lang lang {None};
+    QString snippetsGroup;
     QString onClose;
     bool wrapWord;
     QString fontFace;

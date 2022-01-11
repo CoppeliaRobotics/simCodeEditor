@@ -55,6 +55,9 @@ private slots:
 public slots:
     void updateCursorSelectionDisplay();
 
+public:
+    inline EditorOptions options() const { return opts; }
+
 private:
     UI *ui;
     ToolBar *toolBar_;

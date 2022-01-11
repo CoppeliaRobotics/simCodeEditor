@@ -39,6 +39,8 @@ public:
     bool needsSaving();
     bool canSave();
 
+    inline EditorOptions options() const { return opts; }
+
 private:
     QString getCallTip(const QString &txt);
 

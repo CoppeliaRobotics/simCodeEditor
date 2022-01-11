@@ -50,6 +50,7 @@ void EditorOptions::readFromXML(const QString &xml)
         lang = EditorOptions::Lang::Lua;
     else if (l == "python")
         lang = EditorOptions::Lang::Python;
+    snippetsGroup = e.attribute("snippets-group", l);
     onClose = e.attribute("on-close", "");
     wrapWord = parseBool(e.attribute("wrap-word", "false"));
     text_col = parseColor(e.attribute("text-col", "50 50 50"));

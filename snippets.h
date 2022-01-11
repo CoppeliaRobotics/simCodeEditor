@@ -3,6 +3,8 @@
 
 #include <QtWidgets>
 
+#include "common.h"
+
 struct Snippet
 {
     QString name;
@@ -30,7 +32,7 @@ class SnippetsLibrary : public QToolBar
 {
 public:
     SnippetsLibrary();
-    void load();
+    void load(const EditorOptions &opts);
 private:
     void loadFromPath(const QString &path);
     bool readFile(const QString &file, QMap<QString, QString> &meta, QString &content) const;
@@ -39,7 +41,6 @@ public:
     bool empty() const;
     void fillMenu(Dialog *parent, QMenu *menu) const;
 private:
-    QStringList snippetLocations;
     QMap<QString, SnippetGroup> snippetGroups;
 };
 
