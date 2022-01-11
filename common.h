@@ -41,13 +41,12 @@ struct EditorOptions
     bool lineNumbers;
     int maxLines;
     int tab_width;
-    bool isLua;
     enum Lang {
-        none,
-        lua,
-        python
+        None,
+        Lua,
+        Python
     };
-    Lang lang {none};
+    Lang lang {None};
     QString onClose;
     bool wrapWord;
     QString fontFace;

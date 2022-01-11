@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QByteArray>
 #include <QStringList>
+#include "plugin.h"
 #include "simLib.h"
 
 void EditorOptions::readFromXML(const QString &xml)
@@ -40,14 +41,15 @@ void EditorOptions::readFromXML(const QString &xml)
     lineNumbers = parseBool(e.attribute("line-numbers", "false"));
     maxLines = e.attribute("max-lines", "0").toInt();
     tab_width = e.attribute("tab-width", "4").toInt();
-    isLua = parseBool(e.attribute("is-lua", "false"));
+    if(e.hasAttribute("is-lua"))
+        simAddLog(PLUGIN_NAME, sim_verbosity_errors, "XML contains deprecated 'is-lua' attriibute");
     QString l = e.attribute("lang", "none");
     if (l == "none")
-        lang = EditorOptions::Lang::none;
+        lang = EditorOptions::Lang::None;
     else if (l == "lua")
-        lang = EditorOptions::Lang::lua;
+        lang = EditorOptions::Lang::Lua;
     else if (l == "python")
-        lang = EditorOptions::Lang::python;
+        lang = EditorOptions::Lang::Python;
     onClose = e.attribute("on-close", "");
     wrapWord = parseBool(e.attribute("wrap-word", "false"));
     text_col = parseColor(e.attribute("text-col", "50 50 50"));

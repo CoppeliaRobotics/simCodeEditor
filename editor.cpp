@@ -34,7 +34,7 @@ bool Editor::isActive() const
 void Editor::setEditorOptions(const EditorOptions &o)
 {
     opts = o;
-    if (o.lang == EditorOptions::Lang::python)
+    if (o.lang == EditorOptions::Lang::Python)
     {
         QsciLexerPython* lexer = new QsciLexerPython;
         setLexer(lexer);
@@ -71,7 +71,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
     SendScintilla(QsciScintillaBase::SCI_INDICSETALPHA, (unsigned long)20, (long)160);
     SendScintilla(QsciScintillaBase::SCI_INDICSETFORE, (unsigned long)20, (long)o.selection_col.rgb());
 
-    if (o.lang != EditorOptions::Lang::python)
+    if (o.lang != EditorOptions::Lang::Python)
     {
         setAStyle(SCE_LUA_WORD2, o.keyword1_col, o.background_col);
         setAStyle(SCE_LUA_WORD3, o.keyword2_col, o.background_col);
@@ -79,7 +79,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
         setAStyle(SCE_LUA_WORD8, o.keyword2_col, o.background_col);
     }
 
-    if ( (o.lang == EditorOptions::Lang::lua)||(o.isLua) )
+    if (o.lang == EditorOptions::Lang::Lua)
     {
         setFolding(QsciScintilla::BoxedTreeFoldStyle);
         setAStyle(SCE_LUA_COMMENT, o.comment_col, o.background_col);
@@ -96,7 +96,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
         setAStyle(SCE_LUA_IDENTIFIER, o.identifier_col, o.background_col);
     }
 
-    if (o.lang == EditorOptions::Lang::python)
+    if (o.lang == EditorOptions::Lang::Python)
     {
         setFolding(QsciScintilla::BoxedTreeFoldStyle);
         setAStyle(SCE_P_COMMENTLINE, o.comment_col, o.background_col);
@@ -134,7 +134,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
             sep2 = " ";
         }
     }
-    if ( (o.lang == EditorOptions::Lang::none) && (!o.isLua) )
+    if (o.lang == EditorOptions::Lang::None)
     {
         for (int i=0;i<8;i++)
             SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)i, "");
