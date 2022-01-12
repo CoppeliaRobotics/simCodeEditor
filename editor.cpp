@@ -187,9 +187,10 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
 
     QMenu *menu = createStandardContextMenu();
 
-    if((tok.front() == '\'' && tok.back() == '\'') || (tok.front() == '"' && tok.back() == '"'))
     {
-        QString tok1 = tok.mid(1, tok.size() - 2);
+        QString tok1{tok};
+        if((tok1.front() == '\'' && tok1.back() == '\'') || (tok1.front() == '"' && tok1.back() == '"'))
+            tok1 = tok1.mid(1, tok.size() - 2);
         QString fp = opts.resolveScriptFilePath(tok1);
         if(fp != "")
         {
