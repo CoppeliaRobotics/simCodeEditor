@@ -1,6 +1,5 @@
 function sysCall_vision(inData)
-    -- Can be used for image processing. Only if your non-threaded child script is attached to a
-    -- vision sensor that is handled in the simulation thread
+    -- Can be used for image processing.
     -- inData.handle: handle of the vision sensor
     -- inData.resolution: resolution of the vision sensor
     -- inData.clippingPlanes: near and far clipping plane of the vision sensor

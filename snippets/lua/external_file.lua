@@ -4,7 +4,7 @@
 
 require 'myExternalFile'
 
--- Above will look for <V-REP executable path>/myExternalFile.lua or
--- <V-REP executable path>/lua/myExternalFile.lua
+-- Above will look for <CoppeliaSim executable path>/myExternalFile.lua or
+-- <CoppeliaSim executable path>/lua/myExternalFile.lua
 -- (the file can be opened in this editor with the popup menu over
 -- the file name)
