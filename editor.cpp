@@ -183,12 +183,13 @@ void Editor::onUpdateUi(int updated)
 
 void Editor::contextMenuEvent(QContextMenuEvent *event)
 {
-    QString tok = tokenAt(event->pos());
+    QString tok = tokenAtPosition(positionFromPoint(event->pos()));
+    QString tok0 = tokenAtPosition2(positionFromPoint(event->pos()));
 
     QMenu *menu = createStandardContextMenu();
 
+    for(QString tok1 : QStringList{tok, tok0})
     {
-        QString tok1{tok};
         if((tok1.front() == '\'' && tok1.back() == '\'') || (tok1.front() == '"' && tok1.back() == '"'))
             tok1 = tok1.mid(1, tok.size() - 2);
         QString fp = opts.resolveScriptFilePath(tok1);
@@ -198,6 +199,7 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
             connect(menu->addAction(QStringLiteral("Open '%1'...").arg(tok1)), &QAction::triggered, [=] {
                 dialog->openExternalFile(fp);
             });
+            break;
         }
     }
 
