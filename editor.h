@@ -17,6 +17,7 @@ public:
     void setEditorOptions(const EditorOptions &opts);
     void contextMenuEvent(QContextMenuEvent *event);
     QString tokenAtPosition(int pos);
+    QString tokenAtPosition2(int pos);
     int positionFromPoint(const QPoint &p);
     QString tokenAt(const QPoint &p);
 

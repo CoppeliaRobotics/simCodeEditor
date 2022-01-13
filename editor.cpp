@@ -224,6 +224,32 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
 
 QString Editor::tokenAtPosition(int pos)
 {
+    QString txt{text()};
+    auto isID = [] (const QChar c) { return c.isLetterOrNumber() || c == '_' || c == '.'; };
+    int id = isID(txt.at(pos));
+    if(!id) return {};
+    int start = pos, end = pos, newid = id;
+    while(start > 0)
+    {
+        newid = isID(txt.at(start - 1));
+        if(newid == id) start--;
+        else break;
+    }
+    while(end < txt.length()-1)
+    {
+        newid = isID(txt.at(end + 1));
+        if(newid == id) end++;
+        else break;
+    }
+    end++;
+    // sanitize bounds:
+    if(start < 0) start = 0;
+    if(end > txt.length()) end = txt.length();
+    return text(start, end);
+}
+
+QString Editor::tokenAtPosition2(int pos)
+{
     int style = SendScintilla(SCI_GETSTYLEAT, (long)pos, (long)0);
     int start = pos, end = pos, newstyle = style;
     while(start > 0)
