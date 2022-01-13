@@ -220,6 +220,21 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
         }
     }
 
+    if(event->modifiers() & Qt::ShiftModifier && event->modifiers() & Qt::ControlModifier)
+    {
+        menu->addSeparator();
+        QStringList info;
+        int pos = positionFromPoint(event->pos());
+        info << QString("Position: %1").arg(pos);
+        info << QString("Token: \"%1\"").arg(tok);
+        for(const QString &s : info)
+        {
+            QAction *a = new QAction(s);
+            a->setEnabled(false);
+            menu->addAction(a);
+        }
+    }
+
     menu->exec(event->globalPos());
     delete menu;
 }
