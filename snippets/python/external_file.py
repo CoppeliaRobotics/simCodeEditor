@@ -1,10 +1,10 @@
 #@name External file inclusion
-#luaExec: pythonFile=<path/to/pythonfile.py>
+include myExternalFile
 
-# use above luaExec if you wish to execute code contained in an external file
-# Should be on the second line, directly after the language tag <#python>
-# If 'pythonFile' is not an absolute path, the file is searched in:
-# <CoppeliaSim executable path>/ or
-# <CoppeliaSim executable path>/python or
-# <current scene path>/ or
+# myExternalFile is the pythonScript name or path (absolute or relative), without quotes nor the ending '.py'
+# searched paths include:
+# <CoppeliaSim executable path>/ 
+# <CoppeliaSim executable path>/python 
+# <current scene path>/ 
 # <additional path>/ (see system/usrset.txt and value 'additionalPythonPath')
+# additional include paths passed via #luaExec additionalIncludePaths={'c:/Python38'}
