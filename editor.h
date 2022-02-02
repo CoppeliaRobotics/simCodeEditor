@@ -44,7 +44,8 @@ public:
 
 private:
     QString getCallTip(const QString &txt);
-
+    std::string Editor::divideString(const char* s) const;
+    
     Dialog *dialog;
     EditorOptions opts;
     struct {

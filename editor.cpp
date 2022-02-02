@@ -598,10 +598,71 @@ bool Editor::canSave()
     return !externalFile_.path.isEmpty();
 }
 
+std::string Editor::divideString(const char* s) const
+{
+    size_t w=80;
+    std::string t(s);
+    std::string retVal;
+    std::string off;
+    while (t.size()>0)
+    {
+        if (t.size()>w)
+        {
+            size_t pos=0;
+            while (t.size()>w)
+            {
+                pos=std::min<size_t>(t.find("=",pos+1),std::min<size_t>(t.find(",",pos+1),t.find("(",pos+1)));
+                if (pos!=std::string::npos)
+                {
+                    if (pos>=w)
+                    {
+                        retVal+=off+t.substr(0,pos+1);
+                        t.erase(0,pos+1);
+                        if (off.size()==0)
+                            off="\n    ";
+                        break;
+                    }
+                }
+                else
+                {
+                    retVal+=off+t;
+                    t.clear();
+                    break;
+                }
+            }
+        }
+        else
+        {
+            retVal+=off+t;
+            t.clear();
+        }
+    }
+    return(retVal);
+}
+
 QString Editor::getCallTip(const QString &txt)
 {
     for(auto &k : opts.userKeywords)
         if(txt == k.keyword && !k.callTip.isEmpty())
-            return k.callTip;
+        {
+            std::string t(k.callTip.toStdString());
+            std::vector<std::string> s;
+            size_t pos=0;
+            while ((pos=t.find("\n"))!=std::string::npos)
+            {
+                s.push_back(t.substr(0,pos));
+                t.erase(0,pos+1);
+            }
+            s.push_back(t);
+            std::string retStr;
+            size_t w=80;
+            for (size_t i=0;i<s.size();i++)
+            {
+                if (i!=0)
+                    retStr+="\n";
+                retStr+=divideString(s[i].c_str());
+            }
+            return QString(retStr.c_str());
+        }
     return "";
 }
