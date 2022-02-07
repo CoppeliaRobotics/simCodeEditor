@@ -181,17 +181,25 @@ void Editor::onUpdateUi(int updated)
     }
 }
 
+static QString stripQuotes(const QString &s)
+{
+    for(const char c : {'\'', '"'})
+    {
+        if(s.front() == c && s.back() == c)
+            return s.mid(1, s.size() - 2);
+    }
+    return s;
+}
+
 void Editor::contextMenuEvent(QContextMenuEvent *event)
 {
     QString tok = tokenAtPosition(positionFromPoint(event->pos()));
-    QString tok0 = tokenAtPosition2(positionFromPoint(event->pos()));
+    QString tok0 = stripQuotes(tokenAtPosition2(positionFromPoint(event->pos())));
 
     QMenu *menu = createStandardContextMenu();
 
-    for(QString tok1 : QStringList{tok, tok0})
+    for(QString tok1 : QStringList{tok0, tok})
     {
-        if((tok1.front() == '\'' && tok1.back() == '\'') || (tok1.front() == '"' && tok1.back() == '"'))
-            tok1 = tok1.mid(1, tok.size() - 2);
         QString fp = opts.resolveScriptFilePath(tok1);
         if(fp != "")
         {
@@ -226,7 +234,8 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
         QStringList info;
         int pos = positionFromPoint(event->pos());
         info << QString("Position: %1").arg(pos);
-        info << QString("Token: \"%1\"").arg(tok);
+        info << QString("Token0: %1 -> %2").arg(tok0, opts.resolveScriptFilePath(tok0));
+        info << QString("Token: %1 -> %2").arg(tok, opts.resolveScriptFilePath(tok));
         for(const QString &s : info)
         {
             QAction *a = new QAction(s);
