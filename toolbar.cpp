@@ -119,8 +119,8 @@ void getFunctionDefs(const EditorOptions &opts, const QString &code, QVector<QSt
     case EditorOptions::Lang::Lua:
         getFunctionDefs(opts, code, names, pos,
             "("
-                "function\\s+([a-zA-Z0-9_.:]+)\\s*(\\(.*\\))"
-            "|" "([a-zA-Z0-9_.]+)\\s*=\\s*function\\s*(\\(.*\\))"
+                "function\\s+([a-zA-Z0-9_.:]+)\\s*(\\([^)]*\\))"
+            "|" "([a-zA-Z0-9_.]+)\\s*=\\s*function\\s*(\\([^)]*\\))"
             ")",
             [&] (QRegularExpressionMatch m)
             {
