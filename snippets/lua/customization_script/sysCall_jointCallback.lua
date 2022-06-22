@@ -6,7 +6,9 @@ function sysCall_jointCallback(inData)
     -- inData.cyclic : whether the joint associated with this script is cyclic or not
     -- inData.lowLimit : the lower limit of the joint associated with this script (if the joint is not cyclic)
     -- inData.highLimit : the higher limit of the joint associated with this script (if the joint is not cyclic)
+    -- inData.dt : the step size used for the calculations
     -- inData.currentPos : the current position
+    -- inData.currentVel : the current velocity
     -- inData.targetPos : the desired position (if joint is dynamic, or when sim.setJointTargetPosition was called)
     -- inData.targetVel : the desired velocity (if joint is dynamic, or when sim.setJointTargetVelocity was called)
     -- inData.initVel : the desired initial velocity (if joint is kinematic and when sim.setJointTargetVelocity
@@ -24,7 +26,6 @@ function sysCall_jointCallback(inData)
     -- inData.totalPasses : the number of dynamics calculation passes for each "regular" simulation pass.
     -- inData.effort : the last force or torque that acted on this joint along/around its axis. With Bullet,
     --                 torques from joint limits are not taken into account
-    -- inData.dynStepSize : the step size used for the dynamics calculations (by default 5ms)
     -- inData.force : the joint force/torque, as set via sim.setJointTargetForce
     -- inData.velUpperLimit : the joint velocity upper limit
 
@@ -43,7 +44,7 @@ function sysCall_jointCallback(inData)
         
         -- 2. Integral part:
         if PID_I~=0 then
-            pidCumulativeErrorForIntegralParam=pidCumulativeErrorForIntegralParam+inData.errorValue*inData.dynStepSize
+            pidCumulativeErrorForIntegralParam=pidCumulativeErrorForIntegralParam+inData.errorValue*inData.dt
         else
             pidCumulativeErrorForIntegralParam=0
         end
@@ -51,16 +52,15 @@ function sysCall_jointCallback(inData)
         
         -- 3. Derivative part:
         if not inData.first then
-            ctrl=ctrl+(inData.errorValue-pidLastErrorForDerivativeParam)*PID_D/inData.dynStepSize
+            ctrl=ctrl+currentVel*PID_D
         end
-        pidLastErrorForDerivativeParam=inData.errorValue
         
         -- 4. Calculate the velocity needed to reach the position in one dynamic time step:
-        local maxVelocity=ctrl/inData.dynStepSize -- max. velocity allowed.
-        if (maxVelocity&gt;inData.velUpperLimit) then
+        local maxVelocity=ctrl/inData.dt -- max. velocity allowed.
+        if (maxVelocity>inData.velUpperLimit) then
             maxVelocity=inData.velUpperLimit
         end
-        if (maxVelocity&lt;-inData.velUpperLimit) then
+        if (maxVelocity<-inData.velUpperLimit) then
             maxVelocity=-inData.velUpperLimit
         end
         local forceOrTorqueToApply=inData.maxForce -- the maximum force/torque that the joint will be able to exert
