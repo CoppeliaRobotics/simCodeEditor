@@ -44,7 +44,8 @@ struct EditorOptions
     enum Lang {
         None,
         Lua,
-        Python
+        Python,
+        Json
     };
     Lang lang {None};
     QString langExt {"txt"};

@@ -62,6 +62,12 @@ void EditorOptions::readFromXML(const QString &xml)
         langExt = "py";
         langComment = "#";
     }
+    else if (l == "json")
+    {
+        lang = EditorOptions::Lang::Json;
+        langExt = "json";
+        langComment = "//";
+    }
     snippetsGroup = e.attribute("snippets-group", l);
     onClose = e.attribute("on-close", "");
     wrapWord = parseBool(e.attribute("wrap-word", "false"));

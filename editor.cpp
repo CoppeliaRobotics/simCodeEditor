@@ -4,6 +4,7 @@
 #include <SciLexer.h>
 #include <Qsci/qscilexerlua.h>
 #include <Qsci/qscilexerpython.h>
+#include <Qsci/qscilexerjson.h>
 
 // implemented in plugin.cpp:
 QUrl apiReferenceForSymbol(const QString &sym);
@@ -34,14 +35,19 @@ bool Editor::isActive() const
 void Editor::setEditorOptions(const EditorOptions &o)
 {
     opts = o;
+    if (o.lang == EditorOptions::Lang::Lua)
+    {
+        QsciLexerLua* lexer = new QsciLexerLua;
+        setLexer(lexer);
+    }
     if (o.lang == EditorOptions::Lang::Python)
     {
         QsciLexerPython* lexer = new QsciLexerPython;
         setLexer(lexer);
     }
-    else
+    if (o.lang == EditorOptions::Lang::Json)
     {
-        QsciLexerLua* lexer = new QsciLexerLua;
+        QsciLexerJSON* lexer = new QsciLexerJSON;
         setLexer(lexer);
     }
 
@@ -114,6 +120,20 @@ void Editor::setEditorOptions(const EditorOptions &o)
         setAStyle(SCE_P_WORD2, o.keyword4_col, o.number_col); // ?? None
         setAStyle(SCE_P_CLASSNAME, o.identifier_col, o.string_col); // ?? None
 //        setAStyle(SCE_P_DECORATOR, o.identifier_col, o.number_col); // ?? None
+    }
+    
+    if (o.lang == EditorOptions::Lang::Json)
+    {
+        setFolding(QsciScintilla::BoxedTreeFoldStyle);
+        setAStyle(SCE_JSON_ERROR, o.comment_col, o.background_col);
+        setAStyle(SCE_JSON_LINECOMMENT, o.comment_col, o.background_col);
+        setAStyle(SCE_JSON_BLOCKCOMMENT, o.comment_col, o.background_col);
+        setAStyle(SCE_JSON_NUMBER, o.keyword3_col, o.background_col);
+        setAStyle(SCE_JSON_STRING, o.keyword3_col, o.background_col);
+        setAStyle(SCE_JSON_STRINGEOL, o.keyword3_col, o.background_col);
+        setAStyle(SCE_JSON_PROPERTYNAME, o.keyword4_col, o.background_col);
+        setAStyle(SCE_JSON_KEYWORD, o.keyword3_col, o.background_col);
+        setAStyle(SCE_JSON_LDKEYWORD, o.keyword3_col, o.background_col);
     }
 
     SendScintilla(QsciScintillaBase::SCI_INDICSETSTYLE,(unsigned long)20,(long)QsciScintillaBase::INDIC_STRAIGHTBOX);
