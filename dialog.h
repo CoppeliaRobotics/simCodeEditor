@@ -70,8 +70,8 @@ private:
     int handle;
     int scriptTypeOrHandle;
     EditorOptions opts;
-    QString modalText;
-    int modalPosAndSize[4];
+    static QString modalText;
+    static int modalPosAndSize[4];
     int memorizedPos[2] = { -999999,-999999 };
 
     friend class Toolbar;

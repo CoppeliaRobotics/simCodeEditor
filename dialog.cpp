@@ -6,6 +6,9 @@
 #include "simLib.h"
 #include "UI.h"
 
+QString Dialog::modalText;
+int Dialog::modalPosAndSize[4];
+
 Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
     : QDialog(pParent),
       opts(o),
@@ -145,6 +148,7 @@ void Dialog::setEditorOptions(const EditorOptions &o)
 
     if(!o.modalSpecial)
     {
+        setWindowModality(Qt::ApplicationModal);
         show();
         if(o.activate)
         {
@@ -258,14 +262,13 @@ void Dialog::hide()
 std::string Dialog::makeModal(int *positionAndSize)
 {
     opts.modalSpecial = true;
-    setModal(true);
     exec();
     if(positionAndSize != nullptr)
     {
         for(size_t i = 0; i < 4; i++)
-            positionAndSize[i] = modalPosAndSize[i];
+            positionAndSize[i] = Dialog::modalPosAndSize[i];
     }
-    return(modalText.toStdString());
+    return(Dialog::modalText.toStdString());
 }
 
 void Dialog::showHelp()
@@ -330,7 +333,7 @@ void Dialog::reject()
         modalPosAndSize[1] = y();
         modalPosAndSize[2] = width();
         modalPosAndSize[3] = height();
-        QDialog::closeEvent(event);
+        event->accept();
     }
     else
     {
