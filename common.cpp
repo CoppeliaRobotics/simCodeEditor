@@ -33,7 +33,7 @@ void EditorOptions::readFromXML(const QString &xml)
         placement = EditorOptions::Placement::Relative;
     else if(pl == "center")
         placement = EditorOptions::Placement::Center;
-    fontFace = e.attribute("font", "Courier");
+    fontFace = e.attribute("font", "Courier New"); // prob. available on all platforms. "Courier" is problematic on macOS
     fontSize = e.attribute("font-size", "14").toInt();
     fontBold = parseBool(e.attribute("font-bold", "false"));
     activate = parseBool(e.attribute("activate", "true"));
