@@ -10,12 +10,15 @@ Dialog * UI::createWindow(bool modalSpecial, const QString &initText, const QStr
 
     EditorOptions o;
     o.readFromXML(properties);
+    if (modalSpecial)
+        o.modalSpecial=true;
 
     QWidget *parent = (QWidget *)simGetMainWindow(1);
     Dialog *window = new Dialog(o, this, parent);
     window->setEditorOptions(o);
     window->setText(initText);
-    window->show();
+    if (!modalSpecial)
+        window->show();
     return window;
 }
 

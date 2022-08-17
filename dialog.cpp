@@ -148,7 +148,6 @@ void Dialog::setEditorOptions(const EditorOptions &o)
 
     if(!o.modalSpecial)
     {
-        setWindowModality(Qt::ApplicationModal);
         show();
         if(o.activate)
         {
@@ -261,7 +260,7 @@ void Dialog::hide()
 
 std::string Dialog::makeModal(int *positionAndSize)
 {
-    opts.modalSpecial = true;
+    setWindowModality(Qt::ApplicationModal);
     exec();
     if(positionAndSize != nullptr)
     {
