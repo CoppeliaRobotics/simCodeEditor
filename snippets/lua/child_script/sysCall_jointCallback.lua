@@ -27,49 +27,19 @@ function sysCall_jointCallback(inData)
     -- inData.effort : the last force or torque that acted on this joint along/around its axis. With Bullet,
     --                 torques from joint limits are not taken into account
     -- inData.force : the joint force/torque, as set via sim.setJointTargetForce
-    -- inData.velUpperLimit : the joint velocity upper limit
 
     if inData.mode==sim.jointmode_dynamic then
-        -- a simple PID controller
-        if inData.first then
-            PID_P=0.1
-            PID_I=0
-            PID_D=0
-            pidCumulativeErrorForIntegralParam=0
+        -- a simple position controller
+        local ctrl=inData.errorValue*0.1
+        local maxVelocity=ctrl/inData.dt
+        if (maxVelocity>inData.maxVel) then
+            maxVelocity=inData.maxVel
         end
-        
-        -- The control happens here:
-        -- 1. Proportional part:
-        local ctrl=inData.errorValue*PID_P
-        
-        -- 2. Integral part:
-        if PID_I~=0 then
-            pidCumulativeErrorForIntegralParam=pidCumulativeErrorForIntegralParam+inData.errorValue*inData.dt
-        else
-            pidCumulativeErrorForIntegralParam=0
+        if (maxVelocity<-inData.maxVel) then
+            maxVelocity=-inData.maxVel
         end
-        ctrl=ctrl+pidCumulativeErrorForIntegralParam*PID_I
-        
-        -- 3. Derivative part:
-        if not inData.first then
-            ctrl=ctrl+currentVel*PID_D
-        end
-        
-        -- 4. Calculate the velocity needed to reach the position in one dynamic time step:
-        local maxVelocity=ctrl/inData.dt -- max. velocity allowed.
-        if (maxVelocity>inData.velUpperLimit) then
-            maxVelocity=inData.velUpperLimit
-        end
-        if (maxVelocity<-inData.velUpperLimit) then
-            maxVelocity=-inData.velUpperLimit
-        end
-        local forceOrTorqueToApply=inData.maxForce -- the maximum force/torque that the joint will be able to exert
-
-        -- 5. Following data must be returned to CoppeliaSim:
-        firstPass=false
-        local outData={}
-        outData.velocity=maxVelocity
-        outData.force=forceOrTorqueToApply
+        local forceOrTorqueToApply=inData.maxForce
+        local outData={velocity=maxVelocity,force=forceOrTorqueToApply}
         return outData
     end
     -- Expected return data:
