@@ -103,7 +103,7 @@ set(LIBRARIES
 
 coppeliasim_add_plugin(simExtCodeEditor SOURCES ${SOURCES})
 target_link_libraries(simExtCodeEditor ${LIBRARIES})
-coppeliasim_add_plugin_directory(snippets)
+coppeliasim_add_resource_directory(snippets)
 
 if(APPLE)
     get_filename_component(QSCINTILLA_LIB_NAME ${QSCINTILLA_LIBRARY} NAME)

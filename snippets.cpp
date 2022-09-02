@@ -1,6 +1,7 @@
 #include "snippets.h"
 #include "dialog.h"
 #include "editor.h"
+#include "simPlusPlus/Lib.h"
 
 bool Snippet::changed() const
 {
@@ -38,7 +39,8 @@ void SnippetsLibrary::load(const EditorOptions &opts)
     QStringList snippetLocations;
 
     // system-wide snippets:
-    QDir snippetsBaseDir(QCoreApplication::applicationDirPath());
+    QString resPath{QString::fromStdString(sim::getStringParameter(sim_stringparam_resourcesdir))};
+    QDir snippetsBaseDir(resPath);
     if(snippetsBaseDir.cd("snippets") && snippetsBaseDir.cd(opts.snippetsGroup))
         snippetLocations << snippetsBaseDir.absolutePath();
 
