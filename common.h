@@ -51,6 +51,8 @@ struct EditorOptions
     QString langExt {"txt"};
     QString langComment {""};
     QString snippetsGroup;
+    QStringList snippetsPaths;
+    static QString resourcesPath;
     QString onClose;
     bool wrapWord;
     QString fontFace;

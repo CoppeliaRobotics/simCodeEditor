@@ -10,13 +10,14 @@ Dialog * UI::createWindow(bool modalSpecial, const QString &initText, const QStr
 
     EditorOptions o;
     o.readFromXML(properties);
-    o.modalSpecial=modalSpecial;
+    o.modalSpecial = modalSpecial;
+    o.snippetsPaths << EditorOptions::resourcesPath + "/snippets";
 
     QWidget *parent = (QWidget *)simGetMainWindow(1);
     Dialog *window = new Dialog(o, this, parent);
     window->setEditorOptions(o);
     window->setText(initText);
-    if (!modalSpecial)
+    if(!modalSpecial)
         window->show();
     return window;
 }

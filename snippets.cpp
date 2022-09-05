@@ -38,13 +38,12 @@ void SnippetsLibrary::load(const EditorOptions &opts)
 
     QStringList snippetLocations;
 
-    // system-wide snippets:
-    QString resPath{QString::fromStdString(sim::getStringParameter(sim_stringparam_resourcesdir))};
-    QDir snippetsBaseDir(resPath);
-    if(snippetsBaseDir.cd("snippets") && snippetsBaseDir.cd(opts.snippetsGroup))
-        snippetLocations << snippetsBaseDir.absolutePath();
-
-    // TODO: add userdir to snippetLocations
+    for(auto &path : opts.snippetsPaths)
+    {
+        QDir snippetsBaseDir(path);
+        if(snippetsBaseDir.cd(opts.snippetsGroup))
+            snippetLocations << snippetsBaseDir.absolutePath();
+    }
 
     for(const auto &dir : snippetLocations)
         loadFromPath(opts, dir);

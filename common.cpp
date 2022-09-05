@@ -7,6 +7,8 @@
 #include "plugin.h"
 #include "simLib.h"
 
+QString EditorOptions::resourcesPath{};
+
 void EditorOptions::readFromXML(const QString &xml)
 {
     QDomDocument doc;
