@@ -23,6 +23,7 @@ function sysCall_jointCallback(inData)
     -- inData.first : whether this is the first call from the physics engine, since the joint
     --                was initialized (or re-initialized) in it.
     -- inData.passCnt : the current dynamics calculation pass. 1-10 by default
+    -- inData.rk4pass : if Runge-Kutta 4 solver is selected, will loop from 1 to 4 for each inData.passCnt
     -- inData.totalPasses : the number of dynamics calculation passes for each "regular" simulation pass.
     -- inData.effort : the last force or torque that acted on this joint along/around its axis. With Bullet,
     --                 torques from joint limits are not taken into account
@@ -30,8 +31,8 @@ function sysCall_jointCallback(inData)
 
     if inData.mode==sim.jointmode_dynamic then
         -- a simple position controller
-        local ctrl=inData.errorValue*0.1
-        local maxVelocity=ctrl/inData.dt
+        local ctrl=inData.errorValue*20
+        local maxVelocity=ctrl
         if (maxVelocity>inData.maxVel) then
             maxVelocity=inData.maxVel
         end
