@@ -1,19 +1,19 @@
-function sysCall_jointCallback(inData)
+function sysCall_joint(inData)
     -- inData.mode : sim.jointmode_kinematic or sim.jointmode_dynamic
     --
-    -- inData.handle : the handle of the joint associated with this script
-    -- inData.revolute : whether the joint associated with this script is revolute or prismatic
-    -- inData.cyclic : whether the joint associated with this script is cyclic or not
-    -- inData.lowLimit : the lower limit of the joint associated with this script (if the joint is not cyclic)
-    -- inData.highLimit : the higher limit of the joint associated with this script (if the joint is not cyclic)
+    -- inData.handle : the handle of the joint to control
+    -- inData.revolute : whether the joint is revolute or prismatic
+    -- inData.cyclic : whether the joint is cyclic or not
+    -- inData.lowLimit : the lower limit of the joint (if the joint is not cyclic)
+    -- inData.highLimit : the higher limit of the joint (if the joint is not cyclic)
     -- inData.dt : the step size used for the calculations
-    -- inData.currentPos : the current position
-    -- inData.currentVel : the current velocity
+    -- inData.pos : the current position
+    -- inData.vel : the current velocity
     -- inData.targetPos : the desired position (if joint is dynamic, or when sim.setJointTargetPosition was called)
     -- inData.targetVel : the desired velocity (if joint is dynamic, or when sim.setJointTargetVelocity was called)
     -- inData.initVel : the desired initial velocity (if joint is kinematic and when sim.setJointTargetVelocity
     --                  was called with a 4th argument)
-    -- inData.errorValue : targetPos-currentPos (with revolute cyclic joints, the shortest cyclic distance)
+    -- inData.error : targetPos-currentPos (with revolute cyclic joints, the shortest cyclic distance)
     -- inData.maxVel : a maximum velocity, taken from sim.setJointTargetPosition or 
     --                 sim.setJointTargetVelocity's 3rd argument)
     -- inData.maxAccel : a maximum acceleration, taken from sim.setJointTargetPosition or
@@ -31,7 +31,7 @@ function sysCall_jointCallback(inData)
 
     if inData.mode==sim.jointmode_dynamic then
         -- a simple position controller
-        local ctrl=inData.errorValue*20
+        local ctrl=inData.error*20
         local maxVelocity=ctrl
         if (maxVelocity>inData.maxVel) then
             maxVelocity=inData.maxVel
@@ -40,13 +40,13 @@ function sysCall_jointCallback(inData)
             maxVelocity=-inData.maxVel
         end
         local forceOrTorqueToApply=inData.maxForce
-        local outData={velocity=maxVelocity,force=forceOrTorqueToApply}
+        local outData={vel=maxVelocity,force=forceOrTorqueToApply}
         return outData
     end
     -- Expected return data:
     -- For kinematic joints:
-    -- outData={position=pos, velocity=vel, immobile=false}
+    -- outData={pos=pos, vel=vel, immobile=false}
     -- 
     -- For dynamic joints:
-    -- outData={force=f, velocity=vel}
+    -- outData={force=f, vel=vel}
 end

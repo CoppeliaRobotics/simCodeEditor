@@ -1,4 +1,4 @@
-function sysCall_dynCallback(inData)
+function sysCall_dyn(inData)
     -- This function gets called often, so it might slow down the simulation
     --     (this is called twice at each dynamic simulation step, by default 20x more often than a child script)
     -- We have:

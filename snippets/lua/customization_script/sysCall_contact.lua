@@ -1,4 +1,4 @@
-function sysCall_contactCallback(inData)
+function sysCall_contact(inData)
     -- Will objects with inData.handle1 and inData.handle2 respond to dynamic collision?
     local retData={}
     retData.ignoreContact=false -- handle contact here
@@ -39,6 +39,9 @@ function sysCall_contactCallback(inData)
         -- 1024=dContactApprox1_2
         -- 2048=dContactApprox1
         retData.ode.contactMode=mode
+    end
+
+    if inData.engine==sim.physics_mujoco then
     end
 
     if inData.engine==sim.physics_vortex then
