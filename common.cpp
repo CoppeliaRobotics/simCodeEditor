@@ -143,9 +143,12 @@ void EditorOptions::readFromXML(const QString &xml)
     }
 }
 
-QString EditorOptions::resolveScriptFilePath(const QString &f)
+QString EditorOptions::resolveScriptFilePath(const QString &f_)
 {
-    if(f == "") return "";
+    if(f_ == "") return "";
+
+    QString f(f_);
+    f.replace(".", "/");
 
     for(auto path : scriptSearchPath)
     {
