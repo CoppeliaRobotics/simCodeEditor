@@ -166,7 +166,7 @@ QString EditorOptions::resolveScriptFilePath(const QString &f_)
 char * stringBufferCopy(const QString &str)
 {
     QByteArray byteArr = str.toLocal8Bit();
-    char *buff = simCreateBuffer(byteArr.length() + 1);
+    char *buff = reinterpret_cast<char *>(simCreateBuffer(byteArr.length() + 1));
     strcpy(buff, byteArr.data());
     buff[byteArr.length()] = '\0';
     return buff;
