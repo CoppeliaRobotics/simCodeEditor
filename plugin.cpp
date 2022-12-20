@@ -15,14 +15,14 @@ public:
     {
         uiThread();
 
-        if(simGetBooleanParameter(sim_boolparam_headless) > 0)
+        if(simGetBoolParam(sim_boolparam_headless) > 0)
             throw std::runtime_error("cannot load in headless mode");
 
         if(!registerScriptStuff())
             throw std::runtime_error("failed to register script stuff");
 
         // XXX: parameter doesn't exist when called later?
-        EditorOptions::resourcesPath = QString::fromStdString(sim::getStringParameter(sim_stringparam_resourcesdir));
+        EditorOptions::resourcesPath = QString::fromStdString(sim::getStringParam(sim_stringparam_resourcesdir));
 
         setExtVersion("Code Editor Plugin");
         setBuildDate(BUILD_DATE);
@@ -51,7 +51,7 @@ public:
     {
         simThread();
 
-        auto p = sim::getStringNamedParam("CodeEditor.verboseErrors");
+        auto p = sim::getNamedStringParam("CodeEditor.verboseErrors");
         if(p)
             verboseErrors = *p == "1" || *p == "true";
 
