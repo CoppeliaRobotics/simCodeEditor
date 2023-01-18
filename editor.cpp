@@ -1,6 +1,7 @@
 #include "editor.h"
 #include "dialog.h"
 #include "toolbar.h"
+#include "UI.h"
 #include <SciLexer.h>
 #include <Qsci/qscilexerlua.h>
 #include <Qsci/qscilexerpython.h>
@@ -240,6 +241,8 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
             menu->addSeparator();
             connect(menu->addAction(QStringLiteral("Open reference for %1...").arg(tok)), &QAction::triggered, [=] {
 #if 1
+                dialog->openURL(refUrl.url());
+#elif 0
                 QDesktopServices::openUrl(refUrl);
 #else
                 dialog->showHelp(refUrl);

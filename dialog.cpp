@@ -359,3 +359,7 @@ void Dialog::updateCursorSelectionDisplay()
     statusBar_->setCursorInfo(fromLine, fromIndex);
 }
 
+void Dialog::openURL(const QString &url)
+{
+    ui->openURL(url);
+}

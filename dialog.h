@@ -57,6 +57,7 @@ public slots:
 
 public:
     inline EditorOptions options() const { return opts; }
+    void openURL(const QString &url);
 
 private:
     UI *ui;

@@ -25,6 +25,7 @@ public:
 
 signals:
     void notifyEvent(int handle, const QString &eventType, const QString &data);
+    void openURL(const QString &url);
 
 private:
     int nextEditorHandle = 103800;

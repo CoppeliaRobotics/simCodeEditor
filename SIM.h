@@ -15,6 +15,7 @@ public:
 
 public slots:
     void notifyEvent(int handle, const QString &eventType, const QString &data);
+    void openURL(const QString &url);
 
 signals:
     void openModal(const QString &initText, const QString &properties, QString& text, int *positionAndSize);

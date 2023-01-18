@@ -14,6 +14,7 @@ SIM::SIM(UI *theUi)
     QObject::connect(this, &SIM::close, ui, &UI::close, sim2ui);
     Qt::ConnectionType ui2sim = Qt::AutoConnection;
     QObject::connect(ui, &UI::notifyEvent, this, &SIM::notifyEvent, ui2sim);
+    QObject::connect(ui, &UI::openURL, this, &SIM::openURL, ui2sim);
 }
 
 void SIM::notifyEvent(int handle, const QString &eventType, const QString &data)
@@ -27,3 +28,10 @@ void SIM::notifyEvent(int handle, const QString &eventType, const QString &data)
     simEventNotification(xml.toUtf8().data());
 }
 
+void SIM::openURL(const QString &url)
+{
+    int stackHandle = simCreateStack();
+    QString s(QStringLiteral("simURLDrop.openURL(\"%1\")").arg(url));
+    int ret = simExecuteScriptString(sim_scripttype_sandboxscript, s.toLocal8Bit().data(), stackHandle);
+    simReleaseStack(stackHandle);
+}
