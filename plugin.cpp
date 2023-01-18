@@ -29,13 +29,18 @@ public:
 
         ui = new UI;
 
-        QHostInfo::lookupHost("www.coppeliarobotics.com",
-            [=] (const QHostInfo &info)
-            {
-                if(info.error() == QHostInfo::NoError)
-                    online = true;
-            }
-        );
+        // development builds don't look up online docs:
+        int rev = sim::getInt32Param(sim_intparam_program_revision);
+        if((rev % 2) == 0)
+        {
+            QHostInfo::lookupHost("www.coppeliarobotics.com",
+                [=] (const QHostInfo &info)
+                {
+                    if(info.error() == QHostInfo::NoError)
+                        online = true;
+                }
+            );
+        }
     }
 
     void onEnd()
