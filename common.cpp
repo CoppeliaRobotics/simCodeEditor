@@ -187,3 +187,24 @@ bool parseBool(const QString &boolStr)
     return boolStr != "false";
 }
 
+QString elideLeft(const QString &str, int maxLength)
+{
+    if(str.length() <= maxLength) return str;
+    QString r = str.right(maxLength);
+    return QString::fromWCharArray(L"\x2026") + r;
+}
+
+QString elideMiddle(const QString &str, int maxLength)
+{
+    if(str.length() <= maxLength) return str;
+    int half = maxLength / 2;
+    QString l = str.left(half), r = str.right(half);
+    return l + QString::fromWCharArray(L"\x2026") + r;
+}
+
+QString elideRight(const QString &str, int maxLength)
+{
+    if(str.length() <= maxLength) return str;
+    QString l = str.left(maxLength);
+    return l + QString::fromWCharArray(L"\x2026");
+}

@@ -83,5 +83,8 @@ struct EditorOptions
 char * stringBufferCopy(const QString &str);
 QColor parseColor(const QString &colorStr);
 bool parseBool(const QString &boolStr);
+QString elideLeft(const QString &str, int maxLength = 35);
+QString elideMiddle(const QString &str, int maxLength = 35);
+QString elideRight(const QString &str, int maxLength = 35);
 
 #endif // COMMON_H

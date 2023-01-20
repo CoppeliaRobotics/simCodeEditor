@@ -3,6 +3,33 @@
 #include "editor.h"
 #include "searchandreplacepanel.h"
 
+class QComboBoxOpenFiles : public QComboBox
+{
+public:
+    QComboBoxOpenFiles(QWidget *parent = nullptr)
+        : QComboBox(parent)
+    {
+    }
+
+    void paintEvent(QPaintEvent *)
+    {
+        QStylePainter painter(this);
+        QFontMetrics fm = painter.fontMetrics();
+        painter.setPen(palette().color(QPalette::Text));
+        QStyleOptionComboBox opt;
+        initStyleOption(&opt);
+        int l = opt.currentText.length();
+        int maxW = contentsRect().width() - 1.3 * contentsRect().height();
+        while(fm.width(elideLeft(opt.currentText, l)) > maxW)
+        {
+            if(--l == 0) return;
+        }
+        opt.currentText = elideLeft(opt.currentText, l);
+        painter.drawComplexControl(QStyle::CC_ComboBox, opt);
+        if(l) painter.drawControl(QStyle::CE_ComboBoxLabel, opt);
+    }
+};
+
 inline bool isDarkMode(QWidget *w)
 {
     QColor bg = w->palette().color(QPalette::Window),
@@ -83,7 +110,8 @@ ToolBar::ToolBar(bool canRestart, Dialog *parent)
 
     ICON(save);
     addAction(openFiles.actSave = new QAction(QIcon(save), "Save current file"));
-    openFiles.combo = new QComboBox;
+    openFiles.combo = new QComboBoxOpenFiles;
+    openFiles.combo->setMaximumWidth(300);
     openFiles.actCombo = addWidget(openFiles.combo);
     ICON(close);
     addAction(openFiles.actClose = new QAction(QIcon(close), "Close current file"));
@@ -174,7 +202,7 @@ void ToolBar::updateButtons()
     for(auto path : editors.keys())
     {
         QString name("<embedded script>");
-        if(!path.isEmpty()) name = path;
+        if(!path.isEmpty()) name = QDir::cleanPath(path);
         auto editor = editors[path];
         if(editor->needsSaving()) name = "* " + name;
         openFiles.combo->addItem(name, QVariant::fromValue(editor));
