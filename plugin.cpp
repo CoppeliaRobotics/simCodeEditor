@@ -56,9 +56,9 @@ public:
     {
         simThread();
 
-        auto p = sim::getNamedStringParam("CodeEditor.verboseErrors");
+        auto p = sim::getNamedBoolParam("CodeEditor.verboseErrors");
         if(p)
-            verboseErrors = *p == "1" || *p == "true";
+            verboseErrors = *p;
 
         sim = new SIM(ui);
     }
