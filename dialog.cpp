@@ -3,7 +3,7 @@
 #include "toolbar.h"
 #include "statusbar.h"
 #include "searchandreplacepanel.h"
-#include "simLib.h"
+#include "simPlusPlus/Lib.h"
 #include "UI.h"
 
 QString Dialog::modalText;
@@ -108,7 +108,7 @@ void Dialog::setEditorOptions(const EditorOptions &o)
     for(auto e : editors_)
         e->setEditorOptions(o);
 
-    QWidget *parent = (QWidget *)simGetMainWindow(1);
+    QWidget *parent = (QWidget *)sim::getMainWindow(1);
     setWindowTitle(o.windowTitle);
     statusBar()->setSizeGripEnabled(o.resizable);
     setModal(o.modal);

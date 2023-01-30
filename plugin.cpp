@@ -15,7 +15,7 @@ public:
     {
         uiThread();
 
-        if(simGetBoolParam(sim_boolparam_headless) > 0)
+        if(sim::getBoolParam(sim_boolparam_headless))
             throw std::runtime_error("cannot load in headless mode");
 
         if(!registerScriptStuff())

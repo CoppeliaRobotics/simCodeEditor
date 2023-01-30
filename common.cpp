@@ -5,7 +5,7 @@
 #include <QByteArray>
 #include <QStringList>
 #include "plugin.h"
-#include "simLib.h"
+#include "simPlusPlus/Lib.h"
 
 QString EditorOptions::resourcesPath{};
 
@@ -44,7 +44,7 @@ void EditorOptions::readFromXML(const QString &xml)
     maxLines = e.attribute("max-lines", "0").toInt();
     tab_width = e.attribute("tab-width", "4").toInt();
     if(e.hasAttribute("is-lua"))
-        simAddLog(PLUGIN_NAME, sim_verbosity_errors, "XML contains deprecated 'is-lua' attribute");
+        sim::addLog(sim_verbosity_errors, "XML contains deprecated 'is-lua' attribute");
     QString l = e.attribute("lang", "none");
     if (l == "none")
     {
@@ -134,7 +134,7 @@ void EditorOptions::readFromXML(const QString &xml)
     }
 
     if(e.hasAttribute("lua-search-paths"))
-        simAddLog(PLUGIN_NAME, sim_verbosity_errors, "XML contains deprecated 'lua-search-paths' attribute");
+        sim::addLog(sim_verbosity_errors, "XML contains deprecated 'lua-search-paths' attribute");
     QStringList spl = e.attribute("search-paths", e.attribute("lua-search-paths")).split(";");
     for (int i = 0; i < spl.size(); i++)
     {
@@ -166,7 +166,7 @@ QString EditorOptions::resolveScriptFilePath(const QString &f_)
 char * stringBufferCopy(const QString &str)
 {
     QByteArray byteArr = str.toLocal8Bit();
-    char *buff = reinterpret_cast<char *>(simCreateBuffer(byteArr.length() + 1));
+    char *buff = reinterpret_cast<char *>(sim::createBuffer(byteArr.length() + 1));
     strcpy(buff, byteArr.data());
     buff[byteArr.length()] = '\0';
     return buff;

@@ -13,7 +13,7 @@ Dialog * UI::createWindow(bool modalSpecial, const QString &initText, const QStr
     o.modalSpecial = modalSpecial;
     o.snippetsPaths << EditorOptions::resourcesPath + "/snippets";
 
-    QWidget *parent = (QWidget *)simGetMainWindow(1);
+    QWidget *parent = (QWidget *)sim::getMainWindow(1);
     Dialog *window = new Dialog(o, this, parent);
     window->setEditorOptions(o);
     window->setText(initText);

@@ -25,13 +25,13 @@ void SIM::notifyEvent(int handle, const QString &eventType, const QString &data)
         QStringLiteral("<event origin='codeEditor' msg='%1' handle='%2' data='%3'/>")
             .arg(eventType, QString::number(handle), data)
     );
-    simEventNotification(xml.toUtf8().data());
+    sim::eventNotification(xml.toStdString());
 }
 
 void SIM::openURL(const QString &url)
 {
-    int stackHandle = simCreateStack();
+    int stackHandle = sim::createStack();
     QString s(QStringLiteral("simURLDrop.openURL(\"%1\")").arg(url));
-    int ret = simExecuteScriptString(sim_scripttype_sandboxscript, s.toLocal8Bit().data(), stackHandle);
-    simReleaseStack(stackHandle);
+    sim::executeScriptString(sim_scripttype_sandboxscript, s.toStdString(), stackHandle);
+    sim::releaseStack(stackHandle);
 }
