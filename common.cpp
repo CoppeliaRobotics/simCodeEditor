@@ -5,7 +5,7 @@
 #include <QByteArray>
 #include <QStringList>
 #include "plugin.h"
-#include "simPlusPlus/Lib.h"
+#include <simPlusPlus/Lib.h>
 
 QString EditorOptions::resourcesPath{};
 

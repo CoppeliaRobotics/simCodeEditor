@@ -2,7 +2,7 @@
 #include "plugin.h"
 #include "SIM.h"
 #include "UI.h"
-#include "simPlusPlus/Plugin.h"
+#include <simPlusPlus/Plugin.h>
 #include "common.h"
 #include "stubs.h"
 #include <QtCore>

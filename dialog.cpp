@@ -3,7 +3,7 @@
 #include "toolbar.h"
 #include "statusbar.h"
 #include "searchandreplacepanel.h"
-#include "simPlusPlus/Lib.h"
+#include <simPlusPlus/Lib.h>
 #include "UI.h"
 
 QString Dialog::modalText;
