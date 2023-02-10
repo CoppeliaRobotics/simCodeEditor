@@ -101,6 +101,81 @@ void Editor::setEditorOptions(const EditorOptions &o)
         setAStyle(SCE_LUA_WORD, o.keyword3_col, o.background_col);
         setAStyle(SCE_LUA_WORD4, o.keyword4_col, o.background_col);
         setAStyle(SCE_LUA_IDENTIFIER, o.identifier_col, o.background_col);
+
+        SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1,
+            // Keywords.
+            "and break do else elseif end false for function if "
+            "in local nil not or repeat return then true until "
+            "while "
+        );
+        SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)2,
+            // Basic functions.
+            "rawget rawset require ipairs pairs next "
+            "pcall xpcall getmetatable setmetatable "
+            "string table math coroutine io os debug "
+            "error "
+            // CoppeliaRobotics/lua/functional.lua:
+            "range map reduce filter foreach identity zip negate apply "
+            "partial any all iter "
+            "operator.add operator.sub operator.mul operator.div operator.mod "
+            "operator.idiv operator.pow operator.land operator.lor operator.lxor "
+            "operator.lshl operator.lshr operator.eq operator.neq operator.gt "
+            "operator.ge operator.lt operator.le "
+        );
+        SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)3,
+            // String, table and maths functions.
+            "string.byte string.char string.dump string.find "
+            "string.len string.lower string.rep string.sub "
+            "string.upper string.format string.gfind string.gsub "
+            "string.gmatch string.match string.pack string.packsize "
+            "string.rep string.reverse string.unpack "
+            "table.concat table.foreach table.foreachi table.getn "
+            "table.sort table.insert table.remove table.pack table.unpack "
+            "table.move "
+            "math.abs math.acos math.asin math.atan math.atan2 "
+            "math.ceil math.cos math.deg math.exp math.floor "
+            "math.frexp math.ldexp math.log math.log10 math.max "
+            "math.min math.mod math.pi math.rad math.random "
+            "math.randomseed math.sin math.sqrt math.tan "
+            // CoppeliaRobotics/lua/stringx.lua:
+            "string.gsplit string.split string.startswith string.endswith "
+            "string.trim string.ltrim string.rtrim "
+            // CoppeliaRobotics/lua/tablex.lua:
+            "table.index table.eq table.join table.slice table.tostring "
+            "table.print table.find "
+            // CoppeliaRobotics/lua/base16.lua:
+            "base16.encode base16.decode "
+            // CoppeliaRobotics/lua/base64.lua:
+            "base64.encode base64.decode "
+            // CoppeliaRobotics/lua/checkargs.lua:
+            "checkarg.any checkarg.float checkarg.int checkarg.string "
+            "checkarg.bool checkarg.table checkarg.func checkarg.handle "
+            "checkarg.object checkarg.union "
+            "checkargsEx checkargs "
+            // CoppeliaRobotics/lua/grid.lua:
+            "Grid "
+            // CoppeliaRobotics/lua/matrix.lua:
+            "Matrix Matrix3x3 Matrix4x4 Vector Vector3 Vector4 Vector7 "
+            // CoppeliaRobotics/lua/var.lua:
+            "getvar setvar getlocals "
+        //);
+        //SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)4,
+            // Coroutine, I/O and system facilities.
+            "coroutine.create coroutine.resume coroutine.status "
+            "coroutine.wrap coroutine.yield "
+            "io.close io.flush "
+            "io.input io.lines io.open io.output io.read "
+            "io.tmpfile io.type io.write io.stdin io.stdout "
+            "io.stderr "
+            "os.clock os.date os.difftime os.execute "
+            "os.exit os.getenv os.remove os.rename os.setlocale "
+            "os.time os.tmpname "
+            "debug.debug debug.gethook debug.getinfo debug.getlocal "
+            "debug.getmetatable debug.getregistry debug.getupvalue "
+            "debug.getuservalue debug.sethook debug.setlocal "
+            "debug.setmetatable debug.setupvalue debug.setuservalue "
+            "debug.traceback debug.upvalueid debug.upvaluejoin "
+        );
     }
 
     if (o.lang == EditorOptions::Lang::Python)
