@@ -65,8 +65,7 @@ public:
 
     void onLastInstancePass()
     {
-        delete sim;
-        sim = nullptr;
+        sim->deleteLater();
     }
 
     char * codeEditor_openModal(const char *initText, const char *properties, int *positionAndSize)
