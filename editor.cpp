@@ -121,6 +121,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
             "operator.idiv operator.pow operator.land operator.lor operator.lxor "
             "operator.lshl operator.lshr operator.eq operator.neq operator.gt "
             "operator.ge operator.lt operator.le "
+            "sum prod "
         );
         SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)3,
             // String, table and maths functions.
