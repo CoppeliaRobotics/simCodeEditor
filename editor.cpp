@@ -113,7 +113,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
             "rawget rawset require ipairs pairs next "
             "pcall xpcall getmetatable setmetatable "
             "string table math coroutine io os debug "
-            "error "
+            "error assert "
             // CoppeliaRobotics/lua/functional.lua:
             "range map reduce filter foreach identity zip negate apply "
             "partial any all iter "
