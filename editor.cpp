@@ -130,6 +130,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
             "string.upper string.format string.gfind string.gsub "
             "string.gmatch string.match string.pack string.packsize "
             "string.rep string.reverse string.unpack "
+            "string.chars string.bytes "
             "table.concat table.foreach table.foreachi table.getn "
             "table.sort table.insert table.remove table.pack table.unpack "
             "table.move "
