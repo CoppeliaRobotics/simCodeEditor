@@ -133,7 +133,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
             "string.chars string.bytes "
             "table.concat table.foreach table.foreachi table.getn "
             "table.sort table.insert table.remove table.pack table.unpack "
-            "table.move table.compare "
+            "table.move table.compare table.reversed "
             "math.abs math.acos math.asin math.atan math.atan2 "
             "math.ceil math.cos math.deg math.exp math.floor "
             "math.frexp math.ldexp math.log math.log10 math.max "
