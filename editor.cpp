@@ -442,7 +442,7 @@ void Editor::setAStyle(int style,QColor fore,QColor back,int size,const char *fa
     SendScintilla(QsciScintillaBase::SCI_STYLESETBACK,(unsigned long)style,(long)back.rgb());
     if (size>=1)
         SendScintilla(QsciScintillaBase::SCI_STYLESETSIZE,(unsigned long)style,(long)size);
-    if (face)
+    if (face && strcmp(face, ""))
     {
         SendScintilla(QsciScintillaBase::SCI_STYLESETFONT,(unsigned long)style,face);
         SendScintilla(QsciScintillaBase::SCI_STYLESETBOLD,(unsigned long)style,bold);
