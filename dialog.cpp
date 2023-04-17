@@ -100,6 +100,7 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
 
     if(toolBar_->actReload->isEnabled())
     {
+        updateReloadButtonVisualClue();
         auto dirtyCheckTimer = new QTimer(this);
         dirtyCheckTimer->setInterval(3000);
         dirtyCheckTimer->start();
