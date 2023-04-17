@@ -47,6 +47,7 @@ struct EditorOptions
         Python,
         Json
     };
+    bool doesScriptInitiallyNeedRestart {false};
     Lang lang {None};
     QString langExt {"txt"};
     QString langComment {""};

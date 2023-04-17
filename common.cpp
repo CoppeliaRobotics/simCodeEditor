@@ -35,11 +35,13 @@ void EditorOptions::readFromXML(const QString &xml)
         placement = EditorOptions::Placement::Relative;
     else if(pl == "center")
         placement = EditorOptions::Placement::Center;
-#ifdef __linux__ 
-    fontFace = e.attribute("font", "DejaVu Sans Mono"); // prob. available on all Linux platforms. For Ubuntu only "Ubuntu Mono" would be better
-#else   
-    fontFace = e.attribute("font", "Courier New"); // always available on Windows and macOS. "Courier" & Scintilla is problematic on macOS
+    fontFace = e.attribute("font",
+#ifdef __linux__
+            "DejaVu Sans Mono"
+#else
+            "Courier New" // always available on Windows and macOS. "Courier" & Scintilla is problematic on macOS
 #endif
+    ); // prob. available on all Linux platforms. For Ubuntu only "Ubuntu Mono" would be better
     fontSize = e.attribute("font-size", "14").toInt();
     fontBold = parseBool(e.attribute("font-bold", "false"));
     activate = parseBool(e.attribute("activate", "true"));
@@ -49,6 +51,7 @@ void EditorOptions::readFromXML(const QString &xml)
     tab_width = e.attribute("tab-width", "4").toInt();
     if(e.hasAttribute("is-lua"))
         sim::addLog(sim_verbosity_errors, "XML contains deprecated 'is-lua' attribute");
+    doesScriptInitiallyNeedRestart = !parseBool(e.attribute("script-up-to-date", "true"));
     QString l = e.attribute("lang", "none");
     if (l == "none")
     {

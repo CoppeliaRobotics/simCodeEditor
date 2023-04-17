@@ -77,6 +77,7 @@ private:
     static int modalPosAndSize[4];
     int memorizedPos[2] = { -999999,-999999 };
     QString initText_;
+    bool scriptRestartInitiallyNeeded_ {false};
 
     friend class Toolbar;
 };

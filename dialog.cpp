@@ -16,6 +16,8 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
+    scriptRestartInitiallyNeeded_ = o.doesScriptInitiallyNeedRestart;
+
     stacked_ = new QStackedWidget;
     activeEditor_ = new Editor(this);
     editors_.insert("", activeEditor_);
@@ -361,7 +363,7 @@ void Dialog::updateReloadButtonVisualClue()
 
     if(action->isEnabled())
     {
-        bool dirty = initText_ != text();
+        bool dirty = scriptRestartInitiallyNeeded_ || initText_ != text();
         auto widget = toolBar_->widgetForAction(toolBar_->actReload);
         QString txt = "Restart script";
         QString ss = "";
@@ -378,6 +380,7 @@ void Dialog::updateReloadButtonVisualClue()
 void Dialog::reloadScript()
 {
     initText_ = text();
+    scriptRestartInitiallyNeeded_ = false;
     updateReloadButtonVisualClue();
     ui->notifyEvent(handle, "restartScript", opts.onClose);
 }
