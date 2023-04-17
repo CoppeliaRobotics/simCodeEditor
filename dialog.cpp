@@ -95,6 +95,14 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
     connect(searchPanel_, &SearchAndReplacePanel::hidden, toolBar_, &ToolBar::updateButtons);
 
     toolBar_->updateButtons();
+
+    if(toolBar_->actReload->isEnabled())
+    {
+        auto dirtyCheckTimer = new QTimer(this);
+        dirtyCheckTimer->setInterval(3000);
+        dirtyCheckTimer->start();
+        connect(dirtyCheckTimer, &QTimer::timeout, this, &Dialog::updateReloadButtonVisualClue);
+    }
 }
 
 Dialog::~Dialog()
@@ -222,6 +230,12 @@ void Dialog::setHandle(int handle)
     this->handle = handle;
 }
 
+void Dialog::setInitText(const QString &text)
+{
+    initText_ = text;
+    setText(text);
+}
+
 void Dialog::setText(const QString &text)
 {
     setText(text.toUtf8().data(), 0);
@@ -341,8 +355,30 @@ void Dialog::reject()
     }
 }
 
+void Dialog::updateReloadButtonVisualClue()
+{
+    auto action = toolBar_->actReload;
+
+    if(action->isEnabled())
+    {
+        bool dirty = initText_ != text();
+        auto widget = toolBar_->widgetForAction(toolBar_->actReload);
+        QString txt = "Restart script";
+        QString ss = "";
+        if(dirty)
+        {
+            txt += " (script has changed since last restart!)";
+            ss = "background-color: red;";
+        }
+        action->setText(txt);
+        widget->setStyleSheet(ss);
+    }
+}
+
 void Dialog::reloadScript()
 {
+    initText_ = text();
+    updateReloadButtonVisualClue();
     ui->notifyEvent(handle, "restartScript", opts.onClose);
 }
 

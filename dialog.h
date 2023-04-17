@@ -35,6 +35,7 @@ public:
     inline SearchAndReplacePanel * searchPanel() {return searchPanel_;}
     inline StatusBar * statusBar() {return statusBar_;}
     void setHandle(int handle);
+    void setInitText(const QString &text);
     void setText(const QString &text);
     void setText(const char* txt, int insertMode);
     QString text();
@@ -51,6 +52,7 @@ private:
 
 private slots:
     void reject();
+    void updateReloadButtonVisualClue();
     void reloadScript();
 public slots:
     void updateCursorSelectionDisplay();
@@ -74,6 +76,7 @@ private:
     static QString modalText;
     static int modalPosAndSize[4];
     int memorizedPos[2] = { -999999,-999999 };
+    QString initText_;
 
     friend class Toolbar;
 };

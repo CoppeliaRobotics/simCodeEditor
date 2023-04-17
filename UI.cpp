@@ -16,7 +16,7 @@ Dialog * UI::createWindow(bool modalSpecial, const QString &initText, const QStr
     QWidget *parent = (QWidget *)sim::getMainWindow(1);
     Dialog *window = new Dialog(o, this, parent);
     window->setEditorOptions(o);
-    window->setText(initText);
+    window->setInitText(initText);
     if(!modalSpecial)
         window->show();
     return window;
