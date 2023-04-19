@@ -101,7 +101,6 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
     dirtyCheckTimer_ = new QTimer(this);
     connect(dirtyCheckTimer_, &QTimer::timeout, this, &Dialog::updateReloadButtonVisualClue);
     dirtyCheckTimer_->setInterval(2000);
-    updateReloadButtonVisualClue();
 
     ui->requestSimulationStatus();
 }
@@ -360,20 +359,23 @@ void Dialog::updateReloadButtonVisualClue()
 {
     auto action = toolBar_->actReload;
 
+    bool dirty = false;
+    auto widget = toolBar_->widgetForAction(toolBar_->actReload);
+    QString txt = "Restart script";
+    QString ss = "";
+
     if(action->isEnabled())
     {
-        bool dirty = scriptRestartInitiallyNeeded_ || initText_ != text();
-        auto widget = toolBar_->widgetForAction(toolBar_->actReload);
-        QString txt = "Restart script";
-        QString ss = "";
+        dirty = scriptRestartInitiallyNeeded_ || initText_ != text();
         if(dirty)
         {
             txt += " (script has changed since last restart!)";
             ss = "background-color: red;";
         }
-        action->setText(txt);
-        widget->setStyleSheet(ss);
     }
+
+    action->setText(txt);
+    widget->setStyleSheet(ss);
 }
 
 void Dialog::reloadScript()
@@ -395,8 +397,8 @@ void Dialog::onSimulationRunning(bool running)
         initText_ = text();
     }
 
-    updateReloadButtonVisualClue();
     toolBar_->actReload->setEnabled(restartButtonEnabled);
+    updateReloadButtonVisualClue();
 
     if(restartButtonEnabled)
         dirtyCheckTimer_->start();
