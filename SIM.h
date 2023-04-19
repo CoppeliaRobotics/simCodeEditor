@@ -16,6 +16,7 @@ public:
 public slots:
     void notifyEvent(int handle, const QString &eventType, const QString &data);
     void openURL(const QString &url);
+    void onRequestSimulationStatus();
 
 signals:
     void openModal(const QString &initText, const QString &properties, QString& text, int *positionAndSize);
@@ -24,6 +25,7 @@ signals:
     void getText(int handle, QString *text, int* posAndSize);
     void show(int handle, int showState);
     void close(int handle, int *positionAndSize);
+    void simulationRunning(bool running);
 
 private:
     UI *ui;

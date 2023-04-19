@@ -49,7 +49,7 @@ inline QPixmap loadPixmap(QWidget *w, const uchar *data, int len)
 #include "icons/icons.cpp"
 #define ICON(x) QPixmap x = loadPixmap(this, x ## _png, x ## _png_len)
 
-ToolBar::ToolBar(bool canRestart, Dialog *parent)
+ToolBar::ToolBar(Dialog *parent)
     : QToolBar(parent),
       parent(parent)
 {
@@ -57,7 +57,7 @@ ToolBar::ToolBar(bool canRestart, Dialog *parent)
 
     ICON(upload);
     addAction(actReload = new QAction(QIcon(upload), "Restart script"));
-    actReload->setEnabled(canRestart);
+    actReload->setEnabled(false);
 
     ICON(search);
     addAction(actShowSearchPanel = new QAction(QIcon(search), "Find and replace"));

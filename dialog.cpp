@@ -25,7 +25,7 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
     textBrowser_ = new QTextBrowser;
     textBrowser_->setVisible(false);
 
-    toolBar_ = new ToolBar(o.canRestart, this);
+    toolBar_ = new ToolBar(this);
     if(!o.toolBar)
         toolBar_->setVisible(false);
     searchPanel_ = new SearchAndReplacePanel(this);
@@ -98,14 +98,11 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
 
     toolBar_->updateButtons();
 
-    if(toolBar_->actReload->isEnabled())
-    {
-        updateReloadButtonVisualClue();
-        auto dirtyCheckTimer = new QTimer(this);
-        dirtyCheckTimer->setInterval(3000);
-        dirtyCheckTimer->start();
-        connect(dirtyCheckTimer, &QTimer::timeout, this, &Dialog::updateReloadButtonVisualClue);
-    }
+    dirtyCheckTimer_ = new QTimer(this);
+    connect(dirtyCheckTimer_, &QTimer::timeout, this, &Dialog::updateReloadButtonVisualClue);
+    dirtyCheckTimer_->setInterval(2000);
+
+    ui->requestSimulationStatus();
 }
 
 Dialog::~Dialog()
@@ -384,6 +381,25 @@ void Dialog::reloadScript()
     scriptRestartInitiallyNeeded_ = false;
     updateReloadButtonVisualClue();
     ui->notifyEvent(handle, "restartScript", opts.onClose);
+}
+
+void Dialog::onSimulationRunning(bool running)
+{
+    bool restartButtonEnabled = running && opts.canRestartInSim || !running && opts.canRestartInNonsim;
+
+    toolBar_->actReload->setEnabled(restartButtonEnabled);
+
+    if(firstTimeSeeingSimulationStatus_)
+        firstTimeSeeingSimulationStatus_ = false;
+    else
+        scriptRestartInitiallyNeeded_ = false;
+
+    updateReloadButtonVisualClue();
+
+    if(restartButtonEnabled)
+        dirtyCheckTimer_->start();
+    else
+        dirtyCheckTimer_->stop();
 }
 
 void Dialog::updateCursorSelectionDisplay()

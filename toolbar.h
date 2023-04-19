@@ -12,7 +12,7 @@ class ToolBar : public QToolBar
     Q_OBJECT
 
 public:
-    ToolBar(bool canRestart, Dialog *parent);
+    ToolBar(Dialog *parent);
     virtual ~ToolBar();
 
 public slots:

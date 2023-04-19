@@ -12,9 +12,11 @@ SIM::SIM(UI *theUi)
     QObject::connect(this, &SIM::getText, ui, &UI::getText, sim2ui);
     QObject::connect(this, &SIM::show, ui, &UI::show, sim2ui);
     QObject::connect(this, &SIM::close, ui, &UI::close, sim2ui);
+    QObject::connect(this, &SIM::simulationRunning, ui, &UI::onSimulationRunning, sim2ui);
     Qt::ConnectionType ui2sim = Qt::AutoConnection;
     QObject::connect(ui, &UI::notifyEvent, this, &SIM::notifyEvent, ui2sim);
     QObject::connect(ui, &UI::openURL, this, &SIM::openURL, ui2sim);
+    QObject::connect(ui, &UI::requestSimulationStatus, this, &SIM::onRequestSimulationStatus, ui2sim);
 }
 
 void SIM::notifyEvent(int handle, const QString &eventType, const QString &data)
@@ -34,4 +36,10 @@ void SIM::openURL(const QString &url)
     QString s(QStringLiteral("simURLDrop.openURL(\"%1\")").arg(url));
     sim::executeScriptString(sim_scripttype_sandboxscript, s.toStdString(), stackHandle);
     sim::releaseStack(stackHandle);
+}
+
+void SIM::onRequestSimulationStatus()
+{
+    bool running = sim::getSimulationState() == sim_simulation_advancing_running;
+    emit simulationRunning(running);
 }

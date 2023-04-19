@@ -98,3 +98,11 @@ void UI::close(int handle, int *positionAndSize)
         editors.remove(handle);
     }
 }
+
+void UI::onSimulationRunning(bool running)
+{
+    for(auto editor : editors.values())
+    {
+        editor->onSimulationRunning(running);
+    }
+}

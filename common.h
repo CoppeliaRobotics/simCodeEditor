@@ -19,7 +19,8 @@ struct EditorOptions
 {
     bool toolBar;
     bool statusBar;
-    bool canRestart;
+    bool canRestartInSim;
+    bool canRestartInNonsim;
     bool searchable;
     QString windowTitle;
     bool resizable;

@@ -8,7 +8,7 @@
 #include <simPlusPlus/Lib.h>
 
 QString EditorOptions::resourcesPath{};
-
+#include <iostream>
 void EditorOptions::readFromXML(const QString &xml)
 {
     QDomDocument doc;
@@ -18,7 +18,19 @@ void EditorOptions::readFromXML(const QString &xml)
 
     toolBar = parseBool(e.attribute("toolbar", "false"));
     statusBar = parseBool(e.attribute("statusbar", "false"));
-    canRestart = parseBool(e.attribute("can-restart", "false"));
+    if(e.hasAttribute("can-restart"))
+    {
+        bool b = parseBool(e.attribute("can-restart", "false"));
+        canRestartInSim = b;
+        canRestartInNonsim = b;
+    }
+    else
+    {
+        canRestartInSim = parseBool(e.attribute("can-restart-in-sim", "false"));
+        canRestartInNonsim = parseBool(e.attribute("can-restart-in-nosim", "false"));
+    }
+    std::cout << xml.toStdString() << std::endl;
+    std::cout << "canRestartInSim=" << canRestartInSim << ", canRestartInNonsim=" << canRestartInNonsim << std::endl;
     searchable = parseBool(e.attribute("searchable", "true"));
     windowTitle = e.attribute("title", "Editor");
     resizable = parseBool(e.attribute("resizable", "true"));

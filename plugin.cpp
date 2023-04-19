@@ -68,6 +68,16 @@ public:
         sim->deleteLater();
     }
 
+    void onSimulationAboutToStart()
+    {
+        sim->simulationRunning(true);
+    }
+
+    void onSimulationEnded()
+    {
+        sim->simulationRunning(false);
+    }
+
     char * codeEditor_openModal(const char *initText, const char *properties, int *positionAndSize)
     { // special: blocking until dlg closed
         ASSERT_THREAD(!UI);

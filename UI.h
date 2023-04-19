@@ -22,10 +22,12 @@ public:
     void getText(int handle, QString *text, int* posAndSize);
     void show(int handle, int showState);
     void close(int handle, int *positionAndSize);
+    void onSimulationRunning(bool running);
 
 signals:
     void notifyEvent(int handle, const QString &eventType, const QString &data);
     void openURL(const QString &url);
+    void requestSimulationStatus();
 
 private:
     int nextEditorHandle = 103800;

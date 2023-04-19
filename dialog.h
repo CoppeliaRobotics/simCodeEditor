@@ -55,6 +55,7 @@ private slots:
     void updateReloadButtonVisualClue();
     void reloadScript();
 public slots:
+    void onSimulationRunning(bool running);
     void updateCursorSelectionDisplay();
 
 public:
@@ -78,6 +79,8 @@ private:
     int memorizedPos[2] = { -999999,-999999 };
     QString initText_;
     bool scriptRestartInitiallyNeeded_ {false};
+    QTimer *dirtyCheckTimer_;
+    bool firstTimeSeeingSimulationStatus_ {true};
 
     friend class Toolbar;
 };
