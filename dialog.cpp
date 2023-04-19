@@ -392,7 +392,7 @@ void Dialog::onSimulationRunning(bool running)
 
     if(firstTimeSeeingSimulationStatus_)
         firstTimeSeeingSimulationStatus_ = false;
-    else if(!restartButtonEnabled) {
+    else if(!opts.canRestartInNonsim || !opts.canRestartInSim) {
         scriptRestartInitiallyNeeded_ = false;
         initText_ = text();
     }
