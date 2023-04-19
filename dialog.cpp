@@ -387,14 +387,15 @@ void Dialog::onSimulationRunning(bool running)
 {
     bool restartButtonEnabled = running && opts.canRestartInSim || !running && opts.canRestartInNonsim;
 
-    toolBar_->actReload->setEnabled(restartButtonEnabled);
-
     if(firstTimeSeeingSimulationStatus_)
         firstTimeSeeingSimulationStatus_ = false;
-    else
+    else if(!restartButtonEnabled) {
         scriptRestartInitiallyNeeded_ = false;
+        initText_ = text();
+    }
 
     updateReloadButtonVisualClue();
+    toolBar_->actReload->setEnabled(restartButtonEnabled);
 
     if(restartButtonEnabled)
         dirtyCheckTimer_->start();
