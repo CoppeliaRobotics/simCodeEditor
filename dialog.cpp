@@ -101,6 +101,7 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
     dirtyCheckTimer_ = new QTimer(this);
     connect(dirtyCheckTimer_, &QTimer::timeout, this, &Dialog::updateReloadButtonVisualClue);
     dirtyCheckTimer_->setInterval(2000);
+    updateReloadButtonVisualClue();
 
     ui->requestSimulationStatus();
 }
