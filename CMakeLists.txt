@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(simExtCodeEditor)
+project(simCodeEditor)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -101,11 +101,11 @@ set(LIBRARIES
     ${QSCINTILLA_LIBRARY}
 )
 
-coppeliasim_add_plugin(simExtCodeEditor SOURCES ${SOURCES})
-target_link_libraries(simExtCodeEditor ${LIBRARIES})
+coppeliasim_add_plugin(simCodeEditor SOURCES ${SOURCES})
+target_link_libraries(simCodeEditor ${LIBRARIES})
 coppeliasim_add_resource_directory(snippets)
 
 if(APPLE)
     get_filename_component(QSCINTILLA_LIB_NAME ${QSCINTILLA_LIBRARY} NAME)
-    add_custom_command(TARGET simExtCodeEditor POST_BUILD COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change ${QSCINTILLA_LIB_NAME} @executable_path/../Frameworks/${QSCINTILLA_LIB_NAME} $<TARGET_FILE:simExtCodeEditor>)
+    add_custom_command(TARGET simCodeEditor POST_BUILD COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change ${QSCINTILLA_LIB_NAME} @executable_path/../Frameworks/${QSCINTILLA_LIB_NAME} $<TARGET_FILE:simCodeEditor>)
 endif()

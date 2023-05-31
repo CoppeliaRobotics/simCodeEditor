@@ -2,21 +2,8 @@
 #include "UI.h"
 #include "stubs.h"
 
-SIM::SIM(UI *theUi)
+SIM::SIM()
 {
-    ui = theUi;
-    Qt::ConnectionType sim2ui = Qt::BlockingQueuedConnection;
-    QObject::connect(this, &SIM::openModal, ui, &UI::openModal, sim2ui);
-    QObject::connect(this, &SIM::open, ui, &UI::open, sim2ui);
-    QObject::connect(this, &SIM::setText, ui, &UI::setText, sim2ui);
-    QObject::connect(this, &SIM::getText, ui, &UI::getText, sim2ui);
-    QObject::connect(this, &SIM::show, ui, &UI::show, sim2ui);
-    QObject::connect(this, &SIM::close, ui, &UI::close, sim2ui);
-    QObject::connect(this, &SIM::simulationRunning, ui, &UI::onSimulationRunning, sim2ui);
-    Qt::ConnectionType ui2sim = Qt::AutoConnection;
-    QObject::connect(ui, &UI::notifyEvent, this, &SIM::notifyEvent, ui2sim);
-    QObject::connect(ui, &UI::openURL, this, &SIM::openURL, ui2sim);
-    QObject::connect(ui, &UI::requestSimulationStatus, this, &SIM::onRequestSimulationStatus, ui2sim);
 }
 
 void SIM::notifyEvent(int handle, const QString &eventType, const QString &data)

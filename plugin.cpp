@@ -11,23 +11,26 @@
 class Plugin : public sim::Plugin
 {
 public:
-    void onStart()
+    void onInit()
     {
-        uiThread();
-
         if(sim::getBoolParam(sim_boolparam_headless))
             throw std::runtime_error("cannot load in headless mode");
 
         if(!registerScriptStuff())
             throw std::runtime_error("failed to register script stuff");
 
-        // XXX: parameter doesn't exist when called later?
-        EditorOptions::resourcesPath = QString::fromStdString(sim::getStringParam(sim_stringparam_resourcesdir));
-
         setExtVersion("Code Editor Plugin");
         setBuildDate(BUILD_DATE);
 
-        ui = new UI;
+        // XXX: parameter doesn't exist when called later?
+        EditorOptions::resourcesPath = QString::fromStdString(sim::getStringParam(sim_stringparam_resourcesdir));
+
+        auto p = sim::getNamedBoolParam("CodeEditor.verboseErrors");
+        if(p)
+            verboseErrors = *p;
+
+        simThread();
+        sim = new SIM();
 
         // development builds don't look up online docs:
         int rev = sim::getInt32Param(sim_intparam_program_revision);
@@ -43,29 +46,22 @@ public:
         }
     }
 
-    void onEnd()
+    void onCleanup()
     {
-        delete ui;
-        ui = nullptr;
-
-        UI_THREAD = NULL;
+        sim->deleteLater();
         SIM_THREAD = NULL;
     }
 
-    void onFirstInstancePass(const sim::InstancePassFlags &flags)
+    void onUIInit()
     {
-        simThread();
-
-        auto p = sim::getNamedBoolParam("CodeEditor.verboseErrors");
-        if(p)
-            verboseErrors = *p;
-
-        sim = new SIM(ui);
+        uiThread();
+        ui = new UI(sim);
     }
 
-    void onLastInstancePass()
+    void onUICleanup()
     {
-        sim->deleteLater();
+        ui->deleteLater();
+        UI_THREAD = NULL;
     }
 
     void onSimulationAboutToStart()
@@ -322,7 +318,7 @@ private:
     bool verboseErrors = false;
 };
 
-SIM_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
+SIM_UI_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
 
 QUrl apiReferenceForSymbol(const QString &sym)
 {

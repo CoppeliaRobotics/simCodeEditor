@@ -8,10 +8,13 @@
 
 class Dialog;
 
+class SIM;
+
 class UI : public QObject
 {
     Q_OBJECT
 public:
+    UI(SIM *sim);
 public slots:
 private:
     Dialog * createWindow(bool modalSpecial, const QString &initText, const QString &properties);

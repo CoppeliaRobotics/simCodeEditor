@@ -1,8 +1,26 @@
 #include "UI.h"
+#include "SIM.h"
 #include "stubs.h"
 #include "dialog.h"
 #include "common.h"
 #include <QDebug>
+
+UI::UI(SIM *sim)
+{
+    UI *ui = this;
+    Qt::ConnectionType sim2ui = Qt::BlockingQueuedConnection;
+    QObject::connect(sim, &SIM::openModal, ui, &UI::openModal, sim2ui);
+    QObject::connect(sim, &SIM::open, ui, &UI::open, sim2ui);
+    QObject::connect(sim, &SIM::setText, ui, &UI::setText, sim2ui);
+    QObject::connect(sim, &SIM::getText, ui, &UI::getText, sim2ui);
+    QObject::connect(sim, &SIM::show, ui, &UI::show, sim2ui);
+    QObject::connect(sim, &SIM::close, ui, &UI::close, sim2ui);
+    QObject::connect(sim, &SIM::simulationRunning, ui, &UI::onSimulationRunning, sim2ui);
+    Qt::ConnectionType ui2sim = Qt::AutoConnection;
+    QObject::connect(ui, &UI::notifyEvent, sim, &SIM::notifyEvent, ui2sim);
+    QObject::connect(ui, &UI::openURL, sim, &SIM::openURL, ui2sim);
+    QObject::connect(ui, &UI::requestSimulationStatus, sim, &SIM::onRequestSimulationStatus, ui2sim);
+}
 
 Dialog * UI::createWindow(bool modalSpecial, const QString &initText, const QString &properties)
 {

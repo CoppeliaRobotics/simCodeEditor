@@ -5,13 +5,11 @@
 #include <QString>
 #include <QSemaphore>
 
-class UI;
-
 class SIM : public QObject
 {
     Q_OBJECT
 public:
-    SIM(UI *theUi);
+    SIM();
 
 public slots:
     void notifyEvent(int handle, const QString &eventType, const QString &data);
@@ -26,9 +24,6 @@ signals:
     void show(int handle, int showState);
     void close(int handle, int *positionAndSize);
     void simulationRunning(bool running);
-
-private:
-    UI *ui;
 };
 
 #endif // SIM_H__INCLUDED
