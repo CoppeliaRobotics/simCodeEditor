@@ -28,7 +28,7 @@ struct SnippetGroup
 
 class Dialog;
 
-class SnippetsLibrary : public QToolBar
+class SnippetsLibrary
 {
 public:
     SnippetsLibrary();

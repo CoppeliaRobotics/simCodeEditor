@@ -159,7 +159,7 @@ void SnippetsLibrary::fillMenu(Dialog *parent, QMenu *menu) const
         {
             QAction *a = new QAction(snippet.name);
             QString content = snippet.content;
-            connect(a, &QAction::triggered, [=] {
+            QObject::connect(a, &QAction::triggered, [=] {
                 auto e = parent->activeEditor();
                 int line, index;
                 e->getCursorPosition(&line, &index);
