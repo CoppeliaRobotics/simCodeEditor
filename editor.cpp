@@ -11,7 +11,8 @@
 QUrl apiReferenceForSymbol(const QString &sym);
 
 Editor::Editor(Dialog *d)
-    : dialog(d)
+    : QsciScintilla(d),
+      dialog(d)
 {
     SendScintilla(QsciScintillaBase::SCI_SETSTYLEBITS, 5);
     setTabWidth(4);
