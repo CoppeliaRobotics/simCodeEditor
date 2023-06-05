@@ -48,7 +48,7 @@ public:
 
     void onCleanup()
     {
-        sim->deleteLater();
+        delete sim; //sim->deleteLater(); crashes on quit
         SIM_THREAD = NULL;
     }
 
