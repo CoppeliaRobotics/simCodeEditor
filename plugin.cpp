@@ -318,7 +318,7 @@ private:
     bool verboseErrors = false;
 };
 
-SIM_UI_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
+SIM_UI_PLUGIN(Plugin)
 
 QUrl apiReferenceForSymbol(const QString &sym)
 {
