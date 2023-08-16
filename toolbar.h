@@ -23,8 +23,6 @@ public:
     QAction *actShowSearchPanel;
     QAction *actUndo;
     QAction *actRedo;
-    QAction *actUnindent;
-    QAction *actIndent;
     struct {
         QAction *actSave;
         QComboBox *combo;

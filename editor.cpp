@@ -2,31 +2,19 @@
 #include "dialog.h"
 #include "toolbar.h"
 #include "UI.h"
-#include <SciLexer.h>
-#include <Qsci/qscilexerlua.h>
-#include <Qsci/qscilexerpython.h>
-#include <Qsci/qscilexerjson.h>
 
 // implemented in plugin.cpp:
 QUrl apiReferenceForSymbol(const QString &sym);
 
 Editor::Editor(Dialog *d)
-    : QsciScintilla(d),
+    : QTextEdit(d),
       dialog(d)
 {
-    SendScintilla(QsciScintillaBase::SCI_SETSTYLEBITS, 5);
-    setTabWidth(4);
-    setTabIndents(true);
-    setBackspaceUnindents(true);
-    setAutoIndent(true);
-    SendScintilla(QsciScintillaBase::SCI_SETUSETABS, 0);
-
-    connect(this, SIGNAL(SCN_CHARADDED(int)), this, SLOT(onCharAdded(int)));
-    connect(this, SIGNAL(SCN_MODIFIED(int,int,const char*,int,int,int,int,int,int,int)), this, SLOT(onModified(int,int,const char*,int,int,int,int,int,int,int)));
-    connect(this, &QsciScintilla::textChanged, this, &Editor::onTextChanged);
-    connect(this, &QsciScintilla::selectionChanged, this, &Editor::onSelectionChanged);
-    connect(this, &QsciScintilla::cursorPositionChanged, this, &Editor::onCursorPosChanged);
-    connect(this, SIGNAL(SCN_UPDATEUI(int)), this, SLOT(onUpdateUi(int)));
+    connect(this, &QTextEdit::textChanged, this, &Editor::onTextChanged);
+    connect(this, &QTextEdit::selectionChanged, this, &Editor::onSelectionChanged);
+    connect(this, &QTextEdit::cursorPositionChanged, this, &Editor::onCursorPosChanged);
+    connect(this, &QTextEdit::redoAvailable, [=] (bool a) { this->redoAvailable_ = a; });
+    connect(this, &QTextEdit::undoAvailable, [=] (bool a) { this->undoAvailable_ = a; });
 }
 
 bool Editor::isActive() const
@@ -37,6 +25,7 @@ bool Editor::isActive() const
 void Editor::setEditorOptions(const EditorOptions &o)
 {
     opts = o;
+#if 0
     if (o.lang == EditorOptions::Lang::Lua)
     {
         QsciLexerLua* lexer = new QsciLexerLua;
@@ -52,12 +41,14 @@ void Editor::setEditorOptions(const EditorOptions &o)
         QsciLexerJSON* lexer = new QsciLexerJSON;
         setLexer(lexer);
     }
+#endif
 
     setReadOnly(!o.editable);
-    setTabWidth(o.tab_width);
+    //setTabWidth(o.tab_width);
 
     // theme
 
+#if 0
     setAStyle(QsciScintillaBase::STYLE_DEFAULT, o.text_col, o.background_col, o.fontSize, o.fontFace.toUtf8().data(), o.fontBold); // set global default style
     SendScintilla(QsciScintillaBase::SCI_SETCARETFORE,(unsigned long)QColor(Qt::black).rgb());
     SendScintilla(QsciScintillaBase::SCI_STYLECLEARALL); // set all styles
@@ -241,6 +232,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
 
     SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)6, ss1.toUtf8().data());
     SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)7, ss2.toUtf8().data());
+#endif
 
 #if 0
     SendScintilla(QsciScintillaBase::SCI_STYLESETHOTSPOT, SCE_LUA_WORD2, 1);
@@ -248,6 +240,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
 #endif
 }
 
+#if 0
 void Editor::onUpdateUi(int updated)
 {   // highlight all occurences of selected text:
     SendScintilla(QsciScintillaBase::SCI_SETINDICATORCURRENT, (int)20);
@@ -279,6 +272,7 @@ void Editor::onUpdateUi(int updated)
         delete[] txt;
     }
 }
+#endif
 
 static QString stripQuotes(const QString &s)
 {
@@ -349,7 +343,7 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
     delete menu;
 }
 
-QString Editor::tokenAtPosition(int pos)
+QString Editor::tokenAtPosition2(int pos)
 {
     QString txt{text()};
     auto isID = [] (const QChar c) { return c.isLetterOrNumber() || c == '_' || c == '.'; };
@@ -375,8 +369,9 @@ QString Editor::tokenAtPosition(int pos)
     return text(start, end);
 }
 
-QString Editor::tokenAtPosition2(int pos)
+QString Editor::tokenAtPosition(int pos)
 {
+#if 0
     int style = SendScintilla(SCI_GETSTYLEAT, (long)pos, (long)0);
     int start = pos, end = pos, newstyle = style;
     while(start > 0)
@@ -402,12 +397,16 @@ QString Editor::tokenAtPosition2(int pos)
     SendScintilla(SCI_GETTEXTRANGE, (long)start, (long)end, buf);
     QString txt(buf);
     delete[] buf;
+#else
+    QString txt;
+#endif
     return txt;
 }
 
 int Editor::positionFromPoint(const QPoint &p)
 {
-    return SendScintilla(SCI_POSITIONFROMPOINT, (long)p.x(), (long)p.y());
+    auto c = cursorForPosition(p);
+    return c.position();
 }
 
 QString Editor::tokenAt(const QPoint &p)
@@ -418,9 +417,10 @@ QString Editor::tokenAt(const QPoint &p)
 void Editor::setText(const char* txt, int insertMode)
 {
     if (insertMode == 0)
-        QsciScintilla::setText(txt);
+        QTextEdit::setText(txt);
     else
         append(txt);
+#if 0
     bool ro = isReadOnly();
     SendScintilla(QsciScintillaBase::SCI_SETREADONLY, (int)0);
 
@@ -435,8 +435,10 @@ void Editor::setText(const char* txt, int insertMode)
         SendScintilla(QsciScintillaBase::SCI_GOTOPOS, (int)SendScintilla(QsciScintillaBase::SCI_POSITIONFROMLINE, (int)SendScintilla(QsciScintillaBase::SCI_GETLINECOUNT) - 1)); // set the cursor and move the view into position
     if (ro)
         SendScintilla(QsciScintillaBase::SCI_SETREADONLY, (int)1);
+#endif
 }
 
+#if 0
 void Editor::setAStyle(int style,QColor fore,QColor back,int size,const char *face,bool bold)
 {
     SendScintilla(QsciScintillaBase::SCI_STYLESETFORE,(unsigned long)style,(long)fore.rgb());
@@ -449,7 +451,9 @@ void Editor::setAStyle(int style,QColor fore,QColor back,int size,const char *fa
         SendScintilla(QsciScintillaBase::SCI_STYLESETBOLD,(unsigned long)style,bold);
     }
 }
+#endif
 
+#if 0
 void Editor::onCharAdded(int charAdded)
 {
     auto scintilla_ = this;
@@ -612,6 +616,7 @@ void Editor::onModified(int, int, const char *, int, int, int, int, int, int, in
 {
 
 }
+#endif
 
 void Editor::onTextChanged()
 {
@@ -620,7 +625,7 @@ void Editor::onTextChanged()
     dialog->toolBar()->updateButtons();
 }
 
-void Editor::onCursorPosChanged(int line, int index)
+void Editor::onCursorPosChanged()
 {
     dialog->toolBar()->updateButtons();
     dialog->updateCursorSelectionDisplay();
@@ -634,6 +639,7 @@ void Editor::onSelectionChanged()
 
 void Editor::indentSelectedText()
 {
+#if 0
     int lineFrom, indexFrom, lineTo, indexTo;
     getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
     if(indexTo == 0) lineTo--;
@@ -641,10 +647,12 @@ void Editor::indentSelectedText()
     for(int line = lineFrom; line <= lineTo && line != -1; line++)
         indent(line);
     endUndoAction();
+#endif
 }
 
 void Editor::unindentSelectedText()
 {
+#if 0
     int lineFrom, indexFrom, lineTo, indexTo;
     getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
     if(indexTo == 0) lineTo--;
@@ -652,6 +660,7 @@ void Editor::unindentSelectedText()
     for(int line = lineFrom; line <= lineTo && line != -1; line++)
         unindent(line);
     endUndoAction();
+#endif
 }
 
 void Editor::openExternalFile(const QString &filePath)
@@ -707,6 +716,49 @@ bool Editor::canSave()
 {
     return !externalFile_.path.isEmpty();
 }
+
+void Editor::ensurePositionVisible(int pos)
+{
+    auto c = textCursor();
+    auto p = c.position();
+    c.setPosition(pos);
+    ensureCursorVisible();
+    c.setPosition(p);
+}
+
+void Editor::ensureCurrentLineVisible()
+{
+    ensureCursorVisible();
+}
+
+QString Editor::selectedText() const
+{
+    auto c = textCursor();
+    return c.selectedText();
+}
+
+QString Editor::text(int start, int end) const
+{
+    QString s = toPlainText();
+    return s.mid(start, end == -1 ? -1 : (end - start));
+}
+
+#if 0
+void Editor::getSelection(int *lineFrom, int *indexFrom, int *lineTo, int *indexTo)
+{
+    auto c = textCursor();
+    auto start, end = c.selectionStart(), c.selectionEnd();
+    auto txt = text();
+    int line = 0, index = 0;
+    for(int i = 0; i < txt.length(); i++) {
+        if(i == start) { *lineFrom = line; *indexFrom = index; }
+        if(i == end) { *lineTo = line; *indexTo = index; }
+        QChar ch = txt.at(i);
+        if(ch == '\n') { line++; index = 0; }
+        else { index++; }
+    }
+}
+#endif
 
 std::string Editor::divideString(const char* s) const
 {

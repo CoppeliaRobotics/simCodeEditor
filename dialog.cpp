@@ -67,12 +67,6 @@ Dialog::Dialog(const EditorOptions &o, UI *ui, QWidget* pParent)
     connect(toolBar_->actRedo, &QAction::triggered, [this]() {
         activeEditor()->redo();
     });
-    connect(toolBar_->actIndent, &QAction::triggered, [this]() {
-        activeEditor()->indentSelectedText();
-    });
-    connect(toolBar_->actUnindent, &QAction::triggered, [this]() {
-        activeEditor()->unindentSelectedText();
-    });
     connect(toolBar_->openFiles.actSave, &QAction::triggered, [this]() {
         auto editor = qvariant_cast<Editor*>(toolBar_->openFiles.combo->currentData());
         if(!editor->externalFile().isEmpty())
@@ -308,8 +302,6 @@ void Dialog::showHelp(bool v)
     toolBar_->actShowSearchPanel->setVisible(!v);
     toolBar_->actUndo->setVisible(!v);
     toolBar_->actRedo->setVisible(!v);
-    toolBar_->actUnindent->setVisible(!v);
-    toolBar_->actIndent->setVisible(!v);
     toolBar_->funcNav.act->setVisible(!v);
     toolBar_->snippetLib.act->setVisible(!v);
     toolBar_->actCloseHelp->setVisible(v);
@@ -408,6 +400,7 @@ void Dialog::onSimulationRunning(bool running)
 
 void Dialog::updateCursorSelectionDisplay()
 {
+#if 0
     int fromLine, fromIndex, toLine, toIndex;
     activeEditor()->getSelection(&fromLine, &fromIndex, &toLine, &toIndex);
     if(fromLine != -1)
@@ -417,6 +410,7 @@ void Dialog::updateCursorSelectionDisplay()
     }
     activeEditor()->getCursorPosition(&fromLine, &fromIndex);
     statusBar_->setCursorInfo(fromLine, fromIndex);
+#endif
 }
 
 void Dialog::openURL(const QString &url)

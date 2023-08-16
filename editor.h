@@ -1,12 +1,12 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
-#include <Qsci/qsciscintilla.h>
+#include <QTextEdit>
 #include "common.h"
 
 class Dialog;
 
-class Editor : public QsciScintilla
+class Editor : public QTextEdit
 {
     Q_OBJECT
 
@@ -23,12 +23,12 @@ public:
 
 public slots:
     void setText(const char* txt, int insertMode);
-    void setAStyle(int style, QColor fore, QColor back, int size=-1, const char *face = nullptr, bool bold = false);
-    void onCharAdded(int charAdded);
-    void onUpdateUi(int updated);
-    void onModified(int, int, const char *, int, int, int, int, int, int, int);
+    //void setAStyle(int style, QColor fore, QColor back, int size=-1, const char *face = nullptr, bool bold = false);
+    //void onCharAdded(int charAdded);
+    //void onUpdateUi(int updated);
+    //void onModified(int, int, const char *, int, int, int, int, int, int, int);
     void onTextChanged();
-    void onCursorPosChanged(int line, int index);
+    void onCursorPosChanged();
     void onSelectionChanged();
     void indentSelectedText();
     void unindentSelectedText();
@@ -40,12 +40,22 @@ public:
     bool needsSaving();
     bool canSave();
 
+    void ensurePositionVisible(int pos);
+    void ensureCurrentLineVisible();
+    QString selectedText() const;
+    QString text(int start = 0, int end = -1) const;
+    inline bool isUndoAvailable() { return undoAvailable_; }
+    inline bool isRedoAvailable() { return redoAvailable_; }
+    inline void insert(const QString &txt) { insertPlainText(txt); }
+
     inline EditorOptions options() const { return opts; }
 
 private:
+    bool undoAvailable_{false};
+    bool redoAvailable_{false};
     QString getCallTip(const QString &txt);
     std::string divideString(const char* s) const;
-    
+
     Dialog *dialog;
     EditorOptions opts;
     struct {

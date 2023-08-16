@@ -161,9 +161,6 @@ void SnippetsLibrary::fillMenu(Dialog *parent, QMenu *menu) const
             QString content = snippet.content;
             QObject::connect(a, &QAction::triggered, [=] {
                 auto e = parent->activeEditor();
-                int line, index;
-                e->getCursorPosition(&line, &index);
-                int pos = e->positionFromLineIndex(line, index);
                 e->insert(content);
             });
             subMenu->addAction(a);

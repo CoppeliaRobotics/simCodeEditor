@@ -68,19 +68,14 @@ SearchAndReplacePanel::~SearchAndReplacePanel()
 void SearchAndReplacePanel::setVisibility(bool v)
 {
     QWidget::setVisible(v);
-    if (v)
+    if(v)
     {
-        int line, index;
-        parent->activeEditor()->getCursorPosition(&line, &index);
-        parent->activeEditor()->ensureLineVisible(line);
-        int txtL = parent->activeEditor()->SendScintilla(QsciScintillaBase::SCI_GETSELTEXT, (unsigned long)0, (long)0) - 1;
-        if (txtL >= 1)
+        parent->activeEditor()->ensureCurrentLineVisible();
+        auto txt = parent->activeEditor()->selectedText();
+        if(!txt.isEmpty())
         {
-            char* txt = new char[txtL + 1];
-            parent->activeEditor()->SendScintilla(QsciScintillaBase::SCI_GETSELTEXT, (unsigned long)0, txt);
             editFind->setEditText(txt);
             editFind->lineEdit()->selectAll();
-            delete[] txt;
         }
         editFind->setFocus();
     }
@@ -89,18 +84,13 @@ void SearchAndReplacePanel::setVisibility(bool v)
 void SearchAndReplacePanel::show()
 {
     QWidget::show();
-    int line, index;
-    parent->activeEditor()->getCursorPosition(&line, &index);
-    parent->activeEditor()->ensureLineVisible(line);
+    parent->activeEditor()->ensureCurrentLineVisible();
 
-    int txtL = parent->activeEditor()->SendScintilla(QsciScintillaBase::SCI_GETSELTEXT, (unsigned long)0, (long)0) - 1;
-    if (txtL >= 1)
+    auto txt = parent->activeEditor()->selectedText();
+    if(!txt.isEmpty())
     {
-        char* txt = new char[txtL + 1];
-        parent->activeEditor()->SendScintilla(QsciScintillaBase::SCI_GETSELTEXT, (unsigned long)0, txt);
         editFind->setEditText(txt);
         editFind->lineEdit()->selectAll();
-        delete[] txt;
     }
     editFind->setFocus();
 
@@ -121,23 +111,45 @@ void SearchAndReplacePanel::toggle()
 
 void SearchAndReplacePanel::find()
 {
-    Editor *sci = parent->activeEditor();
+    Editor *editor = parent->activeEditor();
     bool shift = QGuiApplication::keyboardModifiers() & Qt::ShiftModifier;
     // FIXME: reverse search does not work. bug in QScintilla?
     QString what = editFind->currentText();
     if(editFind->findText(what) == -1) editFind->addItem(what);
-    if(!sci->findFirst(what, chkRegExp->isChecked(), chkCaseSens->isChecked(), false, false, !shift))
+
+    QTextDocument::FindFlags options;
+    QRegularExpression::PatternOptions patternOptions;
+    if(chkCaseSens->isChecked())
+        options |= QTextDocument::FindCaseSensitively;
+    else
+        patternOptions |= QRegularExpression::CaseInsensitiveOption;
+
+    bool startedAtTop = editor->textCursor().position() == 0;
+    bool r;
+    if(chkRegExp->isChecked())
+        r = editor->find(QRegularExpression(what, patternOptions), options);
+    else
+        r = editor->find(what, options);
+
+    if(!r && !startedAtTop)
     {
-        if(sci->findFirst(what, chkRegExp->isChecked(), chkCaseSens->isChecked(), false, true, !shift))
-            parent->statusBar()->showMessage("Search reached end. Continuing from top.", 4000);
+        parent->statusBar()->showMessage("Search reached end. Continuing from top.", 4000);
+        editor->textCursor().setPosition(0);
+        if(chkRegExp->isChecked())
+            editor->find(QRegularExpression(what, patternOptions), options);
         else
-            parent->statusBar()->showMessage("No occurrences found.", 4000);
+            editor->find(what, options);
     }
+    else if(!r)
+        parent->statusBar()->showMessage("No occurrences found.", 4000);
 }
 
 void SearchAndReplacePanel::replace()
 {
     QString what = editReplace->currentText();
     if(editReplace->findText(what) == -1) editReplace->addItem(what);
-    parent->activeEditor()->replace(what);
+    auto editor = parent->activeEditor();
+    auto c = editor->textCursor();
+    if(!c.selectedText().isEmpty())
+        c.insertText(what);
 }

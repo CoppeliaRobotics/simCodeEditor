@@ -69,12 +69,6 @@ ToolBar::ToolBar(Dialog *parent)
     ICON(redo);
     addAction(actRedo = new QAction(QIcon(redo), "Redo"));
 
-    ICON(unindent);
-    addAction(actUnindent = new QAction(QIcon(unindent), "Unindent"));
-
-    ICON(indent);
-    addAction(actIndent = new QAction(QIcon(indent), "Indent"));
-
     ICON(func);
     funcNav.menu = new QMenu(parent);
     funcNav.act = funcNav.menu->menuAction();
@@ -184,12 +178,6 @@ void ToolBar::updateButtons()
     actUndo->setEnabled(activeEditor->isUndoAvailable());
     actRedo->setEnabled(activeEditor->isRedoAvailable());
 
-    int fromLine, fromIndex, toLine, toIndex;
-    activeEditor->getSelection(&fromLine, &fromIndex, &toLine, &toIndex);
-    bool hasSel = fromLine != -1;
-    actIndent->setEnabled(hasSel);
-    actUnindent->setEnabled(hasSel);
-
     actShowSearchPanel->setChecked(parent->searchPanel()->isVisible());
 
     openFiles.actClose->setEnabled(!activeEditor->externalFile().isEmpty());
@@ -219,14 +207,14 @@ void ToolBar::updateButtons()
     getFunctionDefs(opts, parent->activeEditor()->text(), names, pos);
     for(int i = 0; i < names.count(); i++)
     {
-        int line, index;
-        parent->activeEditor()->lineIndexFromPosition(pos[i], &line, &index);
+        //int line, index;
+        //parent->activeEditor()->lineIndexFromPosition(pos[i], &line, &index);
+        int p = pos[i];
         QAction *a = new QAction(names[i]);
-        connect(a, &QAction::triggered, [this, line] {
+        connect(a, &QAction::triggered, [this, p] {
             auto e = parent->activeEditor();
-            e->ensureLineVisible(line);
-            e->setSelection(line, 0, line + 1, 0);
-            QTimer::singleShot(200, [=] {e->setSelection(line, 0, line, 0);});
+            e->textCursor().setPosition(p);
+            e->ensurePositionVisible(p);
         });
         funcNav.menu->addAction(a);
     }
