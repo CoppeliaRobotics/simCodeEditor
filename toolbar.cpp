@@ -20,7 +20,15 @@ public:
         initStyleOption(&opt);
         int l = opt.currentText.length();
         int maxW = contentsRect().width() - 1.3 * contentsRect().height();
-        while(fm.width(elideLeft(opt.currentText, l)) > maxW)
+        while(
+                fm.
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+                   width
+#else
+                   horizontalAdvance
+#endif
+                       (elideLeft(opt.currentText, l)) > maxW
+        )
         {
             if(--l == 0) return;
         }
