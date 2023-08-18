@@ -5,7 +5,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_MACOSX_RPATH 1)
 
-find_package(Qt5 COMPONENTS Core Gui Widgets PrintSupport Xml Network REQUIRED)
+set(Qt Qt5 CACHE STRING "Qt version to use (e.g. Qt5)")
+set_property(CACHE Qt PROPERTY STRINGS Qt5 Qt6)  #
+
+find_package(${Qt} COMPONENTS Core Gui Widgets PrintSupport Xml Network REQUIRED)
 
 if(NOT COPPELIASIM_INCLUDE_DIR)
     if(DEFINED ENV{COPPELIASIM_ROOT_DIR})
@@ -92,12 +95,12 @@ else()
 endif()
 
 set(LIBRARIES
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
-    Qt5::PrintSupport
-    Qt5::Xml
-    Qt5::Network
+    ${Qt}::Core
+    ${Qt}::Gui
+    ${Qt}::Widgets
+    ${Qt}::PrintSupport
+    ${Qt}::Xml
+    ${Qt}::Network
     ${QSCINTILLA_LIBRARY}
 )
 
