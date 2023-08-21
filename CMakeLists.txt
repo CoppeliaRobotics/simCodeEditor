@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16.3)
 project(simCodeEditor)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -105,7 +105,7 @@ set(LIBRARIES
 )
 
 coppeliasim_add_plugin(simCodeEditor SOURCES ${SOURCES})
-target_link_libraries(simCodeEditor ${LIBRARIES})
+target_link_libraries(simCodeEditor PRIVATE ${LIBRARIES})
 coppeliasim_add_resource_directory(snippets)
 
 if(APPLE)
