@@ -44,12 +44,12 @@ set(SOURCES
 )
 
 set(LIBRARIES
-    ${Qt}::Core
-    ${Qt}::Gui
-    ${Qt}::Widgets
-    ${Qt}::PrintSupport
-    ${Qt}::Xml
-    ${Qt}::Network
+    Qt::Core
+    Qt::Gui
+    Qt::Widgets
+    Qt::PrintSupport
+    Qt::Xml
+    Qt::Network
 )
 
 coppeliasim_add_plugin(simCodeEditor SOURCES ${SOURCES})
