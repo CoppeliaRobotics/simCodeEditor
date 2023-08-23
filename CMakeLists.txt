@@ -95,12 +95,12 @@ else()
 endif()
 
 set(LIBRARIES
-    ${Qt}::Core
-    ${Qt}::Gui
-    ${Qt}::Widgets
-    ${Qt}::PrintSupport
-    ${Qt}::Xml
-    ${Qt}::Network
+    Qt::Core
+    Qt::Gui
+    Qt::Widgets
+    Qt::PrintSupport
+    Qt::Xml
+    Qt::Network
     ${QSCINTILLA_LIBRARY}
 )
 
