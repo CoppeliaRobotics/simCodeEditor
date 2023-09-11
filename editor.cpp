@@ -179,6 +179,18 @@ void Editor::setEditorOptions(const EditorOptions &o)
             "debug.setmetatable debug.setupvalue debug.setuservalue "
             "debug.traceback debug.upvalueid debug.upvaluejoin "
         );
+
+        QStringList files = QDir(EditorOptions::resourcesPath + "/lua").entryList({"*.lua"});
+        for(const auto &file : files)
+        {
+            QString basename = QFileInfo(file).baseName();
+            if(basename.endsWith("-ce") || basename.endsWith("-typecheck"))
+                continue;
+            UserKeyword kw;
+            kw.keyword = basename + "=require'" + basename + "'";
+            kw.autocomplete = true;
+            opts.userKeywords.push_back(kw);
+        }
     }
 
     if (o.lang == EditorOptions::Lang::Python)
@@ -596,7 +608,7 @@ void Editor::onCharAdded(int charAdded)
                         if (autoCompletionList.size()!=0)
                         { // We need to activate autocomplete!
                             scintilla_->SendScintilla(QsciScintillaBase::SCI_AUTOCSETAUTOHIDE,(int)0);
-                            scintilla_->SendScintilla(QsciScintillaBase::SCI_AUTOCSTOPS,(unsigned long)0," ()[]{}:;~`',=*-+/?!@#$%^&|\\<>\"");
+                            scintilla_->SendScintilla(QsciScintillaBase::SCI_AUTOCSTOPS,(unsigned long)0," ()[]{}:;~`',*-+/?!@#$%^&|\\<>\"");
 //                            scintilla_->SendScintilla(QsciScintillaBase::SCI_AUTOCSETMAXHEIGHT,(int)100); // it seems that SCI_AUTOCSETMAXHEIGHT and SCI_AUTOCSETMAXWIDTH are not implemented yet!
 //                            scintilla_->SendScintilla(QsciScintillaBase::SCI_AUTOCSETMAXWIDTH,(int)500); // it seems that SCI_AUTOCSETMAXHEIGHT and SCI_AUTOCSETMAXWIDTH are not implemented yet!
                             scintilla_->SendScintilla(QsciScintillaBase::SCI_AUTOCSHOW,(unsigned long)cnt,&(autoCompletionList[0]));
