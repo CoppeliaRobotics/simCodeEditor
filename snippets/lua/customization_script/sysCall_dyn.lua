@@ -8,11 +8,14 @@ function sysCall_dyn(inData)
     -- inData.dynStepSize : the step size used for the dynamics calculations (by default 5ms)
     -- inData.afterStep : false when called before, and true after a dynamics step was computed.
 
-    local txt=string.format(" the %ith dynamics calculation step (out of %i steps)",inData.passCnt,inData.totalPasses)
+    local txt = string.format(
+                    " the %ith dynamics calculation step (out of %i steps)", inData.passCnt,
+                    inData.totalPasses
+                )
     if inData.afterStep then
-        txt="After"..txt
+        txt = "After" .. txt
     else
-        txt="Before"..txt
+        txt = "Before" .. txt
     end
     print(txt)
 end

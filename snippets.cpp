@@ -109,7 +109,7 @@ bool SnippetsLibrary::readFile(const EditorOptions &opts, const QString &file, Q
     QTextStream in(&f);
     content = "";
     QString line;
-    QRegularExpression re("^\\s*" + opts.langComment + "@(\\w+) (.*)$");
+    QRegularExpression re("^\\s*" + opts.langComment + "\\s*@(\\w+) (.*)$");
     while(!in.atEnd())
     {
         line = in.readLine();

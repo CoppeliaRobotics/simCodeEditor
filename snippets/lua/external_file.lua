@@ -1,7 +1,6 @@
---@name External file inclusion
+-- @name External file inclusion
 -- if you wish to execute code contained in an external file instead,
 -- use the require-directive, e.g.:
-
 require 'myExternalFile'
 
 -- Above will look for <CoppeliaSim executable path>/myExternalFile.lua or

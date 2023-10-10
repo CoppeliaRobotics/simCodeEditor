@@ -1,1 +1,1 @@
---@name Customization Script
+-- @name Customization Script

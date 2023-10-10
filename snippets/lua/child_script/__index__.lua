@@ -1,1 +1,1 @@
---@name Child Script
+-- @name Child Script

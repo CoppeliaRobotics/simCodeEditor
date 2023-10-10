@@ -1,1 +1,1 @@
-corout=coroutine.create(coroutineFunc)
+corout = coroutine.create(coroutineFunc)

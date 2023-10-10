@@ -29,24 +29,20 @@ function sysCall_joint(inData)
     --                 torques from joint limits are not taken into account
     -- inData.force : the joint force/torque, as set via sim.setJointTargetForce
 
-    if inData.mode==sim.jointmode_dynamic then
+    if inData.mode == sim.jointmode_dynamic then
         -- a simple position controller
-        local ctrl=inData.error*20
-        local maxVelocity=ctrl
-        if (maxVelocity>inData.maxVel) then
-            maxVelocity=inData.maxVel
-        end
-        if (maxVelocity<-inData.maxVel) then
-            maxVelocity=-inData.maxVel
-        end
-        local forceOrTorqueToApply=inData.maxForce
-        local outData={vel=maxVelocity,force=forceOrTorqueToApply}
+        local ctrl = inData.error * 20
+        local maxVelocity = ctrl
+        if (maxVelocity > inData.maxVel) then maxVelocity = inData.maxVel end
+        if (maxVelocity < -inData.maxVel) then maxVelocity = -inData.maxVel end
+        local forceOrTorqueToApply = inData.maxForce
+        local outData = {vel = maxVelocity, force = forceOrTorqueToApply}
         return outData
     end
     -- Expected return data:
     -- For kinematic joints:
-    -- outData={pos=pos, vel=vel, immobile=false}
+    -- outData = {pos = pos, vel = vel, immobile = false}
     -- 
     -- For dynamic joints:
-    -- outData={force=f, vel=vel}
+    -- outData = {force = f, vel = vel}
 end

@@ -10,8 +10,8 @@ function sysCall_trigger(inData)
     -- inData.detectedObjectHandle: handle of detected object
     -- inData.detectedPoint: detected point, relative to sensor frame
     -- inData.normalVector: normal vector at detected point, relative to sensor frame
-    
-    outData={}
-    outData.trigger=true
+
+    outData = {}
+    outData.trigger = true
     return outData
 end
