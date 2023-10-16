@@ -187,7 +187,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
             if(basename.endsWith("-ce") || basename.endsWith("-typecheck"))
                 continue;
             UserKeyword kw;
-            kw.keyword = basename + "=require'" + basename + "'";
+            kw.keyword = basename + " = require '" + basename + "'";
             kw.autocomplete = true;
             opts.userKeywords.push_back(kw);
         }
