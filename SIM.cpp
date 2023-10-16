@@ -20,7 +20,7 @@ void SIM::notifyEvent(int handle, const QString &eventType, const QString &data)
 void SIM::openURL(const QString &url)
 {
     int stackHandle = sim::createStack();
-    QString s(QStringLiteral("require'simURLDrop'.openURL(\"%1\")").arg(url));
+    QString s(QStringLiteral("require'simURLDrop'.openURL(\"%1\")@lua").arg(url));
     sim::executeScriptString(sim_scripttype_sandboxscript, s.toStdString(), stackHandle);
     sim::releaseStack(stackHandle);
 }
