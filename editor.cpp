@@ -79,15 +79,27 @@ void Editor::setEditorOptions(const EditorOptions &o)
     SendScintilla(QsciScintillaBase::SCI_INDICSETALPHA, (unsigned long)20, (long)160);
     SendScintilla(QsciScintillaBase::SCI_INDICSETFORE, (unsigned long)20, (long)o.selection_col.rgb());
 
-    if (o.lang != EditorOptions::Lang::Python)
+    QString ss1, sep1, ss2, sep2;
+    for(auto kw : o.userKeywords)
     {
-        setAStyle(SCE_LUA_WORD2, o.keyword1_col, o.background_col);
-        setAStyle(SCE_LUA_WORD3, o.keyword2_col, o.background_col);
-        setAStyle(SCE_LUA_WORD7, o.keyword1_col, o.background_col);
-        setAStyle(SCE_LUA_WORD8, o.keyword2_col, o.background_col);
+        if (kw.keywordType == 1 || o.lang == EditorOptions::Lang::Python)
+        {
+            ss1 += sep1 + kw.keyword;
+            sep1 = " ";
+        }
+        else
+        {
+            ss2 += sep2 + kw.keyword;
+            sep2 = " ";
+        }
     }
 
-    if (o.lang == EditorOptions::Lang::Lua)
+    if(o.lang == EditorOptions::Lang::None)
+    {
+        for(int i=0;i<8;i++)
+            SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)i, "");
+    }
+    if(o.lang == EditorOptions::Lang::Lua)
     {
         setFolding(QsciScintilla::BoxedTreeFoldStyle);
         setAStyle(SCE_LUA_COMMENT, o.comment_col, o.background_col);
@@ -102,6 +114,10 @@ void Editor::setEditorOptions(const EditorOptions &o)
         setAStyle(SCE_LUA_WORD, o.keyword3_col, o.background_col);
         setAStyle(SCE_LUA_WORD4, o.keyword4_col, o.background_col);
         setAStyle(SCE_LUA_IDENTIFIER, o.identifier_col, o.background_col);
+        setAStyle(SCE_LUA_WORD2, o.keyword1_col, o.background_col);
+        setAStyle(SCE_LUA_WORD3, o.keyword2_col, o.background_col);
+        setAStyle(SCE_LUA_WORD7, o.keyword1_col, o.background_col);
+        setAStyle(SCE_LUA_WORD8, o.keyword2_col, o.background_col);
 
         SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1,
             // Keywords.
@@ -191,9 +207,11 @@ void Editor::setEditorOptions(const EditorOptions &o)
             kw.autocomplete = true;
             //opts.userKeywords.push_back(kw);
         }
-    }
 
-    if (o.lang == EditorOptions::Lang::Python)
+        SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)6, ss1.toUtf8().data());
+        SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)7, ss2.toUtf8().data());
+    }
+    if(o.lang == EditorOptions::Lang::Python)
     {
         setFolding(QsciScintilla::BoxedTreeFoldStyle);
         setAStyle(SCE_P_COMMENTLINE, o.comment_col, o.background_col);
@@ -206,14 +224,20 @@ void Editor::setEditorOptions(const EditorOptions &o)
         setAStyle(SCE_P_CHARACTER, o.character_col, o.background_col);
         setAStyle(SCE_P_OPERATOR, o.operator_col, o.background_col);
         setAStyle(SCE_P_WORD, o.keyword3_col, o.background_col); // Python keywords
-//        setAStyle(SCE_P_IDENTIFIER, o.keyword4_col, o.background_col); // obj & variable
-        setAStyle(SCE_P_DEFNAME, o.keyword4_col, o.background_col); // func
-        setAStyle(SCE_P_WORD2, o.keyword4_col, o.number_col); // ?? None
-        setAStyle(SCE_P_CLASSNAME, o.identifier_col, o.string_col); // ?? None
-//        setAStyle(SCE_P_DECORATOR, o.identifier_col, o.number_col); // ?? None
+        //setAStyle(SCE_P_IDENTIFIER, o.keyword4_col, o.background_col); // obj & variable
+        setAStyle(SCE_P_DEFNAME, o.keyword1_col, o.background_col); // func
+        setAStyle(SCE_P_WORD2, o.keyword1_col, o.background_col); // ?? None
+        setAStyle(SCE_P_CLASSNAME, o.keyword1_col, o.background_col); // ?? None
+        setAStyle(SCE_P_DECORATOR, o.keyword2_col, o.background_col); // ?? None
+
+        // according to https://www.scintilla.org/ScintillaDoc.html#SCI_SETKEYWORDS
+        // the keyword set is dependent on the Lexer used.
+        // according to LexPython.cpp only two keyword sets are used (0,1)
+        // using 0 breaks syntax highlighting of everything
+        // using 1 doesn't work at all...
+        SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, (ss1+" "+ss2).toUtf8().data());
     }
-    
-    if (o.lang == EditorOptions::Lang::Json)
+    if(o.lang == EditorOptions::Lang::Json)
     {
         setFolding(QsciScintilla::BoxedTreeFoldStyle);
         setAStyle(SCE_JSON_ERROR, o.comment_col, o.background_col);
@@ -230,29 +254,6 @@ void Editor::setEditorOptions(const EditorOptions &o)
     SendScintilla(QsciScintillaBase::SCI_INDICSETSTYLE,(unsigned long)20,(long)QsciScintillaBase::INDIC_STRAIGHTBOX);
     SendScintilla(QsciScintillaBase::SCI_INDICSETALPHA,(unsigned long)20,(long)160);
     SendScintilla(QsciScintillaBase::SCI_INDICSETFORE,(unsigned long)20,(long)o.selection_col.rgb());
-
-    QString ss1, sep1, ss2, sep2;
-    for(auto kw : o.userKeywords)
-    {
-        if (kw.keywordType == 1)
-        {
-            ss1 += sep1 + kw.keyword;
-            sep1 = " ";
-        }
-        else
-        {
-            ss2 += sep2 + kw.keyword;
-            sep2 = " ";
-        }
-    }
-    if (o.lang == EditorOptions::Lang::None)
-    {
-        for (int i=0;i<8;i++)
-            SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)i, "");
-    }
-
-    SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)6, ss1.toUtf8().data());
-    SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)7, ss2.toUtf8().data());
 
 #if 0
     SendScintilla(QsciScintillaBase::SCI_STYLESETHOTSPOT, SCE_LUA_WORD2, 1);
