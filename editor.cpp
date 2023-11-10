@@ -235,6 +235,8 @@ void Editor::setEditorOptions(const EditorOptions &o)
         // according to LexPython.cpp only two keyword sets are used (0,1)
         // using 0 breaks syntax highlighting of everything
         // using 1 doesn't work at all...
+        // for a workaround, change QScintilla/lexers/LexPython.cpp:418 to:
+        //       if (!IsAWordChar(sc.ch)) {
         SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, (ss1+" "+ss2).toUtf8().data());
     }
     if(o.lang == EditorOptions::Lang::Json)
