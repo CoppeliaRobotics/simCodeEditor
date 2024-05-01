@@ -195,11 +195,11 @@ public:
             func = sym.mid(dotPos + 1);
         }
 
-        // locate local "helpFiles" dir
-        QDir helpFiles(QCoreApplication::applicationDirPath());
+        // locate local "manual" dir
+        QDir manual(QCoreApplication::applicationDirPath());
 #ifdef MAC_SIM
 #if SIM_PROGRAM_FULL_VERSION_NB < 4010000
-        if(!helpFiles.cd("../../.."))
+        if(!manual.cd("../../.."))
         {
             if(verboseErrors)
                 sim::addLog(sim_verbosity_errors, "Bad directory layout (<4.1.0)");
@@ -207,7 +207,7 @@ public:
         }
 #else
         // since 4.1.0, we have app bundle layout:
-        if(!helpFiles.cd("../Resources"))
+        if(!manual.cd("../Resources"))
         {
             if(verboseErrors)
                 sim::addLog(sim_verbosity_errors, "Bad directory layout (can't locate \"Resources\" dir)");
@@ -215,19 +215,19 @@ public:
         }
 #endif // SIM_PROGRAM_FULL_VERSION_NB
 #endif // MAC_SIM
-        if(!helpFiles.cd("helpFiles"))
+        if(!manual.cd("manual"))
         {
             if(verboseErrors)
-                sim::addLog(sim_verbosity_errors, "Bad directory layout (can't locate \"helpFiles\" dir)");
+                sim::addLog(sim_verbosity_errors, "Bad directory layout (can't locate \"manual\" dir)");
             return {};
         }
 
         // read index/<mod>.json file
-        QDir idxDir(helpFiles);
+        QDir idxDir(manual);
         if(!idxDir.cd("index"))
         {
             if(verboseErrors)
-                sim::addLog(sim_verbosity_errors, "Bad directory layout (missing \"index\" dir inside \"helpFiles\" dir)");
+                sim::addLog(sim_verbosity_errors, "Bad directory layout (missing \"index\" dir inside \"manual\" dir)");
             return {};
         }
         QString idx = (mod.isEmpty() ? "__global__" : mod) + ".json";
@@ -293,12 +293,12 @@ public:
         {
             url.setScheme("https");
             url.setHost("www.coppeliarobotics.com");
-            url.setPath("/helpFiles/en/" + fileName);
+            url.setPath("/manual/en/" + fileName);
         }
         else
         {
             url.setScheme("file");
-            url.setPath(helpFiles.absolutePath() + "/en/" + fileName);
+            url.setPath(manual.absolutePath() + "/en/" + fileName);
         }
         if(!anchor.isEmpty())
             url.setFragment(anchor);
