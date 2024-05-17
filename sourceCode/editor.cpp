@@ -119,94 +119,14 @@ void Editor::setEditorOptions(const EditorOptions &o)
         setAStyle(SCE_LUA_WORD7, o.keyword1_col, o.background_col);
         setAStyle(SCE_LUA_WORD8, o.keyword2_col, o.background_col);
 
+#if 0
         SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1,
             // Keywords.
             "and break do else elseif end false for function if "
             "in local nil not or repeat return then true until "
             "while "
         );
-        SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)2,
-            // Basic functions.
-            "rawget rawset require ipairs pairs next "
-            "pcall xpcall getmetatable setmetatable "
-            "string table math coroutine io os debug "
-            "error assert "
-            // CoppeliaRobotics/lua/functional.lua:
-            "range map reduce filter foreach identity zip negate apply "
-            "partial any all iter "
-            "operator.add operator.sub operator.mul operator.div operator.mod "
-            "operator.idiv operator.pow operator.land operator.lor operator.lxor "
-            "operator.lshl operator.lshr operator.eq operator.neq operator.gt "
-            "operator.ge operator.lt operator.le "
-            "sum prod "
-        );
-        SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)3,
-            // String, table and maths functions.
-            "string.byte string.char string.dump string.find "
-            "string.len string.lower string.rep string.sub "
-            "string.upper string.format string.gfind string.gsub "
-            "string.gmatch string.match string.pack string.packsize "
-            "string.rep string.reverse string.unpack "
-            "string.chars string.bytes "
-            "table.concat table.foreach table.foreachi table.getn "
-            "table.sort table.insert table.remove table.pack table.unpack "
-            "table.move table.compare table.reversed "
-            "math.abs math.acos math.asin math.atan math.atan2 "
-            "math.ceil math.cos math.deg math.exp math.floor "
-            "math.frexp math.ldexp math.log math.log10 math.max "
-            "math.min math.mod math.pi math.rad math.random "
-            "math.randomseed math.sin math.sqrt math.tan "
-            // CoppeliaRobotics/lua/stringx.lua:
-            "string.gsplit string.split string.startswith string.endswith "
-            "string.trim string.ltrim string.rtrim "
-            // CoppeliaRobotics/lua/tablex.lua:
-            "table.index table.eq table.join table.slice table.tostring "
-            "table.print table.find "
-            // CoppeliaRobotics/lua/base16.lua:
-            "base16.encode base16.decode "
-            // CoppeliaRobotics/lua/base64.lua:
-            "base64.encode base64.decode "
-            // CoppeliaRobotics/lua/checkargs.lua:
-            "checkarg.any checkarg.float checkarg.int checkarg.string "
-            "checkarg.bool checkarg.table checkarg.func checkarg.handle "
-            "checkarg.object checkarg.union "
-            "checkargsEx checkargs "
-            // CoppeliaRobotics/lua/grid.lua:
-            "Grid "
-            // CoppeliaRobotics/lua/matrix.lua:
-            "Matrix Matrix3x3 Matrix4x4 Vector Vector3 Vector4 Vector7 "
-            // CoppeliaRobotics/lua/var.lua:
-            "getvar setvar getlocals "
-        //);
-        //SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)4,
-            // Coroutine, I/O and system facilities.
-            "coroutine.create coroutine.resume coroutine.status "
-            "coroutine.wrap coroutine.yield "
-            "io.close io.flush "
-            "io.input io.lines io.open io.output io.read "
-            "io.tmpfile io.type io.write io.stdin io.stdout "
-            "io.stderr "
-            "os.clock os.date os.difftime os.execute "
-            "os.exit os.getenv os.remove os.rename os.setlocale "
-            "os.time os.tmpname "
-            "debug.debug debug.gethook debug.getinfo debug.getlocal "
-            "debug.getmetatable debug.getregistry debug.getupvalue "
-            "debug.getuservalue debug.sethook debug.setlocal "
-            "debug.setmetatable debug.setupvalue debug.setuservalue "
-            "debug.traceback debug.upvalueid debug.upvaluejoin "
-        );
-
-        QStringList files = QDir(EditorOptions::resourcesPath + "/lua").entryList({"*.lua"});
-        for(const auto &file : files)
-        {
-            QString basename = QFileInfo(file).baseName();
-            if(basename.endsWith("-ce") || basename.endsWith("-typecheck"))
-                continue;
-            UserKeyword kw;
-            kw.keyword = basename + "=require'" + basename + "'";
-            kw.autocomplete = true;
-            //opts.userKeywords.push_back(kw);
-        }
+#endif
 
         SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)6, ss1.toUtf8().data());
         SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)7, ss2.toUtf8().data());
