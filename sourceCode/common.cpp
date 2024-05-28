@@ -47,11 +47,11 @@ void EditorOptions::readFromXML(const QString &xml)
         placement = EditorOptions::Placement::Center;
     fontFace = e.attribute("font",
 #ifdef __linux__
-            "DejaVu Sans Mono"
+            "DejaVu Sans Mono" // prob. available on all Linux platforms. For Ubuntu only "Ubuntu Mono" would be better
 #else
             "Courier New" // always available on Windows and macOS. "Courier" & Scintilla is problematic on macOS
 #endif
-    ); // prob. available on all Linux platforms. For Ubuntu only "Ubuntu Mono" would be better
+    );
     fontSize = e.attribute("font-size", "14").toInt();
     fontBold = parseBool(e.attribute("font-bold", "false"));
     activate = parseBool(e.attribute("activate", "true"));
@@ -62,32 +62,28 @@ void EditorOptions::readFromXML(const QString &xml)
     if(e.hasAttribute("is-lua"))
         sim::addLog(sim_verbosity_errors, "XML contains deprecated 'is-lua' attribute");
     doesScriptInitiallyNeedRestart = !parseBool(e.attribute("script-up-to-date", "true"));
-    QString l = e.attribute("lang", "none");
-    if (l == "none")
+    QString defaultLang = "none";
+    QString defaultLangComment = "";
+    QString defaultLangExt = "txt";
+    lang = e.attribute("lang", defaultLang);
+    if (lang == "lua")
     {
-        lang = EditorOptions::Lang::None;
-        langExt = "txt";
-        langComment = "";
+        defaultLangExt = "lua";
+        defaultLangComment = "--";
     }
-    else if (l == "lua")
+    else if (lang == "python")
     {
-        lang = EditorOptions::Lang::Lua;
-        langExt = "lua";
-        langComment = "--";
+        defaultLangExt = "py";
+        defaultLangComment = "#";
     }
-    else if (l == "python")
+    else if (lang == "json")
     {
-        lang = EditorOptions::Lang::Python;
-        langExt = "py";
-        langComment = "#";
+        defaultLangExt = "json";
+        defaultLangComment = "//";
     }
-    else if (l == "json")
-    {
-        lang = EditorOptions::Lang::Json;
-        langExt = "json";
-        langComment = "//";
-    }
-    snippetsGroup = e.attribute("snippets-group", l);
+    langExt = e.attribute("lang-ext", defaultLangExt);
+    langComment = e.attribute("lang-comment", defaultLangComment);
+    snippetsGroup = e.attribute("snippets-group", lang);
     onClose = e.attribute("on-close", "");
     wrapWord = parseBool(e.attribute("wrap-word", "false"));
     text_col = parseColor(e.attribute("text-col", "50 50 50"));

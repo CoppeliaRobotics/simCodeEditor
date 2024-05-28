@@ -3,9 +3,48 @@
 #include "toolbar.h"
 #include "UI.h"
 #include <SciLexer.h>
-#include <Qsci/qscilexerlua.h>
-#include <Qsci/qscilexerpython.h>
+
+#include <Qsci/qscilexer.h>
+#include <Qsci/qscilexeravs.h>
+#include <Qsci/qscilexerbash.h>
+#include <Qsci/qscilexerbatch.h>
+#include <Qsci/qscilexercmake.h>
+#include <Qsci/qscilexercoffeescript.h>
+#include <Qsci/qscilexercpp.h>
+#include <Qsci/qscilexercsharp.h>
+#include <Qsci/qscilexercss.h>
+#include <Qsci/qscilexercustom.h>
+#include <Qsci/qscilexerd.h>
+#include <Qsci/qscilexerdiff.h>
+#include <Qsci/qscilexeredifact.h>
+#include <Qsci/qscilexerfortran.h>
+#include <Qsci/qscilexerfortran77.h>
+#include <Qsci/qscilexerhtml.h>
+#include <Qsci/qscilexeridl.h>
+#include <Qsci/qscilexerjava.h>
+#include <Qsci/qscilexerjavascript.h>
 #include <Qsci/qscilexerjson.h>
+#include <Qsci/qscilexerlua.h>
+#include <Qsci/qscilexermakefile.h>
+#include <Qsci/qscilexermarkdown.h>
+#include <Qsci/qscilexermatlab.h>
+#include <Qsci/qscilexeroctave.h>
+#include <Qsci/qscilexerpascal.h>
+#include <Qsci/qscilexerperl.h>
+#include <Qsci/qscilexerpo.h>
+#include <Qsci/qscilexerpostscript.h>
+#include <Qsci/qscilexerpov.h>
+#include <Qsci/qscilexerproperties.h>
+#include <Qsci/qscilexerpython.h>
+#include <Qsci/qscilexerruby.h>
+#include <Qsci/qscilexerspice.h>
+#include <Qsci/qscilexersql.h>
+#include <Qsci/qscilexertcl.h>
+#include <Qsci/qscilexertex.h>
+#include <Qsci/qscilexerverilog.h>
+#include <Qsci/qscilexervhdl.h>
+#include <Qsci/qscilexerxml.h>
+#include <Qsci/qscilexeryaml.h>
 
 // implemented in plugin.cpp:
 QUrl apiReferenceForSymbol(const QString &sym);
@@ -34,24 +73,58 @@ bool Editor::isActive() const
     return dialog->activeEditor() == this;
 }
 
+#define MAP_LEXER_BEGIN if(0){}
+#define MAP_LEXER(n, c) else if (o.lang == n) lexer = new c;
+#define MAP_LEXER_END else if(0){}
+
 void Editor::setEditorOptions(const EditorOptions &o)
 {
     opts = o;
-    if (o.lang == EditorOptions::Lang::Lua)
-    {
-        QsciLexerLua* lexer = new QsciLexerLua;
-        setLexer(lexer);
-    }
-    if (o.lang == EditorOptions::Lang::Python)
-    {
-        QsciLexerPython* lexer = new QsciLexerPython;
-        setLexer(lexer);
-    }
-    if (o.lang == EditorOptions::Lang::Json)
-    {
-        QsciLexerJSON* lexer = new QsciLexerJSON;
-        setLexer(lexer);
-    }
+    QsciLexer* lexer = nullptr;
+
+    MAP_LEXER_BEGIN
+    MAP_LEXER("avs", QsciLexerAVS)
+    MAP_LEXER("bash", QsciLexerBash)
+    MAP_LEXER("batch", QsciLexerBatch)
+    MAP_LEXER("cmake", QsciLexerCMake)
+    MAP_LEXER("cpp", QsciLexerCPP)
+    MAP_LEXER("css", QsciLexerCSS)
+    MAP_LEXER("csharp", QsciLexerCSharp)
+    MAP_LEXER("coffeescript", QsciLexerCoffeeScript)
+    MAP_LEXER("d", QsciLexerD)
+    MAP_LEXER("diff", QsciLexerDiff)
+    MAP_LEXER("edifact", QsciLexerEDIFACT)
+    MAP_LEXER("fortran", QsciLexerFortran)
+    MAP_LEXER("fortran77", QsciLexerFortran77)
+    MAP_LEXER("html", QsciLexerHTML)
+    MAP_LEXER("idl", QsciLexerIDL)
+    MAP_LEXER("json", QsciLexerJSON)
+    MAP_LEXER("java", QsciLexerJava)
+    MAP_LEXER("javascript", QsciLexerJavaScript)
+    MAP_LEXER("lua", QsciLexerLua)
+    MAP_LEXER("makefile", QsciLexerMakefile)
+    MAP_LEXER("markdown", QsciLexerMarkdown)
+    MAP_LEXER("matlab", QsciLexerMatlab)
+    MAP_LEXER("octave", QsciLexerOctave)
+    MAP_LEXER("po", QsciLexerPO)
+    MAP_LEXER("pov", QsciLexerPOV)
+    MAP_LEXER("pascal", QsciLexerPascal)
+    MAP_LEXER("perl", QsciLexerPerl)
+    MAP_LEXER("postscript", QsciLexerPostScript)
+    MAP_LEXER("properties", QsciLexerProperties)
+    MAP_LEXER("python", QsciLexerPython)
+    MAP_LEXER("ruby", QsciLexerRuby)
+    MAP_LEXER("sql", QsciLexerSQL)
+    MAP_LEXER("spice", QsciLexerSpice)
+    MAP_LEXER("tcl", QsciLexerTCL)
+    MAP_LEXER("tex", QsciLexerTeX)
+    MAP_LEXER("vhdl", QsciLexerVHDL)
+    MAP_LEXER("verilog", QsciLexerVerilog)
+    MAP_LEXER("xml", QsciLexerXML)
+    MAP_LEXER("yaml", QsciLexerYAML)
+    MAP_LEXER_END
+
+    if (lexer) setLexer(lexer);
 
     setReadOnly(!o.editable);
     setTabWidth(o.tab_width);
@@ -82,7 +155,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
     QString ss1, sep1, ss2, sep2;
     for(auto kw : o.userKeywords)
     {
-        if (kw.keywordType == 1 || o.lang == EditorOptions::Lang::Python)
+        if (kw.keywordType == 1 || o.lang == "python")
         {
             ss1 += sep1 + kw.keyword;
             sep1 = " ";
@@ -94,12 +167,12 @@ void Editor::setEditorOptions(const EditorOptions &o)
         }
     }
 
-    if(o.lang == EditorOptions::Lang::None)
+    if(o.lang == "none")
     {
         for(int i=0;i<8;i++)
             SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)i, "");
     }
-    if(o.lang == EditorOptions::Lang::Lua)
+    if(o.lang == "lua")
     {
         setFolding(QsciScintilla::BoxedTreeFoldStyle);
         setAStyle(SCE_LUA_COMMENT, o.comment_col, o.background_col);
@@ -131,7 +204,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
         SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)6, ss1.toUtf8().data());
         SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)7, ss2.toUtf8().data());
     }
-    if(o.lang == EditorOptions::Lang::Python)
+    if(o.lang == "python")
     {
         setFolding(QsciScintilla::BoxedTreeFoldStyle);
         setAStyle(SCE_P_COMMENTLINE, o.comment_col, o.background_col);
@@ -159,7 +232,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
         //       if (!IsAWordChar(sc.ch)) {
         SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1, (ss1+" "+ss2).toUtf8().data());
     }
-    if(o.lang == EditorOptions::Lang::Json)
+    if(o.lang == "json")
     {
         setFolding(QsciScintilla::BoxedTreeFoldStyle);
         setAStyle(SCE_JSON_ERROR, o.comment_col, o.background_col);

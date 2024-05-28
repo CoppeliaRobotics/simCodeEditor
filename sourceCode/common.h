@@ -42,14 +42,8 @@ struct EditorOptions
     bool lineNumbers;
     int maxLines;
     int tab_width;
-    enum Lang {
-        None,
-        Lua,
-        Python,
-        Json
-    };
     bool doesScriptInitiallyNeedRestart {false};
-    Lang lang {None};
+    QString lang {""};
     QString langExt {"txt"};
     QString langComment {""};
     QString snippetsGroup;

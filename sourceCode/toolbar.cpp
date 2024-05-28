@@ -135,7 +135,7 @@ ToolBar::~ToolBar()
 
 void getFunctionDefs(const EditorOptions &opts, const QString &code, QVector<QString> &names, QVector<int> &pos, const QString &re, std::function<QString(QRegularExpressionMatch)> n, std::function<int(QRegularExpressionMatch)> p)
 {
-    if(opts.lang == EditorOptions::Lang::None) return;
+    if(opts.lang != "lua" && opts.lang != "python") return;
     QRegularExpression regexp(re);
     auto i = regexp.globalMatch(code);
     while(i.hasNext())
@@ -148,11 +148,8 @@ void getFunctionDefs(const EditorOptions &opts, const QString &code, QVector<QSt
 
 void getFunctionDefs(const EditorOptions &opts, const QString &code, QVector<QString> &names, QVector<int> &pos)
 {
-    switch(opts.lang)
+    if(opts.lang == "lua")
     {
-    case EditorOptions::Lang::None:
-        break;
-    case EditorOptions::Lang::Lua:
         getFunctionDefs(opts, code, names, pos,
             "("
                 "function\\s+([a-zA-Z0-9_.:]+)\\s*(\\([^)]*\\))"
@@ -167,8 +164,9 @@ void getFunctionDefs(const EditorOptions &opts, const QString &code, QVector<QSt
                 return qMax(m.capturedStart(2), m.capturedStart(4));
             }
         );
-        break;
-    case EditorOptions::Lang::Python:
+    }
+    else if(opts.lang == "python")
+    {
         getFunctionDefs(opts, code, names, pos,
             "def\\s+([a-zA-Z0-9_]+)\\s*(\\(.*\\))\\s*:\\s*",
             [&] (QRegularExpressionMatch m)
@@ -180,7 +178,6 @@ void getFunctionDefs(const EditorOptions &opts, const QString &code, QVector<QSt
                 return m.capturedStart(1);
             }
         );
-        break;
     }
 }
 
