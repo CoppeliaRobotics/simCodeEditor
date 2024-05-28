@@ -115,6 +115,7 @@ void Dialog::setEditorOptions(const EditorOptions &o)
     opts = o;
     for(auto e : editors_)
         e->setEditorOptions(o);
+    toolBar()->setEditorOptions(o);
 
     QWidget *parent = (QWidget *)sim::getMainWindow(1);
     setWindowTitle(o.windowTitle);

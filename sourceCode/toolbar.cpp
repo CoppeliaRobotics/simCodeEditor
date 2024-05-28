@@ -63,6 +63,10 @@ ToolBar::ToolBar(Dialog *parent)
 {
     setIconSize(QSize(16, 16));
 
+    addAction(actLang = new QAction("LANG"));
+    actLang->setEnabled(false);
+    actLang->setVisible(false);
+
     ICON(upload);
     addAction(actReload = new QAction(QIcon(upload), "Restart script"));
     actReload->setEnabled(false);
@@ -179,6 +183,12 @@ void getFunctionDefs(const EditorOptions &opts, const QString &code, QVector<QSt
             }
         );
     }
+}
+
+void ToolBar::setEditorOptions(const EditorOptions &opts)
+{
+    actLang->setText(opts.lang);
+    actLang->setVisible(opts.lang != "none");
 }
 
 void ToolBar::updateButtons()

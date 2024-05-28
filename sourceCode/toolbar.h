@@ -16,9 +16,11 @@ public:
     virtual ~ToolBar();
 
 public slots:
+    void setEditorOptions(const EditorOptions &opts);
     void updateButtons();
 
 public:
+    QAction *actLang;
     QAction *actReload;
     QAction *actShowSearchPanel;
     QAction *actUndo;
