@@ -21,6 +21,7 @@ public slots:
 
 public:
     QAction *actLang;
+    QMenu *actLangMenu;
     QAction *actReload;
     QAction *actShowSearchPanel;
     QAction *actUndo;

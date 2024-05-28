@@ -63,15 +63,43 @@ ToolBar::ToolBar(Dialog *parent)
 {
     setIconSize(QSize(16, 16));
 
-    addAction(actLang = new QAction("LANG"));
+#if 0
+    // TODO: pass script object handle, or otherwise implement
+    //       notify message to switch script language.
+
+    actLangMenu = new QMenu(parent);
+    const std::vector<const char*> langNames {
+        "avs", "bash", "batch", "cmake", "cpp", "css", "csharp", "coffeescript",
+        "d", "diff", "edifact", "fortran", "fortran77", "html", "idl", "json",
+        "java", "javascript", "lua", "makefile", "markdown", "matlab", "octave",
+        "po", "pov", "pascal", "perl", "postscript", "properties", "python",
+        "ruby", "sql", "spice", "tcl", "tex", "vhdl", "verilog", "xml", "yaml"
+    };
+    for(const auto &langName : langNames)
+    {
+        QAction *a = new QAction(langName);
+        connect(a, &QAction::triggered, [this, parent] {
+            auto e = parent->activeEditor();
+        });
+        actLangMenu->addAction(a);
+    }
+    actLang = actLangMenu->menuAction();
+#else
+    actLang = new QAction("LANG");
     actLang->setEnabled(false);
+#endif
     actLang->setVisible(false);
-    widgetForAction(actLang)->setStyleSheet("QToolButton {"
+    addAction(actLang);
+    auto actLangWidget = widgetForAction(actLang);
+    actLangWidget->setStyleSheet("QToolButton {"
         "font-variant: small-caps;"
         "background-color: #666;"
         "color: #ddd;"
         "margin-left: 5px;"
+        //"padding: 0 8px 0 3px;"
     "}");
+    //QToolButton *actLangButton = qobject_cast<QToolButton*>(actLangWidget);
+    //connect(actLang, &QAction::triggered, actLangButton, &QToolButton::showMenu);
 
     ICON(upload);
     addAction(actReload = new QAction(QIcon(upload), "Restart script"));
@@ -194,6 +222,7 @@ void getFunctionDefs(const EditorOptions &opts, const QString &code, QVector<QSt
 void ToolBar::setEditorOptions(const EditorOptions &opts)
 {
     actLang->setText(opts.lang);
+    actLang->setToolTip(QString("Script language: %1").arg(opts.lang));
     actLang->setVisible(opts.lang != "none");
 }
 
