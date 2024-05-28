@@ -113,6 +113,7 @@ void Editor::setEditorOptions(const EditorOptions &o)
     MAP_LEXER("postscript", QsciLexerPostScript)
     MAP_LEXER("properties", QsciLexerProperties)
     MAP_LEXER("python", QsciLexerPython)
+    MAP_LEXER("qml", QsciLexerJavaScript)
     MAP_LEXER("ruby", QsciLexerRuby)
     MAP_LEXER("sql", QsciLexerSQL)
     MAP_LEXER("spice", QsciLexerSpice)
@@ -244,6 +245,29 @@ void Editor::setEditorOptions(const EditorOptions &o)
         setAStyle(SCE_JSON_PROPERTYNAME, o.keyword4_col, o.background_col);
         setAStyle(SCE_JSON_KEYWORD, o.keyword3_col, o.background_col);
         setAStyle(SCE_JSON_LDKEYWORD, o.keyword3_col, o.background_col);
+    }
+    if(o.lang == "qml" || o.lang == "javascript" || o.lang == "cpp" || o.lang == "c")
+    {
+        setFolding(QsciScintilla::BoxedTreeFoldStyle);
+        setAStyle(SCE_C_COMMENT, o.comment_col, o.background_col);
+        setAStyle(SCE_C_COMMENTDOC, o.comment_col, o.background_col);
+        setAStyle(SCE_C_COMMENTLINEDOC, o.comment_col, o.background_col);
+        setAStyle(SCE_C_COMMENTDOCKEYWORD, o.comment_col, o.background_col);
+        setAStyle(SCE_C_PREPROCESSOR, o.keyword1_col, o.background_col);
+        setAStyle(SCE_C_PREPROCESSORCOMMENT, o.keyword1_col, o.background_col);
+        setAStyle(SCE_C_PREPROCESSORCOMMENTDOC, o.keyword1_col, o.background_col);
+        setAStyle(SCE_C_OPERATOR, o.keyword1_col, o.background_col);
+        setAStyle(SCE_C_NUMBER, o.number_col, o.background_col);
+        setAStyle(SCE_C_STRING, o.string_col, o.background_col);
+        setAStyle(SCE_C_ESCAPESEQUENCE, o.string_col, o.background_col);
+        setAStyle(SCE_C_HASHQUOTEDSTRING, o.string_col, o.background_col);
+        setAStyle(SCE_C_STRINGRAW, o.string_col, o.background_col);
+        setAStyle(SCE_C_STRINGEOL, o.string_col, o.background_col);
+        setAStyle(SCE_C_CHARACTER, o.string_col, o.background_col);
+        setAStyle(SCE_C_USERLITERAL, o.string_col, o.background_col);
+        //setAStyle(SCE_C_IDENTIFIER, o.keyword4_col, o.background_col);
+        //setAStyle(SCE_C_WORD, o.keyword3_col, o.background_col);
+        setAStyle(SCE_C_GLOBALCLASS, o.keyword2_col, o.background_col);
     }
 
     SendScintilla(QsciScintillaBase::SCI_INDICSETSTYLE,(unsigned long)20,(long)QsciScintillaBase::INDIC_STRAIGHTBOX);
