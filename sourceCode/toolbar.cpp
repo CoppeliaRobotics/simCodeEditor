@@ -66,6 +66,12 @@ ToolBar::ToolBar(Dialog *parent)
     addAction(actLang = new QAction("LANG"));
     actLang->setEnabled(false);
     actLang->setVisible(false);
+    widgetForAction(actLang)->setStyleSheet("QToolButton {"
+        "font-variant: small-caps;"
+        "background-color: #666;"
+        "color: #ddd;"
+        "margin-left: 5px;"
+    "}");
 
     ICON(upload);
     addAction(actReload = new QAction(QIcon(upload), "Restart script"));
