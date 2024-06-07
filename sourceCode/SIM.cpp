@@ -21,7 +21,7 @@ void SIM::openURL(const QString &url)
 {
     int stackHandle = sim::createStack();
     QString s(QStringLiteral("require'simURLDrop'.openURL(\"%1\")@lua").arg(url));
-    sim::executeScriptString(sim::getScriptHandleEx(sim_scripttype_sandboxscript), s.toStdString(), stackHandle);
+    sim::executeScriptString(sim::getScriptHandleEx(sim_scripttype_sandbox), s.toStdString(), stackHandle);
     sim::releaseStack(stackHandle);
 }
 
