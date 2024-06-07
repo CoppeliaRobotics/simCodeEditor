@@ -1,6 +1,6 @@
 function sysCall_dyn(inData)
     -- This function gets called often, so it might slow down the simulation
-    --     (this is called twice at each dynamic simulation step, by default 20x more often than a child script)
+    --     (this is called twice at each dynamic simulation step)
     -- We have:
     -- inData.passCnt : the current dynamics calculation pass. 1-10 by default. See next item for details.
     -- inData.totalPasses : the number of dynamics calculation passes for each "regular" simulation pass.

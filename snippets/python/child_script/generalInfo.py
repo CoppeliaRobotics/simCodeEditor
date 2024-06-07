@@ -1,4 +1,4 @@
-# A child script is intended to give an object/model a specific simulation
+# A simulation script is intended to give an object/model a specific simulation
 # functionality. It is only executed while simulation is running.
 #
 # Make sure you read the section on "Accessing scene objects programmatically"

@@ -1,4 +1,4 @@
--- A child script is intended to give an object/model a specific simulation
+-- A simulation script is intended to give an object/model a specific simulation
 -- functionality. It is only executed while simulation is running.
 --
 -- if you wish to execute code contained in an external file,

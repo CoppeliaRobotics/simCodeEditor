@@ -1,6 +1,6 @@
 -- A customization script is intended to be used to customize a scene in
 -- various ways, mainly when simulation is not running. When simulation is running,
--- do not use customization scripts, but rather child scripts if possible
+-- do not use customization scripts, but rather simulation scripts if possible
 --
 -- if you wish to execute code contained in an external file,
 -- use the require-directive, e.g.:
