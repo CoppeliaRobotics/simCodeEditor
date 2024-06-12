@@ -259,6 +259,20 @@ void Editor::setEditorOptions(const EditorOptions &o)
         //setAStyle(SCE_C_WORD, o.keyword3_col, o.background_col);
         setAStyle(SCE_C_GLOBALCLASS, o.keyword2_col, o.background_col);
     }
+    if(o.lang == "xml")
+    {
+        setFolding(QsciScintilla::BoxedTreeFoldStyle);
+        setAStyle(SCE_H_TAG, o.keyword1_col, o.background_col);
+        setAStyle(SCE_H_TAGUNKNOWN, o.keyword1_col, o.background_col);
+        setAStyle(SCE_H_ATTRIBUTE, o.keyword2_col, o.background_col);
+        setAStyle(SCE_H_ATTRIBUTEUNKNOWN, o.keyword2_col, o.background_col);
+        setAStyle(SCE_H_NUMBER, o.number_col, o.background_col);
+        setAStyle(SCE_H_DOUBLESTRING, o.string_col, o.background_col);
+        setAStyle(SCE_H_SINGLESTRING, o.string_col, o.background_col);
+        setAStyle(SCE_H_OTHER, o.keyword4_col, o.background_col);
+        setAStyle(SCE_H_COMMENT, o.comment_col, o.background_col);
+        setAStyle(SCE_H_ENTITY, o.keyword3_col, o.background_col);
+    }
 
     SendScintilla(QsciScintillaBase::SCI_INDICSETSTYLE,(unsigned long)20,(long)QsciScintillaBase::INDIC_STRAIGHTBOX);
     SendScintilla(QsciScintillaBase::SCI_INDICSETALPHA,(unsigned long)20,(long)160);
