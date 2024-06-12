@@ -192,16 +192,6 @@ void Editor::setEditorOptions(const EditorOptions &o)
         setAStyle(SCE_LUA_WORD3, o.keyword2_col, o.background_col);
         setAStyle(SCE_LUA_WORD7, o.keyword1_col, o.background_col);
         setAStyle(SCE_LUA_WORD8, o.keyword2_col, o.background_col);
-
-#if 0
-        SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)1,
-            // Keywords.
-            "and break do else elseif end false for function if "
-            "in local nil not or repeat return then true until "
-            "while "
-        );
-#endif
-
         SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)6, ss1.toUtf8().data());
         SendScintilla(QsciScintillaBase::SCI_SETKEYWORDS, (unsigned long)7, ss2.toUtf8().data());
     }
