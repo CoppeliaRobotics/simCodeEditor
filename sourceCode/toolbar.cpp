@@ -91,13 +91,18 @@ ToolBar::ToolBar(Dialog *parent)
     actLang->setVisible(false);
     addAction(actLang);
     auto actLangWidget = widgetForAction(actLang);
-    actLangWidget->setStyleSheet("QToolButton {"
+    bool dark = isDarkMode(this);
+    actLangWidget->setStyleSheet(QString("QToolButton {"
         "font-variant: small-caps;"
-        "background-color: #666;"
-        "color: #ddd;"
+        "background-color: %1;"
+        "color: %2;"
+#ifdef Q_OS_MAC
         "margin-left: 5px;"
-        //"padding: 0 8px 0 3px;"
-    "}");
+#endif
+#ifdef Q_OS_LINUX
+        "padding: 0 3px 0 3px;"
+#endif
+    "}").arg(dark ? "#666" : "#ddd").arg(dark ? "#ddd" : "#333"));
     //QToolButton *actLangButton = qobject_cast<QToolButton*>(actLangWidget);
     //connect(actLang, &QAction::triggered, actLangButton, &QToolButton::showMenu);
 
