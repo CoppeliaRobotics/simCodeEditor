@@ -292,8 +292,8 @@ public:
         if(isOnline())
         {
             url.setScheme("https");
-            url.setHost("www.coppeliarobotics.com");
-            url.setPath("/manual/en/" + fileName);
+            url.setHost("manual.coppeliarobotics.com");
+            url.setPath("/en/" + fileName);
         }
         else
         {
