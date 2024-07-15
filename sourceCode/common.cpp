@@ -56,6 +56,7 @@ void EditorOptions::readFromXML(const QString &xml)
     fontBold = parseBool(e.attribute("font-bold", "false"));
     activate = parseBool(e.attribute("activate", "true"));
     editable = parseBool(e.attribute("editable", "true"));
+    clearable = parseBool(e.attribute("clearable", "false"));
     lineNumbers = parseBool(e.attribute("line-numbers", "false"));
     maxLines = e.attribute("max-lines", "0").toInt();
     tab_width = e.attribute("tab-width", "4").toInt();

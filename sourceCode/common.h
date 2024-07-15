@@ -37,6 +37,7 @@ struct EditorOptions
     Placement placement {Unknown};
     bool activate;
     bool editable;
+    bool clearable;
 
     bool modalSpecial {false};
     bool lineNumbers;

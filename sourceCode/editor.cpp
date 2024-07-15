@@ -381,6 +381,14 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
         }
     }
 
+    if(opts.clearable)
+    {
+        menu->addSeparator();
+        connect(menu->addAction("Clear contents"), &QAction::triggered, [=] {
+            setText("", 0);
+        });
+    }
+
     menu->exec(event->globalPos());
     delete menu;
 }
