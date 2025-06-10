@@ -13,7 +13,7 @@ class Plugin : public sim::Plugin
 public:
     void onInit()
     {
-        if(sim::getBoolProperty(sim_handle_app, "headlessMode"))
+        if(sim::getIntProperty(sim_handle_app, "headlessMode"))
             throw std::runtime_error("cannot load in headless mode");
 
         if(!registerScriptStuff())
