@@ -13,7 +13,7 @@ class Plugin : public sim::Plugin
 public:
     void onInit()
     {
-        if(sim::getBoolParam(sim_boolparam_headless))
+        if(sim::getBoolProperty(sim_handle_app, "headlessMode"))
             throw std::runtime_error("cannot load in headless mode");
 
         if(!registerScriptStuff())
@@ -23,9 +23,9 @@ public:
         setBuildDate(BUILD_DATE);
 
         // XXX: parameter doesn't exist when called later?
-        EditorOptions::resourcesPath = QString::fromStdString(sim::getStringParam(sim_stringparam_resourcesdir));
+        EditorOptions::resourcesPath = QString::fromStdString(sim::getStringProperty(sim_handle_app, "resourcePath"));
 
-        auto p = sim::getNamedBoolParam("CodeEditor.verboseErrors");
+        auto p = sim::getBoolProperty(sim_handle_app, "customData.simCmd.verboseErrors", {});
         if(p)
             verboseErrors = *p;
 
@@ -33,7 +33,7 @@ public:
         sim = new SIM();
 
         // development builds don't look up online docs:
-        int rev = sim::getInt32Param(sim_intparam_program_revision);
+        int rev = sim::getIntProperty(sim_handle_app, "productVersionNb");
         if((rev % 2) == 0)
         {
             QHostInfo::lookupHost("www.coppeliarobotics.com",
