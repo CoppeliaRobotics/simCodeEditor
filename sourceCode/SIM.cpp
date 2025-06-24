@@ -1,5 +1,6 @@
 #include "SIM.h"
 #include "UI.h"
+#include <simPlusPlus-2/Lib.h>
 #include "stubs.h"
 
 SIM::SIM()

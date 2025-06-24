@@ -1,9 +1,10 @@
 #include "UI.h"
 #include "SIM.h"
-#include "stubs.h"
 #include "dialog.h"
 #include "common.h"
 #include <QDebug>
+#include <simPlusPlus-2/Lib.h>
+#include "stubs.h"
 
 UI::UI(SIM *sim)
 {
