@@ -335,6 +335,9 @@ void Editor::contextMenuEvent(QContextMenuEvent *event)
 
     for(QString tok1 : QStringList{tok0, tok})
     {
+        if(tok1.endsWith(".*"))
+            tok1 = tok1.left(tok1.length() - 2);
+
         QString fp = opts.resolveScriptFilePath(tok1);
         if(fp != "")
         {
