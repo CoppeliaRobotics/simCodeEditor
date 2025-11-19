@@ -1,7 +1,7 @@
 #include "snippets.h"
 #include "dialog.h"
 #include "editor.h"
-#include <simPlusPlus/Lib.h>
+#include <simPlusPlus-2/Lib.h>
 
 bool Snippet::changed() const
 {

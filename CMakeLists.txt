@@ -20,7 +20,7 @@ endif()
 list(APPEND CMAKE_MODULE_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules
     ${COPPELIASIM_INCLUDE_DIR}/cmake)
-find_package(CoppeliaSim 4.5.1.7 REQUIRED)
+find_package(CoppeliaSim 4.5.1.7 REQUIRED COMPONENTS simLib-2 simPlusPlus-2)
 
 set(QSCINTILLA_DIR NOTFOUND CACHE PATH "Path to the QScintilla directory")
 if(EXISTS "${QSCINTILLA_DIR}")
