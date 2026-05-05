@@ -23,7 +23,7 @@ public:
         setBuildDate(BUILD_DATE);
 
         // XXX: parameter doesn't exist when called later?
-        EditorOptions::resourcesPath = QString::fromStdString(sim::getStringProperty(sim_handle_app, "resourcePath"));
+        EditorOptions::resourcesPath = QString::fromStdString(sim::getStringProperty(sim_handle_app, "paths.resources"));
 
         auto p = sim::getBoolProperty(sim_handle_app, "customData.simCmd.verboseErrors", {});
         if(p)
