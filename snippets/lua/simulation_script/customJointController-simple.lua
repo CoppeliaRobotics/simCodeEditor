@@ -1,3 +1,4 @@
+-- Make sure the associated joint is dynamically enabled, and in 'custom' control mode
 function sysCall_init()
     sim = require('sim')
     joint = sim.getObject('..')
