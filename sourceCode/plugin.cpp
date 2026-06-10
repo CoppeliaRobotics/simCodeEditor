@@ -19,9 +19,6 @@ public:
         if(!registerScriptStuff())
             throw std::runtime_error("failed to register script stuff");
 
-        setExtVersion("Code Editor Plugin");
-        setBuildDate(BUILD_DATE);
-
         // XXX: parameter doesn't exist when called later?
         EditorOptions::resourcesPath = QString::fromStdString(sim::getStringProperty(sim_handle_app, "paths.resources"));
 
