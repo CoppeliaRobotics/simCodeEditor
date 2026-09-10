@@ -1,7 +1,9 @@
--- Make sure the associated joint is dynamically enabled, and in 'custom' control mode
+-- Make sure the joint is dynamically enabled, in 'custom' control mode, and the following script is parented to it
+-- Value are adjusted for a 1kg mass attached to a revolute joint at a distance of 1m in the joint's x or y direction
+
 function sysCall_init()
-    sim = require('sim')
-    joint = sim.getObject('..')
+    sim = require('sim-2')
+    joint = sim.self:getObject('..')
 
     -- Desired control mode ('position', 'velocity', 'force' or 'spring'):
     jointMode = 'position'
@@ -11,51 +13,52 @@ function sysCall_init()
     -- in velocity mode: sets the maximum force/torque
     -- in force/torque mode: sets the desired force/torque
     -- in spring/damper mode: has no effect
-    sim.setJointTargetForce(joint, 20.0)
+    joint.targetForce = 10
 
     if jointMode ~= 'force' then
         -- in position mode: sets the maximum velocity
         -- in velocity mode: sets the desired velocity
         -- in force/torque mode: has no effect
         -- in spring/damper mode: has no effect
-        sim.setJointTargetVelocity(joint, 1.0)
+        joint.targetVelocity = 1.0
 
         -- in position mode: sets the desired position
         -- in velocity mode: has no effect
         -- in force/torque mode: has no effect
         -- in spring/damper mode: sets the desired spring/damper equilibrium position
-        sim.setJointTargetPosition(joint, 0.0)
+        joint.targetPosition = 0.0
     end
-    
+
     -- The PID values for the position controller's first stage:
-    K_vel_p = 5.0
+    K_vel_p = 50.0
     K_vel_d = 0.25
     K_vel_i = 0.0
 
     -- The PID values for the velocity controller (and the position controller's second stage):
-    K_accel_p = 10.0
+    K_accel_p = 100.0
     K_accel_d = 0.5
     K_accel_i = 0.0
-    
+
     -- The KC values for the spring controller:
     K_spring = 300.0
-    C_spring = 6.25
-    
+    C_spring = 10.0
+
     -- An overall control value scaling factor, linked to the attached mass (normally that value is obtained via inverse dynamics, and is not constant):
     K_mass = 1.0
 
-    mujocoEngine = (sim.getIntArrayProperty(sim.handle_scene, 'dynamicsEngine')[1] == 4)
-    
-    if jointMode == 'spring' then
-        if mujocoEngine and useMujocoSpringDamper then
-            sim.setFloatProperty(joint, 'mujoco.springStiffness', K_spring)
-            sim.setFloatProperty(joint, 'mujoco.springDamping', C_spring)
+    mujocoEngine = (sim.scene.dynamics.engine == sim.physics_mujoco)
+
+    if mujocoEngine and useMujocoSpringDamper then
+        if jointMode == 'spring' then
+            joint.dynamics.mujoco.springStiffness = K_spring
+            joint.dynamics.mujoco.springDamping = C_spring
+            joint.dynamics.mujoco.springRef = joint.targetPosition
         else
-            sim.setFloatProperty(joint, 'mujoco.springStiffness', 0.0)
-            sim.setFloatProperty(joint, 'mujoco.springDamping', 0.0)
+            joint.dynamics.mujoco.springStiffness = 0.0
+            joint.dynamics.mujoco.springDamping = 0.0
         end
     end
-    
+
     jointData = {}
     jointData.prevPosError  = 0.0
     jointData.cumulPosError = 0.0
@@ -65,7 +68,6 @@ end
 
 function sysCall_joint(inData)
     local jointVel_desired = 0.0
-
     if jointMode == 'position' then
         -- The position controller has 2 stages: the first stage regulates the
         -- corresponding required velocity (then in stage 2 regulates the
@@ -114,7 +116,7 @@ function sysCall_joint(inData)
             forceToApply = inData.error * K_spring - inData.vel * C_spring
         end
     end
-    
+
     jointData.prevPosError = inData.error
     jointData.prevVelError = jointVelError
 

@@ -1,6 +1,9 @@
-function sysCall_afterCopy(inData)
-    -- called after objects have been copied. see also sysCall_beforeCopy
-    for key, value in pairs(inData.objectHandles) do
-        print("Object with handle " .. key .. " was copied")
+-- using sim-2
+
+function sysCall_beforeCopy(inData)
+    -- Before one or several objects will be copied. Can be reentrant
+    for i = 1, #inData.objectList do
+        print("Object with handle " .. inData.objectList[i].handle .. " will be copied")
     end
 end
+

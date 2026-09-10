@@ -1,7 +1,9 @@
+-- using sim-2
+
 function sysCall_beforeDelete(inData)
-    -- Called before objects are deleted. See also sysCall_afterDelete
-    for key, value in pairs(inData.objectHandles) do
-        print("Object with handle " .. key .. " will be deleted")
+    -- Before one or several objects will be deleted. Can be reentrant
+    for i = 1, #inData.objectList do
+        print("Object with handle " .. inData.objectList[i].handle .. " will be deleted")
     end
-    -- inData.allObjects indicates if all objects in the scene will be deleted
 end
+

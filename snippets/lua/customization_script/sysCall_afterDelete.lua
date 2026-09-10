@@ -1,7 +1,9 @@
+-- using sim-2
+
 function sysCall_afterDelete(inData)
-    -- Called after objects were deleted. See also sysCall_beforeDelete
-    for key, value in pairs(inData.objectHandles) do
-        print("Object with handle " .. key .. " was deleted")
+    -- After one or several objects were deleted. Can be reentrant
+    for i = 1, #inData.objectHandleList do
+        print("Object with handle " .. inData.objectHandleList[i] .. " was deleted")
     end
-    -- inData.allObjects indicates if all objects in the scene were deleted
 end
+
