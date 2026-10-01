@@ -2,4 +2,113 @@
 <?xml-stylesheet type="text/xsl" href="callbacks.xsl"?>
 
 <plugin name="simCodeEditor" info="Code Editor Plugin" author="federico.ferri.it@gmail.com">
+    <command name="openModal">
+        <description>Open a new code editor window, in "speaicl modal" mode (blocks until dialog closed).</description>
+        <params>
+            <param name="initText" type="string">
+                <description>initial text</description>
+            </param>
+            <param name="properties" type="string" default='""'>
+                <description>properties XML string</description>
+            </param>
+        </params>
+        <return>
+            <param name="text" type="string">
+                <description>final text</description>
+            </param>
+            <param name="positionAndSize" type="table" item-type="int" default="{}">
+                <description>position and size of the editor window</description>
+            </param>
+        </return>
+    </command>
+    <command name="open">
+        <description>Open a new code editor window.</description>
+        <params>
+            <param name="initText" type="string">
+                <description>initial text</description>
+            </param>
+            <param name="properties" type="string" default='""'>
+                <description>properties XML string</description>
+            </param>
+        </params>
+        <return>
+            <param name="handle" type="int">
+                <description>handle to the code editor window</description>
+            </param>
+        </return>
+    </command>
+    <command name="openFile">
+        <description>Open a new code editor window editing an external file.</description>
+        <params>
+            <param name="filePath" type="string">
+                <description>path of the external file</description>
+            </param>
+            <param name="properties" type="string" default='""'>
+                <description>properties XML string</description>
+            </param>
+        </params>
+        <return>
+            <param name="handle" type="int">
+                <description>handle to the code editor window</description>
+            </param>
+        </return>
+    </command>
+    <command name="setText">
+        <description>Set the text of a code editor window.</description>
+        <params>
+            <param name="handle" type="int">
+                <description>handle to the code editor window</description>
+            </param>
+            <param name="text" type="string">
+                <description>new text</description>
+            </param>
+            <param name="insertMode" type="int" default="0">
+                <description>insert mode</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="getText">
+        <description>Get the text of a code editor window.</description>
+        <params>
+            <param name="handle" type="int">
+                <description>handle to the code editor window</description>
+            </param>
+        </params>
+        <return>
+            <param name="text" type="string">
+                <description>current text</description>
+            </param>
+            <param name="positionAndSize" type="table" item-type="int" default="{}">
+                <description>position and size of the editor window</description>
+            </param>
+        </return>
+    </command>
+    <command name="show">
+        <description>Show or hide a code editor window.</description>
+        <params>
+            <param name="handle" type="int">
+                <description>handle to the code editor window</description>
+            </param>
+            <param name="showState" type="int">
+                <description></description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="close">
+        <description>Close a code editor window.</description>
+        <params>
+            <param name="handle" type="int">
+                <description>handle to the code editor window</description>
+            </param>
+        </params>
+        <return>
+            <param name="positionAndSize" type="table" item-type="int" default="{}">
+                <description>position and size of the editor window</description>
+            </param>
+        </return>
+    </command>
 </plugin>

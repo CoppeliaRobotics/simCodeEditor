@@ -71,6 +71,58 @@ public:
         sim->simulationRunning(false);
     }
 
+    // Lua API:
+
+    void openModal(openModal_in *in, openModal_out *out)
+    {
+        QString text;
+        int positionAndSize[4];
+        sim->openModal(QString::fromStdString(in->initText), QString::fromStdString(in->properties), text, &positionAndSize[0]);
+        out->text = text.toStdString();
+        for(int i = 0; i < 4; i++)
+            out->positionAndSize.push_back(positionAndSize[i]);
+    }
+
+    void open(open_in *in, open_out *out)
+    {
+        sim->open(QString::fromStdString(in->initText), QString::fromStdString(in->properties), &out->handle);
+    }
+
+    void openFile(openFile_in *in, openFile_out *out)
+    {
+        sim->openFile(QString::fromStdString(in->filePath), QString::fromStdString(in->properties), &out->handle);
+    }
+
+    void setText(setText_in *in, setText_out *out)
+    {
+        sim->setText(in->handle, QString::fromStdString(in->text), in->insertMode);
+    }
+
+    void getText(getText_in *in, getText_out *out)
+    {
+        QString text;
+        int positionAndSize[4];
+        sim->getText(in->handle, &text, &positionAndSize[0]);
+        out->text = text.toStdString();
+        for(int i = 0; i < 4; i++)
+            out->positionAndSize.push_back(positionAndSize[i]);
+    }
+
+    void show(show_in *in, show_out *out)
+    {
+        sim->show(in->handle, in->showState);
+    }
+
+    void close(close_in *in, close_out *out)
+    {
+        int positionAndSize[4];
+        sim->close(in->handle, &positionAndSize[0]);
+        for(int i = 0; i < 4; i++)
+            out->positionAndSize.push_back(positionAndSize[i]);
+    }
+
+    // C API:
+
     char * _openModal(const char *initText, const char *properties, int *positionAndSize)
     { // special: blocking until dlg closed
         ASSERT_THREAD(!UI);
@@ -334,6 +386,7 @@ private:
 };
 
 SIM_UI_PLUGIN(Plugin)
+#include "stubsPlusPlus.cpp"
 
 QUrl apiReferenceForSymbol(const QString &sym)
 {
