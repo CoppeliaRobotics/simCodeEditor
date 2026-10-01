@@ -12,6 +12,7 @@ UI::UI(SIM *sim)
     Qt::ConnectionType sim2ui = Qt::BlockingQueuedConnection;
     QObject::connect(sim, &SIM::openModal, ui, &UI::openModal, sim2ui);
     QObject::connect(sim, &SIM::open, ui, &UI::open, sim2ui);
+    QObject::connect(sim, &SIM::openFile, ui, &UI::openFile, sim2ui);
     QObject::connect(sim, &SIM::setText, ui, &UI::setText, sim2ui);
     QObject::connect(sim, &SIM::getText, ui, &UI::getText, sim2ui);
     QObject::connect(sim, &SIM::show, ui, &UI::show, sim2ui);
@@ -53,6 +54,16 @@ void UI::open(const QString &initText, const QString &properties, int *handle)
 {
     ASSERT_THREAD(UI);
     Dialog *editor = createWindow(false, initText, properties);
+    *handle = nextEditorHandle++;
+    editor->setHandle(*handle);
+    editors[*handle] = editor;
+}
+
+void UI::openFile(const QString &filePath, const QString &properties, int *handle)
+{
+    ASSERT_THREAD(UI);
+    Dialog *editor = createWindow(false, "", properties);
+    editor->openExternalFile(filePath);
     *handle = nextEditorHandle++;
     editor->setHandle(*handle);
     editors[*handle] = editor;

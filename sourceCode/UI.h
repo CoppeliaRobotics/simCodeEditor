@@ -21,6 +21,7 @@ private:
 public:
     void openModal(const QString &initText, const QString &properties, QString& text, int *positionAndSize);
     void open(const QString &initText, const QString &properties, int *handle);
+    void openFile(const QString &filePath, const QString &properties, int *handle);
     void setText(int handle, const QString &text, int insertMode);
     void getText(int handle, QString *text, int* posAndSize);
     void show(int handle, int showState);

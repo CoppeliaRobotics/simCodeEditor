@@ -111,6 +111,24 @@ public:
         return handle;
     }
 
+    int codeEditor_openFile(const char *filePath, const char *properties)
+    {
+        sim::addLog(sim_verbosity_debug, "codeEditor_openFile: filePath=%s, properties=%s", filePath, properties);
+
+        int handle = -1;
+        if(QThread::currentThreadId() == UI_THREAD)
+            ui->openFile(QString(filePath), QString(properties), &handle);
+        else
+        {
+            if(sim)
+                sim->openFile(QString(filePath), QString(properties), &handle);
+        }
+
+        sim::addLog(sim_verbosity_debug, "codeEditor_openFile: done");
+
+        return handle;
+    }
+
     int codeEditor_setText(int handle, const char *text, int insertMode)
     {
         sim::addLog(sim_verbosity_debug, "codeEditor_setText: handle=%d, text=%s, insertMode=%d", handle, text, insertMode);
@@ -337,6 +355,11 @@ SIM_DLLEXPORT char * codeEditor_openModal(const char *initText, const char *prop
 SIM_DLLEXPORT int codeEditor_open(const char *initText, const char *properties)
 {
     return sim::plugin->codeEditor_open(initText, properties);
+}
+
+SIM_DLLEXPORT int codeEditor_openFile(const char *filePath, const char *properties)
+{
+    return sim::plugin->codeEditor_openFile(filePath, properties);
 }
 
 SIM_DLLEXPORT int codeEditor_setText(int handle, const char *text, int insertMode)
