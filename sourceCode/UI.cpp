@@ -47,7 +47,7 @@ void UI::openModal(const QString &initText, const QString &properties, QString& 
     ASSERT_THREAD(UI);
 
     Dialog *editor = createWindow(true, initText, properties);
-    text = editor->makeModal(positionAndSize).c_str();
+    text = QString::fromStdString(editor->makeModal(positionAndSize));
 }
 
 void UI::open(const QString &initText, const QString &properties, int *handle)

@@ -71,11 +71,11 @@ public:
         sim->simulationRunning(false);
     }
 
-    char * codeEditor_openModal(const char *initText, const char *properties, int *positionAndSize)
+    char * _openModal(const char *initText, const char *properties, int *positionAndSize)
     { // special: blocking until dlg closed
         ASSERT_THREAD(!UI);
 
-        sim::addLog(sim_verbosity_debug, "codeEditor_openModal: initText=%s, properties=%s", initText, properties);
+        sim::addLog(sim_verbosity_debug, "_openModal: initText=%s, properties=%s", initText, properties);
         QString text;
         if(QThread::currentThreadId() == UI_THREAD)
         {
@@ -88,14 +88,14 @@ public:
         }
         char* retVal = stringBufferCopy(text);
 
-        sim::addLog(sim_verbosity_debug, "codeEditor_openModal: done");
+        sim::addLog(sim_verbosity_debug, "_openModal: done");
 
         return retVal;
     }
 
-    int codeEditor_open(const char *initText, const char *properties)
+    int _open(const char *initText, const char *properties)
     {
-        sim::addLog(sim_verbosity_debug, "codeEditor_open: initText=%s, properties=%s", initText, properties);
+        sim::addLog(sim_verbosity_debug, "_open: initText=%s, properties=%s", initText, properties);
 
         int handle = -1;
         if(QThread::currentThreadId() == UI_THREAD)
@@ -106,14 +106,14 @@ public:
                 sim->open(QString(initText), QString(properties), &handle);
         }
 
-        sim::addLog(sim_verbosity_debug, "codeEditor_open: done");
+        sim::addLog(sim_verbosity_debug, "_open: done");
 
         return handle;
     }
 
-    int codeEditor_openFile(const char *filePath, const char *properties)
+    int _openFile(const char *filePath, const char *properties)
     {
-        sim::addLog(sim_verbosity_debug, "codeEditor_openFile: filePath=%s, properties=%s", filePath, properties);
+        sim::addLog(sim_verbosity_debug, "_openFile: filePath=%s, properties=%s", filePath, properties);
 
         int handle = -1;
         if(QThread::currentThreadId() == UI_THREAD)
@@ -124,14 +124,14 @@ public:
                 sim->openFile(QString(filePath), QString(properties), &handle);
         }
 
-        sim::addLog(sim_verbosity_debug, "codeEditor_openFile: done");
+        sim::addLog(sim_verbosity_debug, "_openFile: done");
 
         return handle;
     }
 
-    int codeEditor_setText(int handle, const char *text, int insertMode)
+    int _setText(int handle, const char *text, int insertMode)
     {
-        sim::addLog(sim_verbosity_debug, "codeEditor_setText: handle=%d, text=%s, insertMode=%d", handle, text, insertMode);
+        sim::addLog(sim_verbosity_debug, "_setText: handle=%d, text=%s, insertMode=%d", handle, text, insertMode);
 
         if(QThread::currentThreadId() == UI_THREAD)
             ui->setText(handle, QString(text), insertMode);
@@ -141,14 +141,14 @@ public:
                 sim->setText(handle, QString(text), insertMode);
         }
 
-        sim::addLog(sim_verbosity_debug, "codeEditor_setText: done");
+        sim::addLog(sim_verbosity_debug, "_setText: done");
 
         return -1;
     }
 
-    char * codeEditor_getText(int handle, int* posAndSize)
+    char * _getText(int handle, int* posAndSize)
     {
-        sim::addLog(sim_verbosity_debug, "codeEditor_getText: handle=%d", handle);
+        sim::addLog(sim_verbosity_debug, "_getText: handle=%d", handle);
 
         QString text;
         if(QThread::currentThreadId() == UI_THREAD)
@@ -159,14 +159,14 @@ public:
                 sim->getText(handle, &text, posAndSize);
         }
 
-        sim::addLog(sim_verbosity_debug, "codeEditor_getText: done");
+        sim::addLog(sim_verbosity_debug, "_getText: done");
 
         return stringBufferCopy(text);
     }
 
-    int codeEditor_show(int handle, int showState)
+    int _show(int handle, int showState)
     {
-        sim::addLog(sim_verbosity_debug, "codeEditor_getText: handle=%d, showState=%d", handle, showState);
+        sim::addLog(sim_verbosity_debug, "_getText: handle=%d, showState=%d", handle, showState);
 
         if(QThread::currentThreadId() == UI_THREAD)
             ui->show(handle, showState);
@@ -176,14 +176,14 @@ public:
                 sim->show(handle, showState);
         }
 
-        sim::addLog(sim_verbosity_debug, "codeEditor_show: done");
+        sim::addLog(sim_verbosity_debug, "_show: done");
 
         return -1;
     }
 
-    int codeEditor_close(int handle, int *positionAndSize)
+    int _close(int handle, int *positionAndSize)
     {
-        sim::addLog(sim_verbosity_debug, "codeEditor_close: handle=%d", handle);
+        sim::addLog(sim_verbosity_debug, "_close: handle=%d", handle);
 
         if(QThread::currentThreadId() == UI_THREAD)
             ui->close(handle, positionAndSize);
@@ -193,7 +193,7 @@ public:
                 sim->close(handle, positionAndSize);
         }
 
-        sim::addLog(sim_verbosity_debug, "codeEditor_close: done");
+        sim::addLog(sim_verbosity_debug, "_close: done");
 
         return -1;
     }
@@ -349,35 +349,35 @@ bool isOnline()
 
 SIM_DLLEXPORT char * codeEditor_openModal(const char *initText, const char *properties, int *positionAndSize)
 {
-    return sim::plugin->codeEditor_openModal(initText, properties, positionAndSize);
+    return sim::plugin->_openModal(initText, properties, positionAndSize);
 }
 
 SIM_DLLEXPORT int codeEditor_open(const char *initText, const char *properties)
 {
-    return sim::plugin->codeEditor_open(initText, properties);
+    return sim::plugin->_open(initText, properties);
 }
 
 SIM_DLLEXPORT int codeEditor_openFile(const char *filePath, const char *properties)
 {
-    return sim::plugin->codeEditor_openFile(filePath, properties);
+    return sim::plugin->_openFile(filePath, properties);
 }
 
 SIM_DLLEXPORT int codeEditor_setText(int handle, const char *text, int insertMode)
 {
-    return sim::plugin->codeEditor_setText(handle, text, insertMode);
+    return sim::plugin->_setText(handle, text, insertMode);
 }
 
 SIM_DLLEXPORT char * codeEditor_getText(int handle, int *positionAndSize)
 {
-    return sim::plugin->codeEditor_getText(handle,positionAndSize);
+    return sim::plugin->_getText(handle,positionAndSize);
 }
 
 SIM_DLLEXPORT int codeEditor_show(int handle, int showState)
 {
-    return sim::plugin->codeEditor_show(handle, showState);
+    return sim::plugin->_show(handle, showState);
 }
 
 SIM_DLLEXPORT int codeEditor_close(int handle, int *positionAndSize)
 {
-    return sim::plugin->codeEditor_close(handle, positionAndSize);
+    return sim::plugin->_close(handle, positionAndSize);
 }
