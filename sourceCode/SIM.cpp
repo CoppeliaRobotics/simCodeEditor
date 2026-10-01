@@ -7,15 +7,26 @@ SIM::SIM()
 {
 }
 
-void SIM::notifyEvent(int handle, const QString &eventType, const QString &data)
+void SIM::notifyEvent(int handle, const QString &eventType, const QString &data, qint64 scriptHandle)
 {
     ASSERT_THREAD(!UI);
 
-    QString xml(
-        QStringLiteral("<event origin='codeEditor' msg='%1' handle='%2' data='%3'/>")
-            .arg(eventType, QString::number(handle), data)
-    );
-    sim::eventNotification(xml.toStdString());
+    if(scriptHandle != -1)
+    {
+        int stack = sim::createStack();
+        sim::pushValueOntoStack(stack, handle);
+        sim::pushValueOntoStack(stack, eventType.toStdString());
+        sim::callScriptFunctionEx(scriptHandle, data.toUtf8().constData(), stack);
+        sim::releaseStack(stack);
+    }
+    else
+    {
+        QString xml(
+            QStringLiteral("<event origin='codeEditor' msg='%1' handle='%2' data='%3'/>")
+                .arg(eventType, QString::number(handle), data)
+        );
+        sim::eventNotification(xml.toStdString());
+    }
 }
 
 void SIM::openURL(const QString &url)

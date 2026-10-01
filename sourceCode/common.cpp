@@ -86,6 +86,8 @@ void EditorOptions::readFromXML(const QString &xml)
     langComment = e.attribute("lang-comment", defaultLangComment);
     snippetsGroup = e.attribute("snippets-group", lang);
     onClose = e.attribute("on-close", "");
+    onRestart = e.attribute("on-restart", "");
+    scriptHandle = parseLong(e.attribute("script-handle", "-1"), -1);
     wrapWord = parseBool(e.attribute("wrap-word", "false"));
     text_col = parseColor(e.attribute("text-col", "50 50 50"));
     background_col = parseColor(e.attribute("background-col", "190 190 190"));
@@ -184,6 +186,14 @@ char * stringBufferCopy(const QString &str)
     strcpy(buff, byteArr.data());
     buff[byteArr.length()] = '\0';
     return buff;
+}
+
+long long int parseLong(const QString &numStr, long long int defaultValue)
+{
+    bool ok = false;
+    long long int value = numStr.trimmed().toLongLong(&ok, 10);
+    if(!ok) value = defaultValue;
+    return value;
 }
 
 QColor parseColor(const QString &colorStr)

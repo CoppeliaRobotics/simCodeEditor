@@ -29,7 +29,7 @@ public:
     void onSimulationRunning(bool running);
 
 signals:
-    void notifyEvent(int handle, const QString &eventType, const QString &data);
+    void notifyEvent(int handle, const QString &eventType, const QString &data, qint64 scriptHandle);
     void openURL(const QString &url);
     void requestSimulationStatus();
 

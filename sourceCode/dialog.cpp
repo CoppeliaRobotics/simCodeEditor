@@ -352,7 +352,7 @@ void Dialog::reject()
     else
     {
         event->ignore();
-        ui->notifyEvent(handle, "closeEditor", opts.onClose);
+        ui->notifyEvent(handle, "closeEditor", opts.onClose, opts.scriptHandle);
     }
 }
 
@@ -384,7 +384,7 @@ void Dialog::reloadScript()
     initText_ = text();
     scriptRestartInitiallyNeeded_ = false;
     updateReloadButtonVisualClue();
-    ui->notifyEvent(handle, "restartScript", opts.onClose);
+    ui->notifyEvent(handle, "restartScript", opts.onRestart, opts.scriptHandle);
 }
 
 void Dialog::onSimulationRunning(bool running)

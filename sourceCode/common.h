@@ -51,6 +51,8 @@ struct EditorOptions
     QStringList snippetsPaths;
     static QString resourcesPath;
     QString onClose;
+    QString onRestart;
+    long long int scriptHandle {-1};
     bool wrapWord;
     QString fontFace;
     int fontSize;
@@ -78,6 +80,7 @@ struct EditorOptions
 };
 
 char * stringBufferCopy(const QString &str);
+long long int parseLong(const QString &numStr, long long int defaultValue);
 QColor parseColor(const QString &colorStr);
 bool parseBool(const QString &boolStr);
 QString elideLeft(const QString &str, int maxLength = 35);

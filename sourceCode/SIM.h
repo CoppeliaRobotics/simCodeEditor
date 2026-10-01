@@ -12,7 +12,7 @@ public:
     SIM();
 
 public slots:
-    void notifyEvent(int handle, const QString &eventType, const QString &data);
+    void notifyEvent(int handle, const QString &eventType, const QString &data, qint64 scriptHandle);
     void openURL(const QString &url);
     void onRequestSimulationStatus();
 
